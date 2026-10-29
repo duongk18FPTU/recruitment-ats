@@ -29,50 +29,9 @@ Full analysis, market research (Greenhouse, Base E-Hiring), scope, constraints, 
 
 ### 1.2 Product mind map
 
-Editable XMind file: [`docs/mindmap/recruitment-ats.xmind`](docs/mindmap/recruitment-ats.xmind).
+![Recruitment ATS mind map](docs/mindmap.png)
 
-```mermaid
-mindmap
-  root((Recruitment ATS))
-    Problem
-      CVs scattered across channels
-      Manual slow screening
-      No pipeline visibility
-      Biased interview feedback
-      Personal data risk
-    Roles
-      Admin
-      HR Manager
-      Recruiter
-      Interviewer
-      AI service - external
-    E1 Access and accounts
-      Login and logout
-      User management
-      Profile and password
-    E2 Job postings
-      Browse and search
-      Create and edit with weighted criteria
-      Close and reopen
-    E3 Candidates
-      Kanban and table views
-      Add application with CV
-      Pipeline stages
-      Bulk import Excel plus ZIP
-    E4 AI screening
-      Redact personal data
-      Per-criterion evidence
-      Backend-calculated score
-      Human override with reason
-    E5 Interviews
-      Schedule and panel
-      Blind scorecards
-    E6 Insight and governance
-      Dashboard
-      Reports and export
-      Audit log
-      CV retention
-```
+Editable source: [`docs/mindmap/recruitment-ats.xmind`](docs/mindmap/recruitment-ats.xmind) (same structure, open with XMind).
 
 ### 1.3 INVEST requirements
 
@@ -191,18 +150,18 @@ Authenticated
 
 ### 2.2 Screen hierarchy
 
-Login leads to the authenticated shell (sidebar + topbar). The shell owns navigation to feature pages; small forms (add application, move/reject, schedule interview, override AI, user form) open as modals or drawers on their parent page.
+Login leads to the authenticated shell (sidebar + topbar). The shell owns navigation to feature pages; forms (create posting, add application, move/reject, schedule interview, override a criterion result, user form) open as modals on their parent page, as in the reference project.
 
 ```mermaid
 flowchart TB
     Login["Login"] --> Shell["Authenticated shell"]
     Shell --> Dashboard["Dashboard"]
     Shell --> Jobs["Job postings"] --> JobDetail["Posting detail"] --> Pipeline["Pipeline board"]
-    Jobs --> JobForm["Create / edit posting"]
+    Jobs --> JobForm["Create / edit posting modal"]
     Shell --> Candidates["Candidate table"]
     Pipeline --> AppDetail["Application detail"]
     Candidates --> AppDetail
-    AppDetail --> AI["AI analysis"] --> Override["Override drawer"]
+    AppDetail --> AI["Criteria evaluation"] --> Override["Override modal"]
     AppDetail --> Schedule["Schedule interview"]
     Shell --> MyInterviews["My interviews"] --> Scorecard["Scorecard"]
     Shell --> Import["Bulk import"]
@@ -227,15 +186,15 @@ High-fidelity prototype in Figma: **[Recruitment ATS — UI](https://www.figma.c
 
 ![Pipeline](docs/images/screens/13-pipeline-kanban.png)
 
-#### Application detail — AI analysis with evidence
+#### Application detail — criteria evaluation with CV evidence
 
-![AI analysis](docs/images/screens/23-application-ai-analysis.png)
+![Criteria evaluation](docs/images/screens/23-application-evaluation.png)
 
-#### Override AI result
+#### Override a criterion result
 
-![Override AI](docs/images/screens/24-ai-override-drawer.png)
+![Override](docs/images/screens/24-override-modal.png)
 
-#### Blind interview scorecard
+#### Interview scorecard
 
 ![Scorecard](docs/images/screens/32-scorecard.png)
 
@@ -262,7 +221,7 @@ _Planned._
 - [INVEST requirements and acceptance criteria](docs/03-invest-requirements.md)
 - [Information architecture](docs/04-information-architecture.md)
 - [UI/UX design](docs/05-ui-ux.md)
-- [Mind map (XMind)](docs/mindmap/recruitment-ats.xmind)
+- [Mind map](docs/mindmap.png) · [XMind source](docs/mindmap/recruitment-ats.xmind)
 
 ## Project Progress
 

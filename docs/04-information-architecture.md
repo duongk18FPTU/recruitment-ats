@@ -19,7 +19,7 @@ Recruitment ATS
     │   └── Interviewer variant: my interviews + pending scorecards
     ├── Job postings (Tin tuyển dụng)
     │   ├── List (search, status / department / owner filters, paging)
-    │   ├── Create / edit (details + criteria builder)
+    │   ├── Create / edit modal (details + criteria builder)
     │   └── Detail
     │       ├── Overview
     │       ├── Criteria
@@ -29,7 +29,7 @@ Recruitment ATS
     │   ├── Add application modal (CV upload)
     │   └── Application detail
     │       ├── Profile & CV preview
-    │       ├── AI analysis (score, criteria evidence, override drawer)
+    │       ├── Criteria evaluation (fit score, per-criterion evidence, override modal)
     │       ├── Interviews & scorecards
     │       └── Stage history
     ├── Interviews (Lịch phỏng vấn)
@@ -52,7 +52,7 @@ Recruitment ATS
 
 `#/login` `#/dashboard` `#/jobs` `#/jobs/new` `#/jobs/:id` `#/jobs/:id/edit` `#/jobs/:id/pipeline` `#/applications` `#/applications/:id` `#/interviews` `#/interviews/:id/scorecard` `#/import` `#/reports` `#/audit` `#/users` `#/profile` `#/403`
 
-Small forms (add application, edit candidate, move stage, reject, schedule interview, override AI, user form) open as **modals or drawers** on their parent page. Job posting create/edit is a full page because the criteria builder needs space.
+Forms (create/edit job posting, add application, edit candidate, move stage, reject, schedule interview, override a criterion result, user form) open as **modals** on their parent page, following the reference project's modal pattern: breadcrumb, title, short description, grouped field sections, and a sticky footer with actions.
 
 ## Navigation by role
 
@@ -77,14 +77,14 @@ Unauthorized items are **not rendered** in the sidebar; direct URL access shows 
 | `SCR-01` | Login | Page (two-column) | US01, US02 |
 | `SCR-02` | Dashboard | Page | US03 |
 | `SCR-10` | Job posting list | Page | US04, US07 |
-| `SCR-11` | Job posting create / edit | Page | US05, US06 |
+| `SCR-11` | Job posting create / edit | Modal on `SCR-10` | US05, US06 |
 | `SCR-12` | Job posting detail | Tabbed page | US04, US07 |
 | `SCR-13` | Pipeline board (Kanban) | Tab of `SCR-12` | US08, US11 |
 | `SCR-20` | Candidate table | Page | US08 |
 | `SCR-21` | Add application | Modal | US09 |
 | `SCR-22` | Application detail | Tabbed page | US08, US10, US11 |
-| `SCR-23` | AI analysis | Tab of `SCR-22` | US12 |
-| `SCR-24` | Override AI result | Drawer on `SCR-23` | US13 |
+| `SCR-23` | Criteria evaluation (AI) | Tab of `SCR-22` | US12 |
+| `SCR-24` | Override criterion result | Modal on `SCR-23` | US13 |
 | `SCR-25` | Move stage / reject | Modal | US11 |
 | `SCR-26` | Edit candidate | Modal | US10 |
 | `SCR-30` | Schedule interview | Modal | US14 |
@@ -130,7 +130,7 @@ flowchart TB
     Login["SCR-01 Login"] --> Shell["Authenticated shell<br/>sidebar + topbar"]
     Shell --> Dashboard["SCR-02 Dashboard"]
     Shell --> Jobs["SCR-10 Job postings"]
-    Jobs --> JobForm["SCR-11 Create / edit posting"]
+    Jobs --> JobForm["SCR-11 Create / edit posting modal"]
     Jobs --> JobDetail["SCR-12 Posting detail"]
     JobDetail --> Pipeline["SCR-13 Pipeline board"]
     Shell --> Candidates["SCR-20 Candidate table"]
@@ -138,8 +138,8 @@ flowchart TB
     Pipeline --> AddApp
     Candidates --> AppDetail["SCR-22 Application detail"]
     Pipeline --> AppDetail
-    AppDetail --> AI["SCR-23 AI analysis tab"]
-    AI --> Override["SCR-24 Override drawer"]
+    AppDetail --> AI["SCR-23 Criteria evaluation tab"]
+    AI --> Override["SCR-24 Override modal"]
     AppDetail --> Move["SCR-25 Move / reject modal"]
     AppDetail --> EditCand["SCR-26 Edit candidate modal"]
     AppDetail --> Schedule["SCR-30 Schedule interview modal"]
@@ -215,21 +215,19 @@ flowchart LR
 
 | Status | Badge (UI) | Behavior |
 |---|---|---|
-| `PENDING` / `PROCESSING` | "Đang phân tích" (spinner) | Card and detail show progress; page polls every 5 s |
-| `COMPLETED` | Score 0–100 with color band + "Thiếu tiêu chí bắt buộc" badge when flagged | Evidence list per criterion; quotes highlighted in the CV preview |
-| `FAILED` | "Phân tích lỗi" | Reason + "Phân tích lại" button; manual screening remains available |
+| `PENDING` / `PROCESSING` | Card meta "Đang phân tích CV…", score chip "AI —" | Page polls every 5 s |
+| `COMPLETED` | Score chip "AI 89"; warning line "Thiếu tiêu chí bắt buộc" with icon when flagged | Criteria table with result and quote; quotes highlighted in the CV preview |
+| `FAILED` | "Không phân tích được" (listed under *Cần xử lý* on the dashboard) | Reason + "Phân tích lại"; manual screening remains available |
 | `OUTDATED` | "Cần phân tích lại" | Criteria changed after analysis; old result still readable |
 | Overridden | "Đã điều chỉnh" | Shows AI value and human value side by side, with reason and actor |
 
-Score color bands: ≥ 75 green, 50–74 amber, < 50 grey. Colour is always combined with the number, never used alone.
-
-AI content is always labeled **"Gợi ý từ AI — quyết định cuối cùng thuộc về người tuyển dụng"**.
+The score is shown as a plain number; AI output gets no special colour. Criterion results use a status dot plus text (Đạt / Một phần / Không đạt), never colour alone. Every AI result carries the provenance line **"Gợi ý bởi AI · phân tích lúc …"**, and the override modal states that the original AI result is kept.
 
 ## Responsive and accessibility rules
 
 - Target: desktop first (≥ 1280 px). Tablet uses a collapsible sidebar; the Kanban board scrolls horizontally.
 - Kanban drag-and-drop always has a keyboard alternative ("Chuyển giai đoạn…" menu).
-- Modals and drawers trap focus, close with `Escape` when no submission is running, and restore focus to the trigger.
+- Modals trap focus, close with `Escape` when no submission is running, and restore focus to the trigger.
 - Every input has a visible label; icon-only buttons have accessible names; status and scores are never shown by colour alone.
 - Text contrast meets WCAG 2.1 AA (4.5:1 for body text).
 - Dates use `dd/MM/yyyy` and times `HH:mm` in the user's timezone.
