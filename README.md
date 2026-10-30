@@ -33,7 +33,7 @@ What makes this project different from a generic ATS:
 ### Scope
 
 - **Position vs. job post.** A *position* (vị trí tuyển dụng) is the internal record: job description, headcount, target hire date, and weighted evaluation criteria. A *job post* (tin tuyển dụng) is its public version on the company's own **career site**; HR publishes or unpublishes it.
-- **Channels (all free).** Candidates apply on the career site without an account. HR shares source-tagged links to a job post on LinkedIn, Facebook, or elsewhere (`?src=linkedin`), so applications are classified automatically. CVs sent to the recruitment mailbox are collected into a CV inbox. Recruiters can still add CVs manually or import Excel + ZIP.
+- **Channels (all free).** Candidates apply on the career site — a separate public web app with its own domain — without an account. HR shares source-tagged links to a job post on LinkedIn, Facebook, or elsewhere (`?src=linkedin`), so applications are classified automatically. CVs sent to the recruitment mailbox are collected into a CV inbox. Recruiters can still add CVs manually or import Excel + ZIP.
 - **Candidate communication.** Automatic emails from editable templates: receipt immediately; interview invitation, change, cancellation, rejection, and offer notice after a 10-minute cancel window.
 - **Talent pool and export.** Consented candidates can be added to another position; candidate lists export to Excel.
 - **Out of scope:** candidate accounts, API integration with paid job boards (TopCV, VietnamWorks) and automatic posting to LinkedIn/Facebook (no public API), SMS and calendar integration, headcount planning, OCR for scanned CVs, offer letters and onboarding, and AI that learns from past decisions or makes reject/hire decisions.
@@ -172,9 +172,12 @@ The information architecture has two parts: a public career site for candidates 
 ### 2.1 Information architecture
 
 ```text
-Public (no login)
+Career site — separate public app, no login
+└── Job list · Job detail · Apply form · Thank-you · Privacy policy · Consent management
+
+Internal app
 ├── Login
-└── Career site: Job list · Job detail · Apply form · Thank-you · Privacy policy · Consent management
+└── Authenticated (below)
 
 Authenticated
 ├── Dashboard
@@ -234,27 +237,39 @@ Screen inventory (37 screens, including 6 public career-site screens), requireme
 
 ### 2.3 UI prototype
 
-High-fidelity prototype in Figma: **[Recruitment ATS — UI](https://www.figma.com/design/0TYozUq5jB0KJcdo8vjVjQ/Untitled?node-id=0-1)** (design tokens, components, and 11 key screens). The career site, job post tab, CV inbox, talent pool, emails tab, and settings are specified in the information architecture but not yet drawn. Design decisions: [UI/UX](docs/05-ui-ux.md).
+High-fidelity prototype in Figma: **[Recruitment ATS — UI](https://www.figma.com/design/0TYozUq5jB0KJcdo8vjVjQ/Recruitment-ATS?node-id=0-1)** — design tokens, 47 icons, components, 18 internal screens, and 7 career-site screens (desktop and mobile apply). The career site follows the structure of the Vingroup Career Portal; the internal app is a dense working tool without decorative styling. Design direction, tokens with contrast ratios, and every screen: [UI/UX](docs/05-ui-ux.md).
+
+#### Career site — job list
+
+![Career site job list](docs/images/screens/pub-01-jobs.png)
+
+#### Career site — apply
+
+![Apply form](docs/images/screens/pub-03-apply.png)
 
 #### Dashboard
 
-![Dashboard](docs/images/screens/02-dashboard.png)
+![Dashboard](docs/images/screens/scr-02-dashboard.png)
 
 #### Pipeline (Kanban)
 
-![Pipeline](docs/images/screens/13-pipeline-kanban.png)
+![Pipeline](docs/images/screens/scr-13-pipeline.png)
 
 #### Application detail — criteria evaluation with CV evidence
 
-![Criteria evaluation](docs/images/screens/23-application-evaluation.png)
+![Criteria evaluation](docs/images/screens/scr-23-evaluation.png)
 
-#### Override a criterion result
+#### Candidate emails with a 10-minute cancel window
 
-![Override](docs/images/screens/24-override-modal.png)
+![Emails](docs/images/screens/scr-27-emails.png)
+
+#### CV inbox
+
+![CV inbox](docs/images/screens/scr-41-cv-inbox.png)
 
 #### Interview scorecard
 
-![Scorecard](docs/images/screens/32-scorecard.png)
+![Scorecard](docs/images/screens/scr-32-scorecard.png)
 
 ## 3. C4 Architecture
 

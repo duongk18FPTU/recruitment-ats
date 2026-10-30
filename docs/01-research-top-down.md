@@ -190,7 +190,7 @@ Recruitment ATS
 |---|---|
 | Technical | Stack follows the course reference project: React (Vite) frontend, ASP.NET Core REST API, PostgreSQL |
 | Technical | External services sit behind replaceable interfaces with fakes for tests: AI (`IResumeAnalyzer`), outgoing email (`IEmailSender`), recruitment mailbox (`IMailboxReader`) |
-| Technical | The career site is a public route group of the same React app and calls a separate public API that exposes only published job posts and the apply endpoint |
+| Technical | The career site is a **separate frontend application** with its own domain and deployment; it calls only the public API (published job posts, apply, consent). The internal app and the career site share the backend and the design tokens |
 | Cost | Every adopted channel is free; the test environment sends a small volume of email through a free SMTP tier or a sandbox inbox |
 | Legal | CV data is personal data; processing requires consent or a recorded legal basis; access is limited by role and assignment; retention periods are configurable |
 | Data | One company (single tenant) per deployment |

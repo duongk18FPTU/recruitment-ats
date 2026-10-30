@@ -8,19 +8,19 @@ UI language is Vietnamese; labels in parentheses below are the Vietnamese menu n
 
 ## Information architecture
 
+Recruitment ATS has two frontend applications on one backend:
+
 ```text
-Recruitment ATS
-│
-├── Public (no login)
-│   ├── Login (Đăng nhập) — internal users
-│   └── Career site (Trang tuyển dụng) — candidates
-│       ├── Job list (search, department / location / type filters)
-│       ├── Job detail
-│       ├── Apply form (CV upload, consent, CAPTCHA)
-│       ├── Thank-you page
-│       ├── Privacy policy
-│       └── Consent management (opened from the signed link in emails)
-│
+Career site (Trang tuyển dụng) — separate public app for candidates, no login
+├── Job list (filters: title, location, department, employment type, level; department chips; pagination)
+├── Job detail (with other open jobs)
+├── Apply form (modal on desktop, full page on mobile; CV upload, consent, CAPTCHA)
+├── Thank-you page
+├── Privacy policy
+└── Consent management (opened from the signed link in emails)
+
+Internal app (Recruitment ATS) — hiring team
+├── Login (Đăng nhập)
 └── Authenticated (sidebar + topbar)
     ├── Dashboard (Tổng quan)
     │   └── Interviewer variant: my interviews + pending scorecards
@@ -68,9 +68,9 @@ Recruitment ATS
 
 ### Routes
 
-Internal (hash routes): `#/login` `#/dashboard` `#/jobs` `#/jobs/new` `#/jobs/:id` `#/jobs/:id/edit` `#/jobs/:id/post` `#/jobs/:id/pipeline` `#/applications` `#/applications/:id` `#/inbox` `#/talent-pool` `#/interviews` `#/interviews/:id/scorecard` `#/import` `#/reports` `#/audit` `#/users` `#/settings/email-templates` `#/settings/mailbox` `#/profile` `#/403`
+Internal app (hash routes): `#/login` `#/dashboard` `#/jobs` `#/jobs/new` `#/jobs/:id` `#/jobs/:id/edit` `#/jobs/:id/post` `#/jobs/:id/pipeline` `#/applications` `#/applications/:id` `#/inbox` `#/talent-pool` `#/interviews` `#/interviews/:id/scorecard` `#/import` `#/reports` `#/audit` `#/users` `#/settings/email-templates` `#/settings/mailbox` `#/profile` `#/403`
 
-Public career site (same React app, separate layout without sidebar): `#/careers` `#/careers/:slug` `#/careers/:slug/apply` `#/careers/:slug/thank-you` `#/privacy` `#/consent/:token`. Share links add `?src=linkedin|facebook|topcv|vietnamworks|referral` (BR-18).
+Career site (separate app with its own domain, e.g. `careers.recruitment-ats.vn`, path routes for shareable links): `/jobs` `/jobs/:slug` `/jobs/:slug/apply` `/jobs/:slug/thank-you` `/privacy` `/consent/:token`. Share links add `?src=linkedin|facebook|topcv|vietnamworks|referral` (BR-18), e.g. `https://careers.recruitment-ats.vn/jobs/backend-dotnet?src=linkedin`.
 
 Internal forms (create/edit position, add application, edit candidate, move stage, reject, schedule interview, override a criterion result, assign inbox item, add pool candidate to position, edit pending email, user form) open as **modals** on their parent page, following the reference project's modal pattern: breadcrumb, title, short description, grouped field sections, and a sticky footer with actions.
 
@@ -89,7 +89,7 @@ Internal forms (create/edit position, add application, edit candidate, move stag
 | Nhật ký hoạt động | ✓ | ✓ | | |
 | Người dùng | ✓ | | | |
 | Cài đặt | ✓ (all tabs) | ✓ (email templates) | | |
-| Hồ sơ cá nhân | ✓ | ✓ | ✓ | ✓ |
+| Hồ sơ cá nhân (from the user block at the bottom of the sidebar) | ✓ | ✓ | ✓ | ✓ |
 
 Unauthorized items are **not rendered** in the sidebar; direct URL access shows `#/403`. The career site has its own header (company logo, "Việc làm", "Chính sách dữ liệu") and never links into the internal app.
 

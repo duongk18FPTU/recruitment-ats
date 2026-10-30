@@ -371,7 +371,7 @@ flowchart LR
 
 - **Actor:** Admin, HR Manager; Recruiter if they own the position (BR-14)
 - **Preconditions:** position exists
-- **Main flow:** open the *Tin tuyển dụng* tab of a position → edit public content (BR-20) and closing date → preview as candidates see it → **Publish** (only if the position is `OPEN` — BR-05) → copy share links, one per source (e.g. `…/careers/backend-dotnet?src=linkedin`) → paste them into posts on LinkedIn, Facebook, or elsewhere
+- **Main flow:** open the *Tin tuyển dụng* tab of a position → edit public content (BR-20) and closing date → preview as candidates see it → **Publish** (only if the position is `OPEN` — BR-05) → copy share links, one per source (e.g. `careers.recruitment-ats.vn/jobs/backend-dotnet?src=linkedin`) → paste them into posts on LinkedIn, Facebook, or elsewhere
 - **Alternative:** **Unpublish** → the post disappears from the career site; existing applications are unchanged
 - **Result:** post status `DRAFT`, `PUBLISHED`, or `UNPUBLISHED`; publish and unpublish are audited
 
