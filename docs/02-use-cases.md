@@ -12,21 +12,21 @@ Product name: **Recruitment ATS**.
 |---|---|---|
 | `ADMIN` | Quản trị viên | Manages accounts and has full read access for support and audit |
 | `HR_MANAGER` | Trưởng tuyển dụng | Owns the hiring process; makes offer / hire decisions; sees reports |
-| `RECRUITER` | Chuyên viên tuyển dụng | Daily operations: postings, CV intake, screening, scheduling |
+| `RECRUITER` | Chuyên viên tuyển dụng | Daily operations: positions, CV intake, screening, scheduling |
 | `INTERVIEWER` | Người phỏng vấn | Interviews assigned candidates and submits scorecards |
 | AI service | — (external system) | Receives redacted CV text and returns a structured analysis |
 
-Candidates are **data subjects**, not system users, in V1. They apply through external channels (LinkedIn, Facebook, job boards, email, referral); a Recruiter adds their CV to the system. A job posting is an internal record of an open position and is not published by the system.
+Candidates are **data subjects**, not system users, in V1. They apply through external channels (LinkedIn, Facebook, job boards, email, referral); a Recruiter adds their CV to the system. A **position** (*vị trí tuyển dụng*) is an internal record of a role to fill — JD, headcount, target hire date, and evaluation criteria — and is never published by the system.
 
 ## Role × feature matrix
 
 | Feature | Admin | HR Manager | Recruiter | Interviewer |
 |---|---|---|---|---|
 | Dashboard | ✓ | ✓ | ✓ | Own interviews only |
-| View job postings | ✓ | ✓ | ✓ | Postings they interview for |
-| Create job posting | ✓ | ✓ | ✓ | |
-| Edit job posting | ✓ | ✓ | Own postings | |
-| Close / reopen posting | ✓ | ✓ | | |
+| View positions | ✓ | ✓ | ✓ | Positions they interview for |
+| Create position | ✓ | ✓ | ✓ | |
+| Edit position | ✓ | ✓ | Own positions | |
+| Close / reopen position | ✓ | ✓ | | |
 | View applications | ✓ | ✓ | ✓ | Assigned only |
 | Add application (upload CV) | ✓ | ✓ | ✓ | |
 | Edit candidate information | ✓ | ✓ | ✓ | |
@@ -53,8 +53,8 @@ Menus and buttons are **not displayed** when the user lacks permission. Unauthor
 | BR-02 | `REJECTED` can be set from any non-final stage and requires a reason from a fixed list plus an optional note. |
 | BR-03 | Only `ADMIN` and `HR_MANAGER` may move an application to `OFFER` or `HIRED`. |
 | BR-04 | Every stage change is stored in stage history (from, to, actor, time, reason). |
-| BR-05 | New applications are accepted only for postings with status `OPEN`. Closing a posting does not change existing applications. |
-| BR-06 | A candidate is identified by normalized email or phone number. An existing candidate is reused instead of duplicated; the same candidate cannot apply twice to the same posting. |
+| BR-05 | New applications are accepted only for positions with status `OPEN`. Closing a position does not change existing applications. |
+| BR-06 | A candidate is identified by normalized email or phone number. An existing candidate is reused instead of duplicated; the same candidate cannot have two applications for the same position. |
 | BR-07 | **Blind scorecards:** an interviewer cannot read other scorecards of the same application until they have submitted their own. A submitted scorecard cannot be edited. |
 | BR-08 | Interviewers see only applications where they are on the interview panel, and they never see the AI score, to avoid anchoring bias. |
 | BR-09 | **AI is advisory only:** AI analysis never changes a stage, rejects, or hires a candidate. |
@@ -62,7 +62,7 @@ Menus and buttons are **not displayed** when the user lacks permission. Unauthor
 | BR-11 | The AI returns, for each job criterion, `MET`, `PARTIAL`, or `NOT_MET` with a quote from the CV. If the quote is not found in the CV text, the backend marks the criterion `UNVERIFIED` (counted as 0). |
 | BR-12 | The fit score is calculated by backend code: `score = Σ(weight × value) / Σ(weight) × 100`, where `MET = 1`, `PARTIAL = 0.5`, `NOT_MET = UNVERIFIED = 0`. If any must-have criterion is not `MET`, the application is flagged **Missing must-have**; it is not rejected automatically. |
 | BR-13 | Overriding an AI result requires a reason of at least 10 characters. The original AI result is kept; the override is logged in the audit log. |
-| BR-14 | A Recruiter may edit only postings they own; an HR Manager can reassign the owner. |
+| BR-14 | A Recruiter may edit only positions they own; an HR Manager can reassign the owner. |
 | BR-15 | CV files must be PDF or DOCX, at most 10 MB, and contain extractable text. |
 | BR-16 | Bulk import is all-or-nothing: one Excel file (maximum 200 rows) plus one ZIP of CVs matched by file name. Any invalid row means zero applications are created. |
 | BR-17 | CVs of `REJECTED` applications are deleted automatically after the retention period (default 6 months); the candidate record is anonymized and the deletion is logged. |
@@ -89,12 +89,12 @@ flowchart LR
             uc03["UC03 View Dashboard"]
             uc21["UC21 Manage Profile"]
         end
-        subgraph jobs["Job postings"]
+        subgraph jobs["Positions"]
             direction LR
-            uc04["UC04 View Postings"]
-            uc05["UC05 Create Posting"]
-            uc06["UC06 Edit Posting"]
-            uc07["UC07 Close / Reopen Posting"]
+            uc04["UC04 View Positions"]
+            uc05["UC05 Create Position"]
+            uc06["UC06 Edit Position"]
+            uc07["UC07 Close / Reopen Position"]
         end
         subgraph apps["Candidates and applications"]
             direction LR
@@ -156,13 +156,13 @@ flowchart LR
     auth["Authenticate Session"]:::shared
     authorize["Check RBAC Permission"]:::shared
     assign["Verify Panel Assignment"]:::rule
-    owner["Verify Posting Ownership"]:::rule
+    owner["Verify Position Ownership"]:::rule
     audit["Write Audit Log"]:::shared
     dup["Detect Duplicate Candidate"]:::rule
     redact["Redact Personal Data"]:::rule
     blind["Hide Other Scorecards"]:::rule
 
-    uc06["UC06 Edit Posting"] -->|include| owner
+    uc06["UC06 Edit Position"] -->|include| owner
     uc09["UC09 Add Application + CV"] -->|include| dup
     uc09 -.->|extend: auto| uc12["UC12 Analyze CV with AI"]
     uc16["UC16 Bulk Import"] -->|include| dup
@@ -196,44 +196,44 @@ flowchart LR
 ### UC03 View dashboard
 
 - **Actor:** all roles
-- **Main flow:** choose date range → KPIs (open postings, new applications, applications per stage, interviews this week, hires) + funnel chart + upcoming interviews + postings near deadline
+- **Main flow:** choose date range → KPIs (open positions, new applications, applications per stage, interviews this week, hires) + funnel chart + upcoming interviews + positions near their target hire date
 - **Interviewer variant:** only "My upcoming interviews" and "Scorecards pending"
 - **Result:** read-only overview filtered by permission
 
-### UC04 View job postings
+### UC04 View positions
 
-- **Actor:** all roles (Interviewer: only postings they interview for)
+- **Actor:** all roles (Interviewer: only positions they interview for)
 - **Main flow:** list with search (title, department), filters (status, department, owner), paging → open detail (description, criteria, pipeline summary)
 
-### UC05 Create job posting
+### UC05 Create position
 
 - **Actor:** Admin, HR Manager, Recruiter
-- **Main flow:** form: title, department, location, employment type, headcount, deadline, description (written by HR; the system does not generate or publish it) → add criteria (name, type `MUST_HAVE` / `NICE_TO_HAVE`, weight 1–5) → save as `DRAFT` or `OPEN`
-- **Validation:** at least one criterion; deadline in the future; headcount ≥ 1
-- **Result:** posting appears in the list; the creator becomes the owner
+- **Main flow:** form: title, department, location, employment type, headcount, target hire date, job description (written by HR; the system does not generate or publish it) → add criteria (name, type `MUST_HAVE` / `NICE_TO_HAVE`, weight 1–5) → save as `DRAFT` or `OPEN`
+- **Validation:** at least one criterion; target hire date in the future; headcount ≥ 1
+- **Result:** position appears in the list; the creator becomes the owner
 
-### UC06 Edit job posting
+### UC06 Edit position
 
-- **Actor:** Admin, HR Manager; Recruiter if they own the posting (BR-14)
+- **Actor:** Admin, HR Manager; Recruiter if they own the position (BR-14)
 - **Main flow:** edit fields and criteria → save → audit
-- **Rule:** changing criteria increases the posting version; existing AI results are marked **Outdated** and can be re-analyzed
+- **Rule:** changing criteria increases the position version; existing AI results are marked **Outdated** and can be re-analyzed
 
-### UC07 Close / reopen posting
+### UC07 Close / reopen position
 
 - **Actor:** Admin, HR Manager
 - **Main flow:** confirm → status `CLOSED` (or back to `OPEN`) → audit
-- **Result:** closed postings accept no new applications (BR-05)
+- **Result:** no new applications can be added to a closed position (BR-05); this has no effect on any external job advertisement
 
 ### UC08 View applications
 
 - **Actor:** all roles (Interviewer: assigned only, without AI score — BR-08)
-- **Main flow:** two views: **Kanban** by stage for one posting, or **table** across postings; filter by posting, stage, fit score, source, missing must-have; sort by fit score or date → open application detail (CV preview, AI analysis, stage history, interviews, scorecards)
+- **Main flow:** two views: **Kanban** by stage for one position, or **table** across positions; filter by position, stage, fit score, source, missing must-have; sort by fit score or date → open application detail (CV preview, AI analysis, stage history, interviews, scorecards)
 
 ### UC09 Add application with CV
 
 - **Actor:** Admin, HR Manager, Recruiter
-- **Main flow:** choose posting → upload CV (BR-15) → enter or confirm candidate info (name, email, phone, source — BR-18) → duplicate check (BR-06) → create application in `NEW` → AI analysis is queued automatically (extends UC12)
-- **Alternative:** duplicate found → show the existing candidate and link the new application to it; same posting → 409 Conflict
+- **Main flow:** choose position → upload CV (BR-15) → enter or confirm candidate info (name, email, phone, source — BR-18) → duplicate check (BR-06) → create application in `NEW` → AI analysis is queued automatically (extends UC12)
+- **Alternative:** duplicate found → show the existing candidate and link the new application to it; same position → 409 Conflict
 
 ### UC10 Edit candidate information
 
@@ -271,20 +271,20 @@ flowchart LR
 ### UC15 Submit scorecard
 
 - **Actor:** Interviewer or HR Manager on the panel
-- **Main flow:** open the assigned interview → rate each posting criterion 1–5 and leave comments → overall recommendation (`STRONG_YES`, `YES`, `NO`, `STRONG_NO`) → submit
+- **Main flow:** open the assigned interview → rate each position criterion 1–5 and leave comments → overall recommendation (`STRONG_YES`, `YES`, `NO`, `STRONG_NO`) → submit
 - **Rules:** other scorecards are hidden before submission (BR-07); submitted scorecards are read-only
 - **Result:** after submission, the interviewer can see other submitted scorecards for that application
 
 ### UC16 Bulk import
 
 - **Actor:** Admin, HR Manager, Recruiter
-- **Main flow:** choose posting → download the Excel template → upload `.xlsx` + `.zip` of CVs → preview row validation (required columns, email format, valid source — BR-18, matching CV file, duplicates) → confirm → atomic import (BR-16) → AI analysis queued for each new application
+- **Main flow:** choose position → download the Excel template → upload `.xlsx` + `.zip` of CVs → preview row validation (required columns, email format, valid source — BR-18, matching CV file, duplicates) → confirm → atomic import (BR-16) → AI analysis queued for each new application
 - **Result:** import batch summary (total, valid, created, errors)
 
 ### UC17 View reports
 
 - **Actor:** Admin, HR Manager
-- **Main flow:** choose date range and posting → recruitment funnel (count and conversion per stage), time-to-hire, applications by source, rejection reasons, AI override rate and AI–human agreement
+- **Main flow:** choose date range and position → recruitment funnel (count and conversion per stage), time-to-hire, applications by source, rejection reasons, AI override rate and AI–human agreement
 
 ### UC18 Export reports
 

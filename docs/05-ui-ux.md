@@ -41,7 +41,7 @@ Be Vietnam Pro is designed for Vietnamese diacritics.
 | `color/text` / `color/text-muted` | `#111827` / `#6B7280` | Text hierarchy |
 | `color/bg` / `color/surface` / `color/border` | `#F4F5F7` / `#FFFFFF` / `#E5E7EB` | Canvas, cards, dividers |
 | `color/success` / `-soft` | `#15803D` / `#DCFCE7` | Status: active, valid, criterion met |
-| `color/warning` / `-soft` | `#B45309` / `#FEF3C7` | Status: deadline near, partial, missing must-have, CV evidence highlight |
+| `color/warning` / `-soft` | `#B45309` / `#FEF3C7` | Status: target hire date near, partial, missing must-have, CV evidence highlight |
 | `color/danger` / `-soft` | `#B91C1C` / `#FEE2E2` | Status: errors, criterion not met, overdue |
 
 Status colours appear only as a small pill or a dot next to text — never as the only signal and never to separate chart series.
@@ -66,8 +66,8 @@ Status colours appear only as a small pill or a dot next to text — never as th
 |---|---|---|---|
 | `SCR-01` Login | SCR-01 Đăng nhập | — | Two panels as in the reference; demo-account chips per role; generic error for wrong password and disabled account |
 | `SCR-02` Dashboard | SCR-02 Tổng quan | HR Manager | Pipeline per position as a table, today's interviews, newest applications, and a *Cần xử lý* list of actionable items |
-| `SCR-10` Job postings | SCR-10 Tin tuyển dụng | Recruiter | Codes in monospace; hires vs. headcount; status pill only where it matters |
-| `SCR-11` Create posting | SCR-11 Tạo tin tuyển dụng (modal) | Recruiter | Modal with grouped sections; criteria as editable rows (name, type, weight); description collapsed |
+| `SCR-10` Positions | SCR-10 Vị trí tuyển dụng | Recruiter | Codes in monospace; hires vs. headcount; target hire date; status pill only where it matters |
+| `SCR-11` Create position | SCR-11 Tạo vị trí tuyển dụng (modal) | Recruiter | Modal with grouped sections; target hire date instead of an application deadline; criteria as editable rows (name, type, weight); internal JD collapsed |
 | `SCR-13` Pipeline | SCR-13 Pipeline ứng viên | Recruiter | Kanban columns with counts; card shows AI score chip and a warning line only when a must-have is missing |
 | `SCR-23` Criteria evaluation | SCR-23 Chi tiết hồ sơ — Đánh giá tiêu chí | Recruiter | Stage stepper; criteria table (weight, result, CV quote); CV preview with the quoted passages highlighted |
 | `SCR-24` Override | SCR-24 Điều chỉnh kết quả tiêu chí (modal) | Recruiter | AI result vs. adjusted result; mandatory reason with counter; score preview 89 → 92 |
@@ -76,7 +76,7 @@ Status colours appear only as a small pill or a dot next to text — never as th
 | `SCR-50` Reports | SCR-50 Báo cáo | HR Manager | Filter panel as in the reference; single-hue bar charts with value labels; export |
 | `SCR-70` Users | SCR-70 Người dùng | Admin | Role as plain text, status pill, inline edit and actions |
 
-Remaining screens from the [screen inventory](04-information-architecture.md#screen-inventory) (job detail overview, candidate table, add-application modal, move/reject modal, edit candidate, schedule interview, my interviews, audit log, profile, 403) reuse the same shell and components.
+Remaining screens from the [screen inventory](04-information-architecture.md#screen-inventory) (position detail overview, candidate table, add-application modal, move/reject modal, edit candidate, schedule interview, my interviews, audit log, profile, 403) reuse the same shell and components.
 
 ### Login
 
@@ -86,13 +86,13 @@ Remaining screens from the [screen inventory](04-information-architecture.md#scr
 
 ![Dashboard](images/screens/02-dashboard.png)
 
-### Job postings
+### Positions
 
-![Job postings](images/screens/10-job-list.png)
+![Positions](images/screens/10-job-list.png)
 
-### Create job posting
+### Create position
 
-![Create job posting](images/screens/11-job-form.png)
+![Create position](images/screens/11-job-form.png)
 
 ### Pipeline (Kanban)
 

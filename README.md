@@ -1,6 +1,6 @@
 # Recruitment ATS
 
-Recruitment ATS is a mini applicant tracking system for small companies. It brings job postings, CV intake, a staged hiring pipeline, interview scorecards, reports, and an audit log into one place — with **AI-assisted CV screening that explains every score with evidence from the CV and never makes the hiring decision**.
+Recruitment ATS is a mini applicant tracking system for small companies. It brings open positions, CVs from every sourcing channel, a staged hiring pipeline, interview scorecards, reports, and an audit log into one place — with **AI-assisted CV screening that explains every score with evidence from the CV and never makes the hiring decision**.
 
 ## 1. Requirements — Research, INVEST, Use Cases, and Acceptance Criteria
 
@@ -29,7 +29,7 @@ What makes this project different from a generic ATS:
 
 Recruitment ATS is an **internal tool for the hiring team**. Candidates do not log in or apply through it.
 
-- **Job postings are internal records** of open positions: description, headcount, deadline, and the weighted criteria used for evaluation. HR writes the job description; the system does not generate or publish it.
+- **Positions are internal records**, not job advertisements: job description, headcount, target hire date, and the weighted criteria used for evaluation. HR writes the job description; the system does not generate or publish it.
 - **Advertising happens outside the system.** HR posts the role on LinkedIn, Facebook, TopCV, and similar channels. CVs that arrive by email, job-board inbox, or referral are added by a Recruiter, one at a time or by bulk import, with a source from a fixed list (BR-18) so reports can compare channels.
 - **Not in V1:** public career site or candidate self-service portal, posting to or pulling from job boards, email/SMS to candidates, calendar integration, OCR for scanned CVs, offer letters and onboarding, and AI making reject/hire decisions.
 
@@ -39,7 +39,7 @@ Full analysis, market research (Greenhouse, Base E-Hiring), scope, constraints, 
 
 ![Recruitment ATS mind map](docs/mindmap.png)
 
-Editable source: [`docs/mindmap/recruitment-ats.xmind`](docs/mindmap/recruitment-ats.xmind) (same structure, open with XMind).
+Editable source: [`docs/mindmap/recruitment-ats.xmind`](docs/mindmap/recruitment-ats.xmind) (same structure, open with XMind). After editing it, regenerate the image with `python docs/mindmap/render_mindmap.py`.
 
 ### 1.3 INVEST requirements
 
@@ -57,7 +57,7 @@ The V1 backlog contains **21 user stories (84 story points)**, grouped by epic. 
 ```text
 US01–US02   Authentication and session
 US03        Dashboard
-US04–US07   Job postings (view, create, edit, close/reopen)
+US04–US07   Positions (view, create, edit, close/reopen)
 US08–US11   Candidates and applications (view, add with CV, edit, move stage)
 US12–US13   AI screening (analyze with evidence, human override)
 US14–US15   Interviews (schedule, blind scorecard)
@@ -85,10 +85,10 @@ flowchart TB
 
     subgraph system["Recruitment ATS — System Boundary"]
         direction LR
-        adminCases["<b>Administrator</b><br/><br/>UC01 Login · UC02 Logout<br/>UC03 Dashboard · UC21 Profile<br/>UC04–07 Job postings<br/>UC08–11 Applications<br/>UC12 Analyze CV · UC13 Override AI<br/>UC14 Schedule interview<br/>UC16 Bulk import<br/>UC17 Reports · UC18 Export<br/>UC19 Audit log<br/>UC20 Manage users"]
-        managerCases["<b>HR Manager</b><br/><br/>UC01 Login · UC02 Logout<br/>UC03 Dashboard · UC21 Profile<br/>UC04–07 Job postings<br/>UC08–11 Applications incl. Offer/Hire<br/>UC12 Analyze CV · UC13 Override AI<br/>UC14 Schedule · UC15 Scorecard<br/>UC16 Bulk import<br/>UC17 Reports · UC18 Export<br/>UC19 Audit log"]
-        recruiterCases["<b>Recruiter</b><br/><br/>UC01 Login · UC02 Logout<br/>UC03 Dashboard · UC21 Profile<br/>UC04 View · UC05 Create postings<br/>UC06 Edit own postings<br/>UC08–11 Applications up to Interview<br/>UC12 Analyze CV · UC13 Override AI<br/>UC14 Schedule interview<br/>UC16 Bulk import"]
-        interviewerCases["<b>Interviewer</b><br/><br/>UC01 Login · UC02 Logout<br/>UC03 Dashboard · UC21 Profile<br/>UC04 Assigned postings<br/>UC08 Assigned applications, no AI score<br/>UC15 Submit blind scorecard"]
+        adminCases["<b>Administrator</b><br/><br/>UC01 Login · UC02 Logout<br/>UC03 Dashboard · UC21 Profile<br/>UC04–07 Positions<br/>UC08–11 Applications<br/>UC12 Analyze CV · UC13 Override AI<br/>UC14 Schedule interview<br/>UC16 Bulk import<br/>UC17 Reports · UC18 Export<br/>UC19 Audit log<br/>UC20 Manage users"]
+        managerCases["<b>HR Manager</b><br/><br/>UC01 Login · UC02 Logout<br/>UC03 Dashboard · UC21 Profile<br/>UC04–07 Positions<br/>UC08–11 Applications incl. Offer/Hire<br/>UC12 Analyze CV · UC13 Override AI<br/>UC14 Schedule · UC15 Scorecard<br/>UC16 Bulk import<br/>UC17 Reports · UC18 Export<br/>UC19 Audit log"]
+        recruiterCases["<b>Recruiter</b><br/><br/>UC01 Login · UC02 Logout<br/>UC03 Dashboard · UC21 Profile<br/>UC04 View · UC05 Create positions<br/>UC06 Edit own positions<br/>UC08–11 Applications up to Interview<br/>UC12 Analyze CV · UC13 Override AI<br/>UC14 Schedule interview<br/>UC16 Bulk import"]
+        interviewerCases["<b>Interviewer</b><br/><br/>UC01 Login · UC02 Logout<br/>UC03 Dashboard · UC21 Profile<br/>UC04 Assigned positions<br/>UC08 Assigned applications, no AI score<br/>UC15 Submit blind scorecard"]
     end
 
     admin --> adminCases
@@ -114,9 +114,9 @@ Detailed use case diagram (one node per use case), include/extend relationships,
 | Capability | Admin | HR Manager | Recruiter | Interviewer |
 |---|---|---|---|---|
 | Dashboard | Yes | Yes | Yes | Own interviews |
-| View job postings | Yes | Yes | Yes | Assigned only |
-| Create / edit job postings | Yes | Yes | Own postings | No |
-| Close / reopen postings | Yes | Yes | No | No |
+| View positions | Yes | Yes | Yes | Assigned only |
+| Create / edit positions | Yes | Yes | Own positions | No |
+| Close / reopen positions | Yes | Yes | No | No |
 | View applications | Yes | Yes | Yes | Assigned only, no AI score |
 | Add / edit applications, bulk import | Yes | Yes | Yes | No |
 | Move pipeline stage | Yes | Yes | Up to Interview, and reject | No |
@@ -127,7 +127,7 @@ Detailed use case diagram (one node per use case), include/extend relationships,
 | Audit log | Yes | Yes | No | No |
 | User management | Yes | No | No | No |
 
-The backend must enforce RBAC, posting ownership, panel assignment, and blind scorecards; hiding frontend controls serves UI/UX only.
+The backend must enforce RBAC, position ownership, panel assignment, and blind scorecards; hiding frontend controls serves UI/UX only.
 
 ## 2. Information Architecture, Screen Hierarchy, and UI/UX
 
@@ -141,7 +141,7 @@ Public
 
 Authenticated
 ├── Dashboard
-├── Job postings
+├── Positions
 │   ├── List · Create / edit
 │   └── Detail: Overview · Criteria · Pipeline (Kanban)
 ├── Candidates
@@ -158,14 +158,14 @@ Authenticated
 
 ### 2.2 Screen hierarchy
 
-Login leads to the authenticated shell (sidebar + topbar). The shell owns navigation to feature pages; forms (create posting, add application, move/reject, schedule interview, override a criterion result, user form) open as modals on their parent page, as in the reference project.
+Login leads to the authenticated shell (sidebar + topbar). The shell owns navigation to feature pages; forms (create position, add application, move/reject, schedule interview, override a criterion result, user form) open as modals on their parent page, as in the reference project.
 
 ```mermaid
 flowchart TB
     Login["Login"] --> Shell["Authenticated shell"]
     Shell --> Dashboard["Dashboard"]
-    Shell --> Jobs["Job postings"] --> JobDetail["Posting detail"] --> Pipeline["Pipeline board"]
-    Jobs --> JobForm["Create / edit posting modal"]
+    Shell --> Jobs["Positions"] --> JobDetail["Position detail"] --> Pipeline["Pipeline board"]
+    Jobs --> JobForm["Create / edit position modal"]
     Shell --> Candidates["Candidate table"]
     Pipeline --> AppDetail["Application detail"]
     Candidates --> AppDetail

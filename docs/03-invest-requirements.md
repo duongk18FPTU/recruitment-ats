@@ -23,16 +23,16 @@ Priority uses MoSCoW (`M` must, `S` should, `C` could). Story points use the Fib
 |---|---|---|---|---|---|
 | US01 | As an active user, I want to log in so that I can access the features of my role. | Protected access | Seeded account | M | 3 |
 | US02 | As an authenticated user, I want to log out so that this client discards my token and private data. | Session safety | US01 | M | 1 |
-| US03 | As any role, I want a dashboard for a date range so that I can see open postings, the pipeline, and upcoming interviews at a glance. | Fast overview | US01, US08 | M | 5 |
-| US04 | As any role, I want to search and view job postings so that I know which positions are open and what they require. | Visibility of openings | US01 | M | 3 |
-| US05 | As an Admin, HR Manager, or Recruiter, I want to create a job posting with weighted must-have and nice-to-have criteria so that candidates are evaluated against explicit requirements. | Consistent evaluation basis | US01 | M | 5 |
-| US06 | As the posting owner or an HR Manager, I want to edit a job posting so that requirements stay accurate; Recruiters may edit only their own postings. | Accurate postings | US04 | M | 3 |
-| US07 | As an Admin or HR Manager, I want to close or reopen a posting so that no new applications arrive after the position is filled. | Controlled intake | US04 | M | 2 |
+| US03 | As any role, I want a dashboard for a date range so that I can see open positions, the pipeline, and upcoming interviews at a glance. | Fast overview | US01, US08 | M | 5 |
+| US04 | As any role, I want to search and view positions so that I know which roles are being filled and what they require. | Visibility of open positions | US01 | M | 3 |
+| US05 | As an Admin, HR Manager, or Recruiter, I want to create a position with weighted must-have and nice-to-have criteria so that candidates are evaluated against explicit requirements. | Consistent evaluation basis | US01 | M | 5 |
+| US06 | As the position owner or an HR Manager, I want to edit a position so that requirements stay accurate; Recruiters may edit only their own positions. | Accurate positions | US04 | M | 3 |
+| US07 | As an Admin or HR Manager, I want to close or reopen a position so that the team stops adding candidates once it is filled. | Controlled intake | US04 | M | 2 |
 | US08 | As any role, I want to view applications as a Kanban board or table with filters so that I can find candidates quickly; Interviewers see only assigned applications. | Pipeline visibility | US01 | M | 5 |
 | US09 | As an Admin, HR Manager, or Recruiter, I want to add an application by uploading a CV so that every candidate is stored in one place without duplicates. | Centralized candidates | US05 | M | 5 |
 | US10 | As an Admin, HR Manager, or Recruiter, I want to edit candidate information or replace a CV so that records stay correct. | Accurate data | US09 | S | 2 |
 | US11 | As an authorized user, I want to move an application through pipeline stages, with a reason when rejecting, so that progress is tracked and traceable. | Transparent process | US09 | M | 5 |
-| US12 | As an Admin, HR Manager, or Recruiter, I want the system to analyze a CV with AI and score it against the posting criteria with evidence so that I can prioritize screening. | Faster screening | US05, US09 | M | 8 |
+| US12 | As an Admin, HR Manager, or Recruiter, I want the system to analyze a CV with AI and score it against the position criteria with evidence so that I can prioritize screening. | Faster screening | US05, US09 | M | 8 |
 | US13 | As an Admin, HR Manager, or Recruiter, I want to override an AI criterion result with a reason so that the final judgment stays human and auditable. | Human oversight | US12 | M | 3 |
 | US14 | As an Admin, HR Manager, or Recruiter, I want to schedule an interview and assign a panel so that interviewers know when and whom they interview. | Coordinated interviews | US11 | M | 5 |
 | US15 | As a panel member, I want to submit a scorecard without seeing others' feedback first so that my evaluation is independent. | Fair evaluation | US14 | M | 5 |
@@ -90,42 +90,42 @@ Format: **Given** context, **When** action, **Then** observable result.
 
 ### AC-US03 Dashboard
 
-1. Given a date range, then KPIs show open postings, new applications, count per stage, interviews this week, and hires, using only data the role may see.
+1. Given a date range, then KPIs show open positions, new applications, count per stage, interviews this week, and hires, using only data the role may see.
 2. Given an Interviewer, then only "My upcoming interviews" and "Scorecards pending" are shown.
 3. Given no data, then an empty state with a hint is shown instead of zeros without explanation.
 
-### AC-US04 View job postings
+### AC-US04 View positions
 
-1. Given postings exist, when searching by title or filtering by status/department, then only matching postings are listed with paging (default 20, max 100).
-2. Given an Interviewer, then only postings where they are on at least one interview panel are listed.
+1. Given positions exist, when searching by title or filtering by status/department, then only matching positions are listed with paging (default 20, max 100).
+2. Given an Interviewer, then only positions where they are on at least one interview panel are listed.
 
-### AC-US05 Create job posting
+### AC-US05 Create position
 
-1. Given valid data with at least one criterion, when saved, then the posting is created with the creator as owner, version 1, and status `DRAFT` or `OPEN`.
-2. Given no criteria, a weight outside 1–5, a past deadline, or headcount < 1, then the API returns 400 with field errors.
+1. Given valid data with at least one criterion, when saved, then the position is created with the creator as owner, version 1, and status `DRAFT` or `OPEN`.
+2. Given no criteria, a weight outside 1–5, a past target hire date, or headcount < 1, then the API returns 400 with field errors.
 3. Given an Interviewer, then the create action is hidden and the API returns 403.
 
-### AC-US06 Edit job posting
+### AC-US06 Edit position
 
-1. Given a Recruiter who does not own the posting, when editing, then the API returns 403.
+1. Given a Recruiter who does not own the position, when editing, then the API returns 403.
 2. Given criteria are changed, when saved, then the version increases and existing AI analyses are marked `OUTDATED`.
 
-### AC-US07 Close / reopen posting
+### AC-US07 Close / reopen position
 
-1. Given an `OPEN` posting, when an HR Manager closes it, then the status is `CLOSED`, an audit entry is written, and adding an application to it returns 409.
+1. Given an `OPEN` position, when an HR Manager closes it, then the status is `CLOSED`, an audit entry is written, and adding an application to it returns 409.
 2. Given a Recruiter, then the close action is hidden and the API returns 403.
 
 ### AC-US08 View applications
 
-1. Given a posting, when the Kanban view is opened, then applications appear in stage columns with candidate name, fit score, and "Missing must-have" badge.
-2. Given the table view, when filtering by stage, score range, source, or posting and sorting by score, then the result matches the filters.
+1. Given a position, when the Kanban view is opened, then applications appear in stage columns with candidate name, fit score, and "Missing must-have" badge.
+2. Given the table view, when filtering by stage, score range, source, or position and sorting by score, then the result matches the filters.
 3. Given an Interviewer, then only assigned applications are returned and AI fields are absent from the API response (not just hidden).
 
 ### AC-US09 Add application with CV
 
-1. Given an `OPEN` posting and a valid PDF/DOCX ≤ 10 MB, when submitted, then an application in `NEW` is created and an AI analysis with status `PENDING` is queued.
+1. Given an `OPEN` position and a valid PDF/DOCX ≤ 10 MB, when submitted, then an application in `NEW` is created and an AI analysis with status `PENDING` is queued.
 2. Given an existing candidate with the same normalized email or phone, then the new application links to that candidate instead of creating a new one.
-3. Given the candidate already applied to the same posting, then the API returns 409.
+3. Given the candidate already has an application for the same position, then the API returns 409.
 4. Given a wrong file type, a file > 10 MB, or no extractable text, then the API returns 400 (or 413 for size) and nothing is stored.
 5. Given no source, a source outside the BR-18 list, or `OTHER` without a note, then the API returns 400 with a field error.
 
@@ -176,7 +176,7 @@ Format: **Given** context, **When** action, **Then** observable result.
 
 ### AC-US17 View reports
 
-1. Given a date range and optional posting, then the report shows stage counts and conversion rates, average time-to-hire, applications by source, rejection reasons, AI override rate, and AI–human agreement rate.
+1. Given a date range and optional position, then the report shows stage counts and conversion rates, average time-to-hire, applications by source, rejection reasons, AI override rate, and AI–human agreement rate.
 2. Given a Recruiter or Interviewer, then the Reports menu is hidden and the API returns 403.
 
 ### AC-US18 Export reports
@@ -204,7 +204,7 @@ Format: **Given** context, **When** action, **Then** observable result.
 ## Cross-cutting acceptance constraints
 
 - Only `ADMIN`, `HR_MANAGER`, `RECRUITER`, and `INTERVIEWER` exist.
-- The API, not the React client, enforces RBAC, posting ownership, panel assignment, and blind scorecards.
+- The API, not the React client, enforces RBAC, position ownership, panel assignment, and blind scorecards.
 - AI output is advisory; no endpoint lets the AI change application stage.
 - Every call to the external AI service uses redacted text and is logged with model, duration, and status.
 - API errors use RFC 7807 `ProblemDetails` with a stable `errorCode` and `traceId`.

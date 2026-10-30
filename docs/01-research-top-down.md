@@ -33,7 +33,7 @@ Small and medium companies (10–100 employees) in Vietnam usually recruit with 
 |---|---|---|
 | System administrator | `ADMIN` | Accounts, roles, system audit |
 | Head of recruitment / HR manager | `HR_MANAGER` | Overall pipeline, final decisions (offer / hire), reports |
-| Recruiter | `RECRUITER` | Daily work: job postings, CV intake, screening, scheduling |
+| Recruiter | `RECRUITER` | Daily work: positions, CV intake, screening, scheduling |
 | Interviewer (hiring manager, team lead, engineer) | `INTERVIEWER` | Only the candidates assigned to them; submit feedback quickly |
 | Candidate | Not a system user in V1 | Fair evaluation; personal data handled lawfully |
 | AI service provider | External system | Receives redacted CV text; returns structured analysis |
@@ -53,7 +53,7 @@ Small and medium companies (10–100 employees) in Vietnam usually recruit with 
 
 | Product | Relevant ideas | What we adopt in V1 |
 |---|---|---|
-| **Greenhouse** (global ATS, "structured hiring") | Interview scorecards; a visibility setting that lets interviewers see other scorecards only after submitting their own, to reduce bias and groupthink | Blind scorecards until submission (business rule BR-07) |
+| **Greenhouse** (global ATS, "structured hiring") | Separates the internal *job* (hiring plan, interview kit, scorecard attributes) from the public *job post* on the careers page and job boards. Interview scorecards; a visibility setting that lets interviewers see other scorecards only after submitting their own, to reduce bias and groupthink | Only the internal job, called a **position**; no public job post in V1. Blind scorecards until submission (business rule BR-07) |
 | **Base E-Hiring** (Vietnamese ATS by Base Enterprise) | Multi-channel candidate sourcing, talent pools, AI "Scan CV", automatic emails and scheduling, SLA per recruitment stage, recruitment reports | Pipeline stages, CV scanning with AI, recruitment reports. Job-board integration and email automation are out of scope |
 | Regulation reference: **EU AI Act** | AI systems used to screen or evaluate job candidates are classified as high-risk and require human oversight and transparency | Human-in-the-loop, evidence for every AI result, override with reason |
 
@@ -67,7 +67,7 @@ Small and medium companies (10–100 employees) in Vietnam usually recruit with 
 
 ```mermaid
 flowchart LR
-    A[Create job posting<br/>+ criteria] --> B[Open for intake]
+    A[Create position<br/>+ JD + criteria] --> B[Open position<br/>start adding candidates]
     X[HR advertises the role on<br/>LinkedIn, Facebook, job boards<br/>outside the system] -.->|CVs arrive by email,<br/>job-board inbox, referral| C
     B --> C[Recruiter adds application<br/>upload CV or bulk import]
     C --> D[AI analysis<br/>redact → extract → match]
@@ -79,10 +79,10 @@ flowchart LR
     E -.->|Reject + reason| R[Rejected]
     F -.->|Reject + reason| R
     G -.->|Reject + reason| R
-    I --> J[Close job posting]
+    I --> J[Close position]
 ```
 
-A **job posting** in Recruitment ATS is an internal record of an open position: description, headcount, deadline, and the weighted criteria the AI and interviewers evaluate against. It is **not published anywhere**. HR writes the job description and advertises the role on external channels themselves; candidates never log in or apply through the system. Recruiters bring each CV in and record its source (BR-18). `OPEN` means "the team still accepts applications for this position", not "visible to the public".
+A **position** (UI: *vị trí tuyển dụng*) is an internal record of a role the company needs to fill: job description, headcount, target hire date, and the weighted criteria the AI and interviewers evaluate against. It is **not a job advertisement and is never published**. HR writes the job description and advertises the role on external channels themselves; candidates never log in or apply through the system. Recruiters bring each CV in and record its source (BR-18). `OPEN` means "the team is still adding candidates for this position"; `CLOSED` means it has stopped.
 
 Pipeline stages: `NEW → SCREENING → INTERVIEW → OFFER → HIRED`, with `REJECTED` reachable from any non-final stage.
 
@@ -94,10 +94,10 @@ Recruitment ATS
 │   ├── F1.1 Login / logout                         → US01, US02
 │   ├── F1.2 User management (Admin)                → US20
 │   └── F1.3 Personal profile & password            → US21
-├── E2 Job postings
-│   ├── F2.1 Browse & search postings               → US04
-│   ├── F2.2 Create / edit posting with criteria    → US05, US06
-│   └── F2.3 Close / reopen posting                 → US07
+├── E2 Positions
+│   ├── F2.1 Browse & search positions               → US04
+│   ├── F2.2 Create / edit position with criteria    → US05, US06
+│   └── F2.3 Close / reopen position                 → US07
 ├── E3 Candidates & applications
 │   ├── F3.1 Browse & filter applications           → US08
 │   ├── F3.2 Add application with CV                → US09
@@ -122,7 +122,7 @@ Recruitment ATS
 ### In scope (V1)
 
 - 4 internal roles with backend-enforced RBAC and record-level rules.
-- Job postings with must-have / nice-to-have criteria and weights.
+- Positions with must-have / nice-to-have criteria and weights.
 - Applications with CV upload (PDF, DOCX), duplicate detection, pipeline stages and history.
 - Asynchronous AI analysis with PII redaction, per-criterion evidence, deterministic scoring, retry, and human override.
 - Interview scheduling (date, time, location/link, panel) and blind scorecards.

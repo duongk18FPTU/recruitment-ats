@@ -17,7 +17,7 @@ Recruitment ATS
 └── Authenticated (sidebar + topbar)
     ├── Dashboard (Tổng quan)
     │   └── Interviewer variant: my interviews + pending scorecards
-    ├── Job postings (Tin tuyển dụng)
+    ├── Positions (Vị trí tuyển dụng)
     │   ├── List (search, status / department / owner filters, paging)
     │   ├── Create / edit modal (details + criteria builder)
     │   └── Detail
@@ -25,7 +25,7 @@ Recruitment ATS
     │       ├── Criteria
     │       └── Pipeline (Kanban board)
     ├── Candidates (Ứng viên)
-    │   ├── Table across postings (filters, sort by fit score)
+    │   ├── Table across positions (filters, sort by fit score)
     │   ├── Add application modal (CV upload)
     │   └── Application detail
     │       ├── Profile & CV preview
@@ -52,14 +52,14 @@ Recruitment ATS
 
 `#/login` `#/dashboard` `#/jobs` `#/jobs/new` `#/jobs/:id` `#/jobs/:id/edit` `#/jobs/:id/pipeline` `#/applications` `#/applications/:id` `#/interviews` `#/interviews/:id/scorecard` `#/import` `#/reports` `#/audit` `#/users` `#/profile` `#/403`
 
-Forms (create/edit job posting, add application, edit candidate, move stage, reject, schedule interview, override a criterion result, user form) open as **modals** on their parent page, following the reference project's modal pattern: breadcrumb, title, short description, grouped field sections, and a sticky footer with actions.
+Forms (create/edit position, add application, edit candidate, move stage, reject, schedule interview, override a criterion result, user form) open as **modals** on their parent page, following the reference project's modal pattern: breadcrumb, title, short description, grouped field sections, and a sticky footer with actions.
 
 ## Navigation by role
 
 | Menu | Admin | HR Manager | Recruiter | Interviewer |
 |---|---|---|---|---|
 | Tổng quan | ✓ | ✓ | ✓ | ✓ (variant) |
-| Tin tuyển dụng | ✓ | ✓ | ✓ | ✓ (assigned) |
+| Vị trí tuyển dụng | ✓ | ✓ | ✓ | ✓ (assigned) |
 | Ứng viên | ✓ | ✓ | ✓ | ✓ (assigned, no AI) |
 | Lịch phỏng vấn | ✓ | ✓ | ✓ | ✓ |
 | Nhập hàng loạt | ✓ | ✓ | ✓ | |
@@ -76,9 +76,9 @@ Unauthorized items are **not rendered** in the sidebar; direct URL access shows 
 |---|---|---|---|
 | `SCR-01` | Login | Page (two-column) | US01, US02 |
 | `SCR-02` | Dashboard | Page | US03 |
-| `SCR-10` | Job posting list | Page | US04, US07 |
-| `SCR-11` | Job posting create / edit | Modal on `SCR-10` | US05, US06 |
-| `SCR-12` | Job posting detail | Tabbed page | US04, US07 |
+| `SCR-10` | Position list | Page | US04, US07 |
+| `SCR-11` | Position create / edit | Modal on `SCR-10` | US05, US06 |
+| `SCR-12` | Position detail | Tabbed page | US04, US07 |
 | `SCR-13` | Pipeline board (Kanban) | Tab of `SCR-12` | US08, US11 |
 | `SCR-20` | Candidate table | Page | US08 |
 | `SCR-21` | Add application | Modal | US09 |
@@ -105,7 +105,7 @@ Unauthorized items are **not rendered** in the sidebar; direct URL access shows 
 | US02 | Topbar user menu → logout → `SCR-01` |
 | US03 | `SCR-02` change date range |
 | US04 | `SCR-10` search / filter → `SCR-12` |
-| US05 | `SCR-11` save new posting with criteria |
+| US05 | `SCR-11` save new position with criteria |
 | US06 | `SCR-11` save changes (owner or HR Manager) |
 | US07 | `SCR-10` / `SCR-12` close or reopen with confirmation |
 | US08 | `SCR-13` Kanban or `SCR-20` table → `SCR-22` |
@@ -129,9 +129,9 @@ Unauthorized items are **not rendered** in the sidebar; direct URL access shows 
 flowchart TB
     Login["SCR-01 Login"] --> Shell["Authenticated shell<br/>sidebar + topbar"]
     Shell --> Dashboard["SCR-02 Dashboard"]
-    Shell --> Jobs["SCR-10 Job postings"]
-    Jobs --> JobForm["SCR-11 Create / edit posting modal"]
-    Jobs --> JobDetail["SCR-12 Posting detail"]
+    Shell --> Jobs["SCR-10 Positions"]
+    Jobs --> JobForm["SCR-11 Create / edit position modal"]
+    Jobs --> JobDetail["SCR-12 Position detail"]
     JobDetail --> Pipeline["SCR-13 Pipeline board"]
     Shell --> Candidates["SCR-20 Candidate table"]
     Candidates --> AddApp["SCR-21 Add application modal"]
@@ -159,7 +159,7 @@ flowchart TB
 
 ```mermaid
 flowchart LR
-    A["Posting pipeline"] --> B["Add application<br/>upload CV"]
+    A["Position pipeline"] --> B["Add application<br/>upload CV"]
     B --> C{"Duplicate?"}
     C -->|Yes| D["Link to existing candidate"]
     C -->|No| E["Create candidate"]
@@ -209,7 +209,7 @@ flowchart LR
 | Conflict (409) | Explain the rule (e.g. "Ứng viên đã ứng tuyển vị trí này", "Không thể chuyển từ NEW sang INTERVIEW") and show allowed options. |
 | Saving / uploading / importing | Disable duplicate submission; show progress for uploads. |
 | Success | Toast confirmation; close modal; refresh the affected data. |
-| Destructive confirmation | Name the record (e.g. close posting, reject candidate) and state the consequence. |
+| Destructive confirmation | Name the record (e.g. stop intake for a position, reject candidate) and state the consequence. |
 
 ### AI analysis states
 
@@ -238,7 +238,7 @@ The score is shown as a plain number; AI output gets no special colour. Criterio
 |---|---|
 | Login | `login`, `logout` |
 | Dashboard | `getDashboard` |
-| Job postings | `listJobs`, `getJob`, `createJob`, `updateJob`, `updateJobStatus` |
+| Positions | `listJobs`, `getJob`, `createJob`, `updateJob`, `updateJobStatus` |
 | Pipeline / candidates | `listApplications`, `getApplication`, `createApplication`, `updateCandidate`, `replaceCv`, `moveApplicationStage`, `getStageHistory` |
 | AI analysis | `getAnalysis`, `requestAnalysis`, `overrideAnalysis` |
 | Interviews | `listInterviews`, `createInterview`, `getScorecards`, `submitScorecard` |
