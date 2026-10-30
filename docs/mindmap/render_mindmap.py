@@ -5,8 +5,9 @@ hand), then run:
 
     python docs/mindmap/render_mindmap.py
 
-Requires Pillow and the Inter variable font (Inter-VF.ttf). The first six
-branches are drawn on the right, the rest on the left, in file order.
+Requires Pillow and the Inter variable font (Inter-VF.ttf). The first half of
+the branches (rounded up) is drawn on the right, the rest on the left, in file
+order. The canvas grows vertically when the branches need more room.
 """
 
 import json
@@ -21,9 +22,10 @@ XMIND = os.path.join(HERE, "recruitment-ats.xmind")
 OUT = os.path.join(HERE, "..", "mindmap.png")
 
 S = 2  # supersampling factor
-W, H = 1860, 1240
-CENTER = (708, 527, 1153, 713)
-RIGHT_COUNT = 6
+W, MIN_H, V_MARGIN = 1860, 1240, 78
+CENTER_X, CENTER_HALF_H = (708, 1153), 93
+# Set by configure() from the tree
+H, CENTER, RIGHT_COUNT = MIN_H, None, 0
 MAIN_H, LEAF_H, LEAF_PITCH, BLOCK_GAP = 50, 34, 42, 32
 MAIN_GAP, BRACKET_X = 30, 16
 MAIN_X_RIGHT, MAIN_X_LEFT_END = 1180, 680
@@ -104,6 +106,20 @@ def bezier(d, p0, p3, color, width=2.5):
     d.line(pts, fill=color, width=s(width), joint="curve")
 
 
+def configure(branches):
+    """Size the canvas and centre box so both sides fit."""
+    global H, CENTER, RIGHT_COUNT
+    RIGHT_COUNT = (len(branches) + 1) // 2
+
+    def span(group):
+        return sum(len(leaves) * LEAF_PITCH for _, leaves in group) + BLOCK_GAP * (len(group) - 1)
+
+    tallest = max(span(branches[:RIGHT_COUNT]), span(branches[RIGHT_COUNT:]))
+    H = max(MIN_H, int(tallest + 2 * V_MARGIN))
+    mid = H / 2
+    CENTER = (CENTER_X[0], mid - CENTER_HALF_H, CENTER_X[1], mid + CENTER_HALF_H)
+
+
 def layout(branches):
     """Return the y centre of each main topic, stacked around the canvas middle."""
     heights = [len(leaves) * LEAF_PITCH for _, leaves in branches]
@@ -134,6 +150,7 @@ def main():
     f_leaf = font(font_path, 17, 400)
 
     title, branches = load_tree()
+    configure(branches)
     img = Image.new("RGB", (W * S, H * S), "white")
     d = ImageDraw.Draw(img)
 

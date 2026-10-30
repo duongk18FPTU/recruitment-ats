@@ -1,6 +1,6 @@
 # UI/UX Design
 
-> Design status: TARGET V1 — high-fidelity prototype
+> Design status: TARGET — high-fidelity prototype
 >
 > Figma file: [Recruitment ATS — UI](https://www.figma.com/design/0TYozUq5jB0KJcdo8vjVjQ/Untitled?node-id=0-1)
 
@@ -76,7 +76,9 @@ Status colours appear only as a small pill or a dot next to text — never as th
 | `SCR-50` Reports | SCR-50 Báo cáo | HR Manager | Filter panel as in the reference; single-hue bar charts with value labels; export |
 | `SCR-70` Users | SCR-70 Người dùng | Admin | Role as plain text, status pill, inline edit and actions |
 
-Remaining screens from the [screen inventory](04-information-architecture.md#screen-inventory) (position detail overview, candidate table, add-application modal, move/reject modal, edit candidate, schedule interview, my interviews, audit log, profile, 403) reuse the same shell and components.
+Remaining screens from the [screen inventory](04-information-architecture.md#screen-inventory) (position detail overview, job post tab, candidate table, add-application modal, move/reject modal, edit candidate, emails tab, schedule interview, my interviews, CV inbox, talent pool, settings, audit log, profile, 403) reuse the same shell and components.
+
+**Not yet drawn in Figma:** the job post tab (`SCR-14`), emails tab and pending-email modal (`SCR-27`, `SCR-28`), CV inbox (`SCR-41`, `SCR-42`), talent pool (`SCR-45`, `SCR-46`), settings (`SCR-75`, `SCR-76`), and the public career site (`PUB-01`–`PUB-06`). The sidebar in the existing screens predates the *Hộp thư CV*, *Kho ứng viên*, and *Cài đặt* menu items. The career site reuses the colour and type tokens with its own header and a mobile-first single-column layout.
 
 ### Login
 
@@ -127,8 +129,10 @@ Remaining screens from the [screen inventory](04-information-architecture.md#scr
 1. **Evidence over decoration.** An AI score is a number next to the quotes that justify it; the quoted passages are highlighted in the CV so a recruiter can check them in seconds.
 2. **Human decisions stay explicit.** Stage changes are buttons the user presses; adjusting an AI result requires a reason and keeps the original.
 3. **Independent evaluation.** Interviewers see who has submitted, not what they wrote, until their own scorecard is in; the AI score is not shown to interviewers.
-4. **Role-shaped navigation.** The sidebar shows only permitted items (Recruiter 6, Interviewer 5, HR Manager and Admin 9).
+4. **Role-shaped navigation.** The sidebar shows only permitted items (Interviewer 5, Recruiter 8, HR Manager 11, Admin 12).
 5. **Recoverable errors.** Validation keeps input and states the rule where it applies (import errors per row, unscored criterion, wrong credentials).
-6. **Accessible by default.** Visible labels, WCAG AA contrast, status never by colour alone, keyboard alternative for drag-and-drop.
+6. **No surprise emails.** Any action that emails a candidate says so before confirming; apart from the receipt email, the email waits 10 minutes with a visible countdown and a cancel button.
+7. **Short path for candidates.** The career site asks only for what screening needs (name, email, phone, CV), works on a phone, and explains data use next to the consent checkboxes.
+8. **Accessible by default.** Visible labels, WCAG AA contrast, status never by colour alone, keyboard alternative for drag-and-drop.
 
 **Related:** [Information architecture](04-information-architecture.md) · [Use cases](02-use-cases.md)

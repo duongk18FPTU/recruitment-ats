@@ -1,6 +1,6 @@
-# INVEST Requirements & Acceptance Criteria — Recruitment ATS V1
+# INVEST Requirements & Acceptance Criteria — Recruitment ATS
 
-> Design status: TARGET V1
+> Design status: TARGET
 
 Each story is small enough to implement and test independently. Authentication, authorization, validation, auditing, and error handling are acceptance constraints, not hidden features. Business rules `BR-xx` are defined in [Use cases](02-use-cases.md#business-rules).
 
@@ -42,8 +42,18 @@ Priority uses MoSCoW (`M` must, `S` should, `C` could). Story points use the Fib
 | US19 | As an Admin or HR Manager, I want to inspect the audit log so that important actions on candidate data are traceable. | Accountability | US01 | M | 3 |
 | US20 | As an Admin, I want to create, edit, activate, and deactivate users so that access is controlled. | Access administration | US01 | M | 3 |
 | US21 | As an authenticated user, I want to maintain my profile and password without changing my role so that my account stays current and secure. | Self-service | US01 | S | 2 |
+| US22 | As an Admin, HR Manager, or position owner, I want to edit, publish, and unpublish the job post of a position and copy source-tagged share links so that candidates can find it and I know which channel brought them. | Reach + channel tracking | US05 | M | 5 |
+| US23 | As a candidate, I want to browse published job posts and read their details without an account so that I can find a suitable job. | Candidate reach | US22 | M | 3 |
+| US24 | As a candidate, I want to apply online with my CV and give consent so that my application reaches the hiring team and I get a receipt. | Self-service intake | US23, US09, US27 | M | 8 |
+| US25 | As an Admin, HR Manager, or Recruiter, I want CVs sent to the recruitment mailbox to appear in a CV inbox and become applications so that emailed CVs are not lost. | Centralized intake | US09, US29 | M | 8 |
+| US26 | As an Admin, HR Manager, or Recruiter, I want to search consented past candidates and add them to a position so that I can reuse talent instead of sourcing from scratch. | Talent reuse | US09, US24 | M | 5 |
+| US27 | As an Admin, HR Manager, or Recruiter, I want candidates to receive automatic emails at key events, with a 10-minute window to edit or cancel, so that candidates are informed without risky mistakes. | Candidate experience | US09, US11, US14 | M | 8 |
+| US28 | As an Admin or HR Manager, I want to edit email templates with placeholders and a preview so that emails match the company's tone. | Consistent communication | US27 | S | 3 |
+| US29 | As an Admin, I want to configure the recruitment mailbox and email sender and test the connection so that intake and sending work securely. | Operability | US01 | M | 3 |
+| US30 | As an Admin, HR Manager, or Recruiter, I want to export the filtered candidate list or talent pool to Excel so that I can share or process it offline. | Portable data | US08, US26 | M | 3 |
+| US31 | As a candidate, I want to join or leave the talent pool or delete my data from a link in any email so that I control my personal data. | Lawful processing | US24, US27 | M | 3 |
 
-**Total:** 21 stories, 84 points. Must-have stories: 17 (69 points).
+**Total:** 31 stories, 133 points. Must-have stories: 26 (115 points).
 
 ## Per-story INVEST review
 
@@ -51,8 +61,8 @@ Priority uses MoSCoW (`M` must, `S` should, `C` could). Story points use the Fib
 
 | Story | I | N | V | E | S | T | Notes |
 |---|---|---|---|---|---|---|---|
-| US01 | PASS | PASS | PASS | PASS | PASS | PASS | Bearer token, 30-minute lifetime, no refresh token in V1. |
-| US02 | PASS | PASS | PASS | PASS | PASS | PASS | Client-side discard; no server-side revocation in V1. |
+| US01 | PASS | PASS | PASS | PASS | PASS | PASS | Bearer token, 30-minute lifetime, no refresh token. |
+| US02 | PASS | PASS | PASS | PASS | PASS | PASS | Client-side discard; no server-side revocation. |
 | US03 | PASS | PASS | PASS | PASS | PASS | PASS | KPI list and Interviewer variant are defined. |
 | US04 | PASS | PASS | PASS | PASS | PASS | PASS | Read / filter / paging is independently testable. |
 | US05 | PASS | PASS | PASS | PASS | PASS | PASS | Criteria model (type, weight 1–5) is explicit. |
@@ -72,6 +82,16 @@ Priority uses MoSCoW (`M` must, `S` should, `C` could). Story points use the Fib
 | US19 | PASS | PASS | PASS | PASS | PASS | PASS | Read-only with filters. |
 | US20 | PASS | PASS | PASS | PASS | PASS | PASS | Admin-only lifecycle; no self-deactivation. |
 | US21 | PASS | PASS | PASS | PASS | PASS | PASS | Allowed fields and password verification are explicit. |
+| US22 | PASS | PASS | PASS | PASS | PASS | PASS | Public fields (BR-20) and publish rule (BR-05) are explicit; share links are plain URLs. |
+| US23 | PASS | PASS | PASS | PASS | PASS | PASS | Read-only public endpoint; closed and expired states defined. |
+| US24 | PASS | PASS | PASS | PASS | PASS | PASS | Largest public story (8). Splits into: form + validation, CAPTCHA/rate limit, consent record, intake reuse of US09. |
+| US25 | PASS | PASS | PASS | PASS | PASS | PASS | 8 points. Splits into: mailbox reader, inbox list, assign flow, auto-assign by code. Uses a fake `IMailboxReader` in tests. |
+| US26 | PASS | PASS | PASS | PASS | PASS | PASS | Pool membership depends only on consent (BR-24). |
+| US27 | PASS | PASS | PASS | PASS | PASS | PASS | 8 points. Splits into: event → queue, scheduler, edit/cancel, retry. Uses a fake `IEmailSender`; delays are configurable for tests. |
+| US28 | PASS | PASS | PASS | PASS | PASS | PASS | Placeholder list is fixed; consent link is mandatory. |
+| US29 | PASS | PASS | PASS | PASS | PASS | PASS | Secrets are never returned by the API after saving. |
+| US30 | PASS | PASS | PASS | PASS | PASS | PASS | Columns and row limit are explicit (BR-25). |
+| US31 | PASS | PASS | PASS | PASS | PASS | PASS | Signed link replaces a login; deletion effects are listed in BR-24. |
 
 ## Acceptance criteria
 
@@ -112,7 +132,7 @@ Format: **Given** context, **When** action, **Then** observable result.
 
 ### AC-US07 Close / reopen position
 
-1. Given an `OPEN` position, when an HR Manager closes it, then the status is `CLOSED`, an audit entry is written, and adding an application to it returns 409.
+1. Given an `OPEN` position, when an HR Manager closes it, then the status is `CLOSED`, an audit entry is written, its job post is unpublished, and adding an application to it returns 409.
 2. Given a Recruiter, then the close action is hidden and the API returns 403.
 
 ### AC-US08 View applications
@@ -123,7 +143,7 @@ Format: **Given** context, **When** action, **Then** observable result.
 
 ### AC-US09 Add application with CV
 
-1. Given an `OPEN` position and a valid PDF/DOCX ≤ 10 MB, when submitted, then an application in `NEW` is created and an AI analysis with status `PENDING` is queued.
+1. Given an `OPEN` position and a valid PDF/DOCX ≤ 10 MB, when submitted, then an application in `NEW` is created, an AI analysis with status `PENDING` is queued, and a receipt email is sent to the candidate.
 2. Given an existing candidate with the same normalized email or phone, then the new application links to that candidate instead of creating a new one.
 3. Given the candidate already has an application for the same position, then the API returns 409.
 4. Given a wrong file type, a file > 10 MB, or no extractable text, then the API returns 400 (or 413 for size) and nothing is stored.
@@ -140,6 +160,7 @@ Format: **Given** context, **When** action, **Then** observable result.
 2. Given a skip (e.g. `NEW → INTERVIEW`) or a move out of `HIRED`/`REJECTED`, then the API returns 409 with the allowed next stages.
 3. Given a Recruiter moving to `OFFER` or `HIRED`, then the API returns 403.
 4. Given a move to `REJECTED` without a reason, then the API returns 400.
+5. Given a move to `REJECTED` or `OFFER`, then the matching email is created with status `PENDING` and a send time 10 minutes later.
 
 ### AC-US12 Analyze CV with AI
 
@@ -160,6 +181,7 @@ Format: **Given** context, **When** action, **Then** observable result.
 1. Given an application in `INTERVIEW`, when a future time and at least one panel member are saved, then the interview appears on each panel member's dashboard.
 2. Given a panel member already has an overlapping interview, then the API returns 409 naming the conflict.
 3. Given an application not in `INTERVIEW`, then the API returns 409.
+4. Given a saved interview, then an invitation email is queued for 10 minutes; rescheduling or cancelling before it is sent replaces or cancels it instead of sending a second email.
 
 ### AC-US15 Submit scorecard
 
@@ -201,13 +223,82 @@ Format: **Given** context, **When** action, **Then** observable result.
 1. Given valid name, phone, avatar URL, and timezone, when saved, then the profile is updated; the role field is read-only.
 2. Given a wrong current password when changing password, then the API returns 400 and the password is unchanged.
 
+### AC-US22 Manage job post
+
+1. Given an `OPEN` position, when the owner publishes its job post, then the post appears on the career site with only public fields (BR-20) and a `PUBLISH` audit entry is written.
+2. Given a `DRAFT` or `CLOSED` position, when publishing, then the API returns 409.
+3. Given a published post, when copying share links, then each link points to the post and carries `src` for one source in the BR-18 list.
+4. Given a Recruiter who does not own the position, then publish returns 403.
+
+### AC-US23 Browse job posts
+
+1. Given published posts, when an anonymous visitor opens the career site, then only `PUBLISHED` posts of `OPEN` positions are listed, with search and filters.
+2. Given a post past its closing date, then it shows "Đã hết hạn nhận hồ sơ" and the apply button is disabled.
+3. Given an unpublished or unknown post URL, then a "Tin không còn tồn tại" page is shown; the public API returns 404 without internal details.
+
+### AC-US24 Apply online
+
+1. Given a published post and valid input with privacy consent and CAPTCHA, when submitted, then an application in `NEW` is created with the `src` source (default `CAREER_SITE`), the consent version and time are stored, an AI analysis is queued, a receipt email is sent, and the thank-you page is shown.
+2. Given privacy consent not ticked, then the API returns 400 and nothing is stored.
+3. Given talent-pool consent ticked, then the candidate appears in the talent pool; unticked, they do not.
+4. Given the same email already has an application for that position, then the thank-you page is shown and no new application or email is created.
+5. Given more than 5 submissions from one IP within an hour, then the API returns 429.
+
+### AC-US25 Process CV inbox
+
+1. Given a new email with a PDF attachment and subject `[JOB-014] …` for an `OPEN` position, when the reader runs, then an application with source `EMAIL` is created automatically and a receipt email is sent.
+2. Given an email with a CV but no valid position code, then a `NEEDS_REVIEW` inbox item appears; when a recruiter assigns a position and confirms the candidate, then an application is created.
+3. Given an email without a PDF/DOCX attachment, then no inbox item is created.
+4. Given the same message is read twice, then only one inbox item exists (Message-ID).
+5. Given a dismissed item, then it and its attachments are deleted after 7 days.
+
+### AC-US26 Use talent pool
+
+1. Given candidates with and without active pool consent, when searching the pool, then only consented candidates are returned.
+2. Given a pool candidate and an `OPEN` position, when added, then an application in `NEW` is created, AI analysis is queued, and a receipt email is sent; adding to a position they already applied to returns 409.
+
+### AC-US27 Automatic candidate emails
+
+1. Given an application is created from any channel, then the receipt email is sent immediately and logged as `SENT`.
+2. Given an interview is scheduled or an application moves to `REJECTED` or `OFFER`, then an email is logged as `PENDING` with send time +10 minutes and is visible on the application's *Email* tab.
+3. Given a `PENDING` email, when a recruiter cancels it, then it becomes `CANCELLED` and is never sent; when edited, then the edited content is sent.
+4. Given the email service fails, then the email is retried 3 times and then marked `FAILED` and listed under *Cần xử lý*.
+5. Given a candidate without a valid email, then no email is queued and the application shows a warning.
+6. Given any sent email, then it contains the candidate's signed consent link.
+
+### AC-US28 Manage email templates
+
+1. Given a template with known placeholders, when saved, then the next emails for that event use it; preview renders sample data.
+2. Given an unknown placeholder or a body without `{{link_dong_y}}`, then the API returns 400.
+3. Given a Recruiter or Interviewer, then the API returns 403.
+
+### AC-US29 Configure mailbox and sender
+
+1. Given valid IMAP and SMTP settings, when *Test connection* is run, then both connections report success or a specific error.
+2. Given saved settings, when they are read back, then passwords are not returned.
+3. Given a non-Admin, then the API returns 403.
+
+### AC-US30 Export candidates
+
+1. Given current filters on the candidate table or talent pool, when exporting, then the XLSX contains exactly the visible rows (maximum 5,000) and the listed columns, and an `EXPORT` audit entry stores the filters.
+2. Given more than 5,000 matching rows, then the API returns 400 asking to narrow the filters.
+3. Given an Interviewer, then the API returns 403.
+
+### AC-US31 Manage data consent
+
+1. Given a valid signed link, when the candidate leaves the pool, then they no longer appear in the talent pool and receive a confirmation email.
+2. Given a valid signed link, when the candidate deletes all data, then CVs are deleted, the candidate is anonymized, open applications become `REJECTED` with reason "Ứng viên rút hồ sơ", and an audit entry is written.
+3. Given an invalid or expired link, then the page explains that a new link arrives with the next email or can be requested by replying to the recruitment mailbox.
+
 ## Cross-cutting acceptance constraints
 
-- Only `ADMIN`, `HR_MANAGER`, `RECRUITER`, and `INTERVIEWER` exist.
+- Only `ADMIN`, `HR_MANAGER`, `RECRUITER`, and `INTERVIEWER` have accounts. Candidates use public endpoints without an account; these expose only published job posts, the apply action, and the signed consent action.
 - The API, not the React client, enforces RBAC, position ownership, panel assignment, and blind scorecards.
 - AI output is advisory; no endpoint lets the AI change application stage.
 - Every call to the external AI service uses redacted text and is logged with model, duration, and status.
 - API errors use RFC 7807 `ProblemDetails` with a stable `errorCode` and `traceId`.
 - File type and size are validated server-side before parsing or storage.
+- External services (AI, email sender, mailbox reader) sit behind interfaces with fakes, so every story is testable without real accounts.
+- Personal data is processed only with a recorded consent or basis (BR-19); deletions follow BR-17 and BR-24.
 
 **Related:** [Research](01-research-top-down.md) · [Use cases](02-use-cases.md) · [Information architecture](04-information-architecture.md)
