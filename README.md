@@ -25,6 +25,14 @@ What makes this project different from a generic ATS:
 2. **Blind screening** — personal attributes are redacted before the CV is sent to the AI.
 3. **Independent interviews** — an interviewer sees other scorecards only after submitting their own.
 
+### V1 scope
+
+Recruitment ATS is an **internal tool for the hiring team**. Candidates do not log in or apply through it.
+
+- **Job postings are internal records** of open positions: description, headcount, deadline, and the weighted criteria used for evaluation. HR writes the job description; the system does not generate or publish it.
+- **Advertising happens outside the system.** HR posts the role on LinkedIn, Facebook, TopCV, and similar channels. CVs that arrive by email, job-board inbox, or referral are added by a Recruiter, one at a time or by bulk import, with a source from a fixed list (BR-18) so reports can compare channels.
+- **Not in V1:** public career site or candidate self-service portal, posting to or pulling from job boards, email/SMS to candidates, calendar integration, OCR for scanned CVs, offer letters and onboarding, and AI making reject/hire decisions.
+
 Full analysis, market research (Greenhouse, Base E-Hiring), scope, constraints, and risks: [Top-down research](docs/01-research-top-down.md).
 
 ### 1.2 Product mind map
@@ -99,7 +107,7 @@ flowchart TB
     style system fill:#f8fbff,stroke:#1168bd,stroke-dasharray:5 5
 ```
 
-Detailed use case diagram (one node per use case), include/extend relationships, 17 business rules, and use case specifications: [Actors, business rules, and use cases](docs/02-use-cases.md).
+Detailed use case diagram (one node per use case), include/extend relationships, 18 business rules, and use case specifications: [Actors, business rules, and use cases](docs/02-use-cases.md).
 
 ### 1.5 Roles and permissions
 

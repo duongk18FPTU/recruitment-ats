@@ -16,7 +16,7 @@ Product name: **Recruitment ATS**.
 | `INTERVIEWER` | Người phỏng vấn | Interviews assigned candidates and submits scorecards |
 | AI service | — (external system) | Receives redacted CV text and returns a structured analysis |
 
-Candidates are **data subjects**, not system users, in V1.
+Candidates are **data subjects**, not system users, in V1. They apply through external channels (LinkedIn, Facebook, job boards, email, referral); a Recruiter adds their CV to the system. A job posting is an internal record of an open position and is not published by the system.
 
 ## Role × feature matrix
 
@@ -66,6 +66,7 @@ Menus and buttons are **not displayed** when the user lacks permission. Unauthor
 | BR-15 | CV files must be PDF or DOCX, at most 10 MB, and contain extractable text. |
 | BR-16 | Bulk import is all-or-nothing: one Excel file (maximum 200 rows) plus one ZIP of CVs matched by file name. Any invalid row means zero applications are created. |
 | BR-17 | CVs of `REJECTED` applications are deleted automatically after the retention period (default 6 months); the candidate record is anonymized and the deletion is logged. |
+| BR-18 | Every application has exactly one source from a fixed list: `LINKEDIN`, `FACEBOOK`, `TOPCV`, `VIETNAMWORKS`, `COMPANY_WEBSITE`, `EMAIL`, `REFERRAL`, `OTHER`. `OTHER` requires a short note. Bulk import rejects rows with an unknown source. |
 
 ## Use case diagram
 
@@ -207,7 +208,7 @@ flowchart LR
 ### UC05 Create job posting
 
 - **Actor:** Admin, HR Manager, Recruiter
-- **Main flow:** form: title, department, location, employment type, headcount, deadline, description → add criteria (name, type `MUST_HAVE` / `NICE_TO_HAVE`, weight 1–5) → save as `DRAFT` or `OPEN`
+- **Main flow:** form: title, department, location, employment type, headcount, deadline, description (written by HR; the system does not generate or publish it) → add criteria (name, type `MUST_HAVE` / `NICE_TO_HAVE`, weight 1–5) → save as `DRAFT` or `OPEN`
 - **Validation:** at least one criterion; deadline in the future; headcount ≥ 1
 - **Result:** posting appears in the list; the creator becomes the owner
 
@@ -231,7 +232,7 @@ flowchart LR
 ### UC09 Add application with CV
 
 - **Actor:** Admin, HR Manager, Recruiter
-- **Main flow:** choose posting → upload CV (BR-15) → enter or confirm candidate info (name, email, phone, source) → duplicate check (BR-06) → create application in `NEW` → AI analysis is queued automatically (extends UC12)
+- **Main flow:** choose posting → upload CV (BR-15) → enter or confirm candidate info (name, email, phone, source — BR-18) → duplicate check (BR-06) → create application in `NEW` → AI analysis is queued automatically (extends UC12)
 - **Alternative:** duplicate found → show the existing candidate and link the new application to it; same posting → 409 Conflict
 
 ### UC10 Edit candidate information
@@ -277,7 +278,7 @@ flowchart LR
 ### UC16 Bulk import
 
 - **Actor:** Admin, HR Manager, Recruiter
-- **Main flow:** choose posting → download the Excel template → upload `.xlsx` + `.zip` of CVs → preview row validation (required columns, email format, matching CV file, duplicates) → confirm → atomic import (BR-16) → AI analysis queued for each new application
+- **Main flow:** choose posting → download the Excel template → upload `.xlsx` + `.zip` of CVs → preview row validation (required columns, email format, valid source — BR-18, matching CV file, duplicates) → confirm → atomic import (BR-16) → AI analysis queued for each new application
 - **Result:** import batch summary (total, valid, created, errors)
 
 ### UC17 View reports

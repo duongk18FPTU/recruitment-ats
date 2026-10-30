@@ -25,7 +25,7 @@ Small and medium companies (10–100 employees) in Vietnam usually recruit with 
 | Interview feedback is collected by chat | Interviewers influence each other; feedback is lost; decisions are not traceable |
 | CVs are personal data | Under Vietnam's Personal Data Protection Law (Law No. 91/2025/QH15, in force since 01/01/2026, detailed by Decree No. 356/2025/ND-CP, which replaced Decree 13/2023/ND-CP), the company must control who accesses CVs and delete data that is no longer needed |
 
-**Problem statement:** a small hiring team needs one place to publish openings, collect and screen CVs, move candidates through a defined pipeline, collect independent interview feedback, and report on hiring results — with AI assistance for the slowest step (CV screening) but without letting AI make hiring decisions.
+**Problem statement:** a small hiring team needs one place to define open positions and their evaluation criteria, collect CVs from every sourcing channel, screen them, move candidates through a defined pipeline, collect independent interview feedback, and report on hiring results — with AI assistance for the slowest step (CV screening) but without letting AI make hiring decisions.
 
 ## 2. Stakeholders
 
@@ -67,8 +67,9 @@ Small and medium companies (10–100 employees) in Vietnam usually recruit with 
 
 ```mermaid
 flowchart LR
-    A[Create job posting<br/>+ criteria] --> B[Publish / open]
-    B --> C[Add application<br/>upload CV or bulk import]
+    A[Create job posting<br/>+ criteria] --> B[Open for intake]
+    X[HR advertises the role on<br/>LinkedIn, Facebook, job boards<br/>outside the system] -.->|CVs arrive by email,<br/>job-board inbox, referral| C
+    B --> C[Recruiter adds application<br/>upload CV or bulk import]
     C --> D[AI analysis<br/>redact → extract → match]
     D --> E[Recruiter screening<br/>accept or override AI]
     E --> F[Interview<br/>schedule + scorecards]
@@ -80,6 +81,8 @@ flowchart LR
     G -.->|Reject + reason| R
     I --> J[Close job posting]
 ```
+
+A **job posting** in Recruitment ATS is an internal record of an open position: description, headcount, deadline, and the weighted criteria the AI and interviewers evaluate against. It is **not published anywhere**. HR writes the job description and advertises the role on external channels themselves; candidates never log in or apply through the system. Recruiters bring each CV in and record its source (BR-18). `OPEN` means "the team still accepts applications for this position", not "visible to the public".
 
 Pipeline stages: `NEW → SCREENING → INTERVIEW → OFFER → HIRED`, with `REJECTED` reachable from any non-final stage.
 

@@ -127,6 +127,7 @@ Format: **Given** context, **When** action, **Then** observable result.
 2. Given an existing candidate with the same normalized email or phone, then the new application links to that candidate instead of creating a new one.
 3. Given the candidate already applied to the same posting, then the API returns 409.
 4. Given a wrong file type, a file > 10 MB, or no extractable text, then the API returns 400 (or 413 for size) and nothing is stored.
+5. Given no source, a source outside the BR-18 list, or `OTHER` without a note, then the API returns 400 with a field error.
 
 ### AC-US10 Edit candidate information
 
@@ -168,7 +169,7 @@ Format: **Given** context, **When** action, **Then** observable result.
 
 ### AC-US16 Bulk import
 
-1. Given a template-compliant Excel file and a ZIP whose file names match the `cv_file` column, when previewed, then each row shows `VALID` or `INVALID` with reasons.
+1. Given a template-compliant Excel file and a ZIP whose file names match the `cv_file` column, when previewed, then each row shows `VALID` or `INVALID` with reasons; an unknown `source` value makes the row `INVALID` (BR-18).
 2. Given any invalid row, when confirming, then zero applications are created.
 3. Given all rows valid, when confirming, then all applications are created in one transaction, an import batch is recorded, and an AI analysis is queued for each.
 4. Given more than 200 rows or files above size limits, then the API returns 400/413 before processing.
