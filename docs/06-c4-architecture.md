@@ -249,7 +249,7 @@ flowchart TB
             score["<b>FitScoreCalculator</b><br/>weighted score,<br/>must-have flag"]
         end
         core["<b>Application core</b><br/>use-case services, queue writers,<br/>audit writer, AtsDbContext, IFileStorage"]
-        analyzer["<b>IResumeAnalyzer</b><br/>[LLM adapter]"]
+        analyzer["<b>IResumeAnalyzer</b><br/>[OpenAI-compatible adapter]"]
         sender["<b>IEmailSender</b><br/>[MailKit SMTP]"]
         reader["<b>IMailboxReader</b><br/>[MailKit IMAP]"]
     end
@@ -361,12 +361,13 @@ flowchart TB
 | AD-09 | **One VM with Docker Compose** behind Caddy | Kubernetes; managed PaaS | Matches a small single-tenant deployment and free/low-cost constraint |
 | AD-10 | **Mermaid flowcharts with C4 styling** | Mermaid `C4Context` syntax; Structurizr; PlantUML | Renders reliably on GitHub, same style as the existing diagrams |
 | AD-11 | **Simplified Clean Architecture**: Application, Infrastructure, and two thin hosts (Api, Worker) — see [folder structures](09-folder-structure.md#1-architecture-choice) | Layered N-tier; full Clean Architecture with Domain project and MediatR; vertical slices | Both hosts reuse the same use cases; every external service is a replaceable port; no layers without a driver |
+| AD-12 | **One OpenAI-compatible adapter, provider chosen by environment variables.** Development and demo use **DeepSeek V4.1 Flash** (paid) with synthetic CVs only; tests use `FakeResumeAnalyzer` — see [AI configuration](09-folder-structure.md#71-ai-provider-configuration) | Free tiers (rate limits, slow); a provider SDK per vendor | Cheapest paid option, no rate-limit waits; DeepSeek, GLM, OpenAI, Gemini, and local Ollama all speak the same API, so switching is configuration only |
 
 ## Open items
 
 | Item | Needed before |
 |---|---|
-| AI provider and model behind `IResumeAnalyzer`, including where it processes data (cross-border transfer under Law 91/2025 and Decree 356/2025) | Implementing US12 |
+| Production LLM provider for **real** CVs: paid tier with a no-training commitment, data not stored in China, cross-border transfer assessment under Law 91/2025 and Decree 356/2025. The development choice (AD-12) is for synthetic CVs only | Processing real candidate data |
 | Company domain names and SMTP provider with SPF/DKIM | First deployment |
 
 **Related:** [Top-down research](01-research-top-down.md) · [Use cases](02-use-cases.md) · [INVEST requirements](03-invest-requirements.md) · [Information architecture](04-information-architecture.md)

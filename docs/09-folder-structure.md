@@ -165,9 +165,10 @@ RecruitmentAts.Infrastructure/
 │   ├── UnitOfWork.cs
 │   └── Seed/                           # admin user, departments, email templates
 ├── Ai/
-│   ├── LlmResumeAnalyzer.cs            # provider SDK / HTTP, JSON schema, timeout
-│   ├── ResumeAnalysisPrompt.cs
-│   └── FakeResumeAnalyzer.cs           # used when no API key is configured (local, tests)
+│   ├── OpenAiCompatibleResumeAnalyzer.cs  # any OpenAI-compatible API (DeepSeek, GLM, OpenAI, Gemini, Ollama)
+│   ├── AiOptions.cs                    # bound from the Ai__* environment variables (§7.1)
+│   ├── ResumeAnalysisPrompt.cs         # system prompt and JSON schema
+│   └── FakeResumeAnalyzer.cs           # Ai__Provider=Fake: tests, CI, local work without a key
 ├── Email/MailKitEmailSender.cs
 ├── Mailbox/MailKitMailboxReader.cs
 ├── Files/
@@ -443,10 +444,45 @@ packages/ui/
 
 | Setting | Where |
 |---|---|
-| Connection string, JWT signing key, AI API key, Turnstile secret | Environment variables / Docker secrets (`.env` locally, never committed) |
+| Connection string, JWT signing key, AI API key (`Ai__ApiKey`), Turnstile secret | Environment variables / Docker secrets (`.env` locally, never committed) |
 | Mailbox and SMTP passwords | Database, encrypted with Data Protection (keys in the `dp-keys` volume) |
 | Non-secret defaults (timeouts, delays, limits) | `appsettings.json`, overridable by environment |
 | Frontend | `VITE_TURNSTILE_SITE_KEY` only; API calls are same-origin, so no API URL is needed |
+
+### 7.1 AI provider configuration
+
+The analyzer is selected at startup from environment variables (ASP.NET Core maps `Ai__Model` to the `Ai:Model` setting). Both the API (for `requestAnalysis` validation) and the Worker read the same values.
+
+| Variable | Values | Default |
+|---|---|---|
+| `Ai__Provider` | `Fake` · `OpenAICompatible` | `Fake` |
+| `Ai__BaseUrl` | Base URL of an OpenAI-compatible Chat Completions API | — |
+| `Ai__Model` | Model ID as published by the provider | — |
+| `Ai__ApiKey` | Secret; never in `appsettings*.json` | — |
+| `Ai__ResponseFormat` | `JsonSchema` (strict schema, where supported) · `JsonObject` (JSON mode; schema given in the prompt) | `JsonObject` |
+| `Ai__TimeoutSeconds` | Per-call timeout (keeps analysis under the 60 s goal, G2) | `45` |
+
+Whatever the format, the Worker parses the reply against the schema in code; a reply that does not match is an `INVALID` call (not retried automatically, see [class design](10-class-design.md#5-ai-screening)).
+
+| Use | `Ai__Provider` | `Ai__BaseUrl` | Data allowed |
+|---|---|---|---|
+| Unit, integration, E2E tests, CI | `Fake` | — | — |
+| **Development and demo (AD-12)** | `OpenAICompatible` | `https://api.deepseek.com` (DeepSeek V4.1 Flash) | **Synthetic CVs only** — data is stored in China |
+| Alternative for development | `OpenAICompatible` | `https://api.z.ai/api/paas/v4` (GLM Flash models) | Synthetic CVs only |
+| Local, offline | `OpenAICompatible` | `http://localhost:11434/v1` (Ollama) | Any; nothing leaves the machine |
+| Production candidates | `OpenAICompatible` | e.g. `https://api.openai.com/v1`, Gemini's OpenAI-compatible endpoint | Real CVs, paid tier only (C4 open item) |
+
+Check each provider's documentation for the current model IDs and whether it supports `JsonSchema`. Claude is not used through an OpenAI-compatible shim: choosing it would add an `AnthropicResumeAnalyzer` that uses the official Anthropic .NET SDK.
+
+Example `.env` for development:
+
+```bash
+Ai__Provider=OpenAICompatible
+Ai__BaseUrl=https://api.deepseek.com
+Ai__Model=<model id from DeepSeek docs>
+Ai__ApiKey=<secret>
+Ai__ResponseFormat=JsonObject
+```
 
 ## 8. Order of creation
 

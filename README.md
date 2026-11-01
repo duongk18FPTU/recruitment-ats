@@ -358,6 +358,8 @@ flowchart TB
 | AD-08 | Internal app polls AI status; no WebSocket |
 | AD-09 | One VM with Docker Compose behind Caddy, two domains |
 | AD-10 | Mermaid flowcharts with C4 styling |
+| AD-11 | Simplified Clean Architecture (see section 5) |
+| AD-12 | One OpenAI-compatible AI adapter chosen by environment variables; DeepSeek V4.1 Flash for development and demo with synthetic CVs only; `Fake` analyzer for tests |
 
 Architecture drivers, full context and container diagrams, component diagrams for the API and the Worker, key interactions (AI analysis, email queue, public apply, link previews), deployment, and open items: [C4 architecture](docs/06-c4-architecture.md).
 
@@ -512,14 +514,14 @@ classDiagram
         +ClaimNextAsync(TimeSpan) CvAnalysis?
     }
     class AnalysisRunner
-    class LlmResumeAnalyzer
+    class OpenAiCompatibleResumeAnalyzer
     AnalysisRunner --> ScreeningService
     ScreeningService --> IAnalysisQueue
     ScreeningService --> Redactor
     ScreeningService --> IResumeAnalyzer
     ScreeningService --> QuoteVerifier
     ScreeningService --> FitScoreCalculator
-    LlmResumeAnalyzer ..|> IResumeAnalyzer
+    OpenAiCompatibleResumeAnalyzer ..|> IResumeAnalyzer
 ```
 
 ### 6.2 Analyze CV with AI

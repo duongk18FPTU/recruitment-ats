@@ -590,7 +590,7 @@ classDiagram
         <<interface>>
         +Add(AiCallLog) void
     }
-    class LlmResumeAnalyzer
+    class OpenAiCompatibleResumeAnalyzer
     class FakeResumeAnalyzer
     class AnalysisQueue
 
@@ -608,7 +608,7 @@ classDiagram
     IResumeAnalyzer --> ResumeAnalysisInput
     IResumeAnalyzer --> ResumeAnalysisOutput
     IResumeAnalyzer --> AnalyzerException
-    LlmResumeAnalyzer ..|> IResumeAnalyzer
+    OpenAiCompatibleResumeAnalyzer ..|> IResumeAnalyzer
     FakeResumeAnalyzer ..|> IResumeAnalyzer
     AnalysisQueue ..|> IAnalysisQueue
 ```
