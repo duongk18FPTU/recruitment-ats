@@ -124,7 +124,7 @@ All browser and crawler traffic passes through the reverse proxy shown in the [D
 |---|---|---|---|
 | Career site | React + Vite, static files on `careers.<domain>` | Public, mobile-first pages; renders the Turnstile widget; reads `src` from the share link and sends it with the application | API public routes only (same origin through the proxy) |
 | Internal app | React + Vite, static files on `ats.<domain>` | All authenticated screens; polls AI status while an analysis is pending | API internal routes (same origin through the proxy) |
-| API | ASP.NET Core 8+, EF Core, Npgsql | Authentication, RBAC and record rules, validation, business transactions, audit, Excel/PDF export, enqueuing AI jobs and emails, Open Graph pages for crawlers | Database, file store, Turnstile; SMTP/IMAP only for the Admin connection test |
+| API | ASP.NET Core (.NET 10 LTS), EF Core, Npgsql | Authentication, RBAC and record rules, validation, business transactions, audit, Excel/PDF export, enqueuing AI jobs and emails, Open Graph pages for crawlers | Database, file store, Turnstile; SMTP/IMAP only for the Admin connection test |
 | Worker | .NET Worker Service (`BackgroundService`), same core libraries as the API | Everything slow, scheduled, or external: AI analysis, email dispatch with retries, mailbox intake, retention and consent expiry | Database, file store, AI Service, SMTP, IMAP |
 | Database | PostgreSQL 16 | Single source of truth, including the two queues and the audit log | — |
 | CV file store | Docker volume behind `IFileStorage` | Binary files; keys stored in the database, never public URLs | — |
@@ -360,6 +360,7 @@ flowchart TB
 | AD-08 | **The internal app polls** AI status every 5 s while pending | SignalR / WebSocket push | Simple and sufficient for a few users and a 60 s target |
 | AD-09 | **One VM with Docker Compose** behind Caddy | Kubernetes; managed PaaS | Matches a small single-tenant deployment and free/low-cost constraint |
 | AD-10 | **Mermaid flowcharts with C4 styling** | Mermaid `C4Context` syntax; Structurizr; PlantUML | Renders reliably on GitHub, same style as the existing diagrams |
+| AD-11 | **Simplified Clean Architecture**: Application, Infrastructure, and two thin hosts (Api, Worker) — see [folder structures](09-folder-structure.md#1-architecture-choice) | Layered N-tier; full Clean Architecture with Domain project and MediatR; vertical slices | Both hosts reuse the same use cases; every external service is a replaceable port; no layers without a driver |
 
 ## Open items
 

@@ -421,7 +421,56 @@ Every internal operation declares its roles in `x-roles`; errors use RFC 7807 Pr
 
 ## 5. Frontend and Backend Folder Structures
 
-_Planned._
+The backend uses **Simplified Clean Architecture** (AD-11), the same three-project core as the course reference project ([finance-manager](https://github.com/PhamHiep948/finance-manager)), with a second host for the Worker. Business rules and ports live in `Application`; `Infrastructure` implements the ports; `Api` and `Worker` are thin hosts that reuse the same use cases. The frontend is an npm workspace with two React apps sharing a generated API client and a UI package.
+
+| Option | Verdict |
+|---|---|
+| Layered N-tier | Rejected — business code would depend on EF Core and concrete adapters; AI, SMTP, and IMAP could not be faked cleanly, and the Worker could not reuse the services |
+| Full Clean Architecture (Domain project, MediatR, CQRS) | Rejected — ~85 handlers and an extra project add ceremony without a driver at this scale |
+| **Simplified Clean Architecture** | **Selected** — two hosts share one core; every external service is a replaceable port; pure rules are unit-tested without a database |
+
+### 5.1 Backend (.NET 10 LTS)
+
+```text
+src/backend/
+├── RecruitmentAts.slnx
+├── src/
+│   ├── RecruitmentAts.Application/     # modules: Positions, Applications, Screening, Interviews,
+│   │                                   # Communication, Inbox, Imports, Consent, … + Abstractions (ports)
+│   ├── RecruitmentAts.Infrastructure/  # EF Core + PostgreSQL, queues, MailKit, LLM, files, Excel, PDF
+│   ├── RecruitmentAts.Api/             # controllers (route name = operationId), JWT, ProblemDetails
+│   └── RecruitmentAts.Worker/          # AnalysisRunner, EmailDispatcher, MailboxPoller, RetentionJob
+└── tests/                              # Application, Infrastructure (Testcontainers), Api (+ contract),
+                                        # Worker, ArchitectureTests
+```
+
+```mermaid
+flowchart LR
+    Api["Api (HTTP host)"] --> App["Application<br/>(business + ports)"]
+    Worker["Worker (background host)"] --> App
+    Infra["Infrastructure<br/>(adapters)"] --> App
+    Api -.->|"DI only"| Infra
+    Worker -.->|"DI only"| Infra
+```
+
+### 5.2 Frontend (React + Vite + TypeScript)
+
+```text
+src/frontend/
+├── apps/
+│   ├── internal/src/features/          # auth, dashboard, positions, job-posts, applications, screening,
+│   │                                   # interviews, emails, inbox, talent-pool, imports, reports, audit,
+│   │                                   # users, settings, profile
+│   └── career/src/features/            # jobs, apply, consent, privacy
+├── packages/
+│   ├── api-client/                     # types generated from docs/api/openapi.yaml, auth refresh, ProblemDetails
+│   └── ui/                             # design tokens and shared components
+└── e2e/                                # Playwright
+```
+
+Data flow: page → feature hook (TanStack Query) → feature `api.ts` (functions named by `operationId`) → `api-client` → API.
+
+Project responsibilities, module layout, dependency rules enforced by architecture tests, test strategy, packages, the C4-component-to-folder ownership map, naming, configuration, and the order of creation: [Folder structures](docs/09-folder-structure.md).
 
 ## 6. Detailed Class and Sequence Design
 
@@ -437,6 +486,7 @@ _Planned._
 - [C4 architecture](docs/06-c4-architecture.md)
 - [Database design](docs/07-database-design.md) · [Reference DDL](docs/database/schema.sql)
 - [OpenAPI contract](docs/08-openapi-contract.md) · [OpenAPI YAML](docs/api/openapi.yaml)
+- [Frontend and backend folder structures](docs/09-folder-structure.md)
 - [Mind map](docs/mindmap.png) · [XMind source](docs/mindmap/recruitment-ats.xmind)
 
 ## Project Progress
@@ -449,6 +499,6 @@ _Planned._
 - [x] UI/UX prototype (Figma)
 - [x] C4 architecture
 - [x] Database design and OpenAPI contract
-- [ ] Folder structures
+- [x] Folder structures
 - [ ] Class and sequence diagrams
 - [ ] Implementation
