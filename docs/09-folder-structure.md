@@ -11,11 +11,11 @@ This document fixes where every piece of code lives and which way dependencies p
 | Option | Fit for Recruitment ATS | Verdict |
 |---|---|---|
 | **Layered (N-tier)** — Controllers → Services → Repositories, Business depends on Data | Simple, but business code depends on EF Core and concrete adapters, so the AI service, SMTP, and IMAP cannot be swapped for fakes cleanly; the Worker would have to reach into API-shaped services | Rejected |
-| **Full Clean Architecture** — Domain, Application, Infrastructure, Api; CQRS with MediatR, a handler per operation | 85 operations would become ~85 command/query classes plus handlers, pipelines, and a separate Domain project; ceremony larger than the problem | Rejected |
+| **Full Clean Architecture** — Domain, Application, Infrastructure, Api; CQRS with MediatR, a handler per operation | 88 operations would become ~85 command/query classes plus handlers, pipelines, and a separate Domain project; ceremony larger than the problem | Rejected |
 | **Vertical slices** — one folder per endpoint with its own data access | Good for many independent endpoints, but our rules (stage transitions, scoring, consent, audit) are shared across slices and by the Worker | Rejected |
 | **Simplified Clean Architecture** — Application (business rules + ports), Infrastructure (adapters), thin hosts (Api, Worker) | Same 3-project core as the reference project; dependencies point inward, so **two hosts reuse the same use cases** and every external service has a fake | **Selected (AD-11)** |
 
-Why it fits this scale (31 stories, 25 tables, 85 operations, 2 hosts, 4 external systems):
+Why it fits this scale (34 stories, 28 tables, 88 operations, 2 hosts, 4 external systems):
 
 1. **Two hosts, one core.** The API and the Worker run the same business rules (e.g. a mailbox CV and a manual upload go through the same intake). Business code must not depend on ASP.NET Core or on `BackgroundService`.
 2. **Replaceable adapters are a requirement**, not a nicety (constraint in [research §8](01-research-top-down.md#8-constraints-and-assumptions)): `IResumeAnalyzer`, `IEmailSender`, `IMailboxReader`, `IFileStorage`, `ICaptchaVerifier` are defined by Application and implemented by Infrastructure.
@@ -93,7 +93,7 @@ Modules follow the OpenAPI tags. Each module holds its entities, rules, services
 RecruitmentAts.Application/
 ├── Abstractions/                       # ports implemented by Infrastructure
 │   ├── Persistence/                    # I<Aggregate>Repository, IUnitOfWork, IAnalysisQueue, IEmailQueue
-│   ├── Ai/IResumeAnalyzer.cs
+│   ├── Ai/                             # IResumeAnalyzer, IAiAssistant (criteria and question drafts), IEmbeddingClient
 │   ├── Email/IEmailSender.cs
 │   ├── Mailbox/IMailboxReader.cs
 │   ├── Files/                          # IFileStorage, ITextExtractor
@@ -113,17 +113,17 @@ RecruitmentAts.Application/
 ├── Profile/
 ├── Lookups/                            # Department
 ├── Dashboard/                          # DashboardService (read models)
-├── Positions/                          # Position, PositionCriterion, criteria versioning
+├── Positions/                          # Position, PositionCriterion, criteria versioning, CriteriaSuggestionService (AI drafts)
 ├── JobPosts/                           # JobPost, slug rules, share links
 ├── Applications/                       # JobApplication, StageHistoryEntry, StageTransitions, pipeline
 ├── Candidates/                         # Candidate, CvFile, ContactNormalizer, duplicate matching
 ├── Intake/                             # IntakeService — one path for manual, public, mailbox, import, pool
 ├── Screening/                          # CvAnalysis, Redactor, QuoteVerifier, FitScoreCalculator, overrides
-├── Interviews/                         # Interview, Scorecard, ScorecardVisibilityPolicy
+├── Interviews/                         # Interview, InterviewQuestion, Scorecard, ScorecardVisibilityPolicy, InterviewQuestionService
 ├── Communication/                      # EmailMessage, EmailTemplate, TemplateRenderer, EmailScheduler, MailSettings
 ├── Inbox/                              # InboxItem, PositionCodeParser, MailboxIntakeService
 ├── Imports/                            # ImportBatch, ImportValidator
-├── TalentPool/
+├── TalentPool/                         # TalentPoolService, PoolMatchingService (vector search), CandidateEmbeddingService
 ├── Consent/                            # ConsentRecord, ConsentService, AnonymizationService
 ├── Retention/                          # RetentionService (BR-17, BR-22, BR-24)
 ├── Reports/                            # ReportService, metric definitions
@@ -166,9 +166,12 @@ RecruitmentAts.Infrastructure/
 │   └── Seed/                           # admin user, departments, email templates
 ├── Ai/
 │   ├── OpenAiCompatibleResumeAnalyzer.cs  # any OpenAI-compatible API (DeepSeek, GLM, OpenAI, Gemini, Ollama)
+│   ├── OpenAiCompatibleAssistant.cs    # criteria and interview-question drafts, same chat endpoint
+│   ├── OpenAiCompatibleEmbeddingClient.cs  # /embeddings, 1024 dimensions (AD-13)
+│   ├── AiCallLimiter.cs                # 30 suggestion calls per user per hour from ai_call_logs (BR-26)
 │   ├── AiOptions.cs                    # bound from the Ai__* environment variables (§7.1)
 │   ├── ResumeAnalysisPrompt.cs         # system prompt and JSON schema
-│   └── FakeResumeAnalyzer.cs           # Ai__Provider=Fake: tests, CI, local work without a key
+│   └── Fakes/                          # FakeResumeAnalyzer, FakeAiAssistant, FakeEmbeddingClient — tests, CI, no key
 ├── Email/MailKitEmailSender.cs
 ├── Mailbox/MailKitMailboxReader.cs
 ├── Files/
@@ -217,7 +220,8 @@ RecruitmentAts.Worker/
 │   ├── AnalysisRunner.cs               # every 2 s → Screening.AnalyzeNextAsync()
 │   ├── EmailDispatcher.cs              # every 15 s → Communication.DispatchDueAsync()
 │   ├── MailboxPoller.cs                # every 5 min → Inbox.PollAsync()
-│   └── RetentionJob.cs                 # daily 02:00 → Retention.RunAsync()
+│   ├── RetentionJob.cs                 # daily 02:00 → Retention.RunAsync()
+│   └── EmbeddingRunner.cs              # every 1 min → TalentPool.EmbedPendingAsync() (BR-27)
 ├── Scheduling/
 │   ├── PeriodicJob.cs                  # PeriodicTimer loop, error logging, per-run scope
 │   └── AdvisoryLock.cs                 # pg_try_advisory_lock for single-instance jobs
@@ -260,7 +264,7 @@ Enforced by `ArchitectureTests`:
 
 | Purpose | Package |
 |---|---|
-| Persistence | `Npgsql.EntityFrameworkCore.PostgreSQL`, `EFCore.NamingConventions` |
+| Persistence | `Npgsql.EntityFrameworkCore.PostgreSQL`, `EFCore.NamingConventions`, `Pgvector.EntityFrameworkCore` (vector columns and `<=>` queries) |
 | Validation | `FluentValidation` |
 | Auth | `Microsoft.AspNetCore.Authentication.JwtBearer` |
 | Email, mailbox | `MailKit` |
@@ -274,7 +278,7 @@ Enforced by `ArchitectureTests`:
 
 Two apps share design tokens, UI components, and the API client, so the frontend is one npm workspace.
 
-**TypeScript, not JavaScript (difference from the reference project).** With 85 operations, types generated from `openapi.yaml` turn contract drift into a build error instead of a runtime bug.
+**TypeScript, not JavaScript (difference from the reference project).** With 88 operations, types generated from `openapi.yaml` turn contract drift into a build error instead of a runtime bug.
 
 ### 4.1 Workspace
 
@@ -320,14 +324,14 @@ apps/internal/
     ├── features/
     │   ├── auth/                       # SCR-01, session, refresh, role guards
     │   ├── dashboard/                  # SCR-02 (+ interviewer variant)
-    │   ├── positions/                  # SCR-10, SCR-11, SCR-12 overview & criteria tabs
+    │   ├── positions/                  # SCR-10, SCR-11 (with AI criteria drafts), SCR-12 overview & criteria tabs
     │   ├── job-posts/                  # SCR-14 job post tab, share links
     │   ├── applications/               # SCR-13 pipeline, SCR-20 table, SCR-21 add, SCR-22 detail, SCR-25 move, SCR-26 edit
     │   ├── screening/                  # SCR-23 evaluation tab, SCR-24 override
-    │   ├── interviews/                 # SCR-30 schedule, SCR-31 my interviews, SCR-32 scorecard
+    │   ├── interviews/                 # SCR-30 schedule (with AI question drafts), SCR-31 my interviews, SCR-32 scorecard
     │   ├── emails/                     # SCR-27 emails tab, SCR-28 edit / cancel
     │   ├── inbox/                      # SCR-41, SCR-42
-    │   ├── talent-pool/                # SCR-45, SCR-46
+    │   ├── talent-pool/                # SCR-45, SCR-46, SCR-15 pool-matches tab of a position
     │   ├── imports/                    # SCR-40 wizard and history
     │   ├── reports/                    # SCR-50
     │   ├── audit/                      # SCR-60
@@ -416,7 +420,7 @@ packages/ui/
 | Applications & Pipeline | `Applications`, `Candidates`, `Intake` | `ApplicationsController`, `CandidatesController` | `applications` |
 | Screening | `Screening` | `ScreeningController` | `screening` |
 | Interviews | `Interviews` | `InterviewsController` | `interviews` |
-| Intake | `Inbox`, `Imports`, `TalentPool`, `Intake` | `InboxController`, `ImportsController`, `TalentPoolController` | `inbox`, `imports`, `talent-pool` |
+| Intake | `Inbox`, `Imports`, `TalentPool`, `Intake` | `InboxController`, `ImportsController`, `TalentPoolController` (incl. pool matches) | `inbox`, `imports`, `talent-pool` |
 | Communication | `Communication` | `EmailsController`, `SettingsController` | `emails`, `settings` |
 | Insight & Admin | `Dashboard`, `Reports`, `Audit`, `Users` | `DashboardController`, `ReportsController`, `AuditLogsController`, `UsersController` | `dashboard`, `reports`, `audit`, `users` |
 | Public API | `Careers`, `Consent` | `Public/*` | career `jobs`, `apply`, `consent`, `privacy` |
@@ -424,6 +428,8 @@ packages/ui/
 | Worker: EmailDispatcher | `Communication` | — | — |
 | Worker: MailboxPoller | `Inbox`, `Intake` | — | — |
 | Worker: RetentionJob | `Retention`, `Consent` | — | — |
+| Worker: EmbeddingRunner | `TalentPool` | — | — |
+| AI assistant and embedding client | `Positions`, `Interviews`, `TalentPool` + `Abstractions/Ai` | `PositionsController`, `InterviewsController`, `TalentPoolController` | `positions`, `interviews`, `talent-pool` |
 
 ## 6. Naming conventions
 
@@ -461,6 +467,10 @@ The analyzer is selected at startup from environment variables (ASP.NET Core map
 | `Ai__ApiKey` | Secret; never in `appsettings*.json` | — |
 | `Ai__ResponseFormat` | `JsonSchema` (strict schema, where supported) · `JsonObject` (JSON mode; schema given in the prompt) | `JsonObject` |
 | `Ai__TimeoutSeconds` | Per-call timeout (keeps analysis under the 60 s goal, G2) | `45` |
+| `Ai__SuggestionTimeoutSeconds` | Timeout of synchronous criteria and question drafts | `30` |
+| `AiEmbedding__Provider` | `Fake` · `OpenAICompatible` — separate because DeepSeek has no embedding API (AD-13) | `Fake` |
+| `AiEmbedding__BaseUrl` / `__Model` / `__ApiKey` | Endpoint, model, and secret of the embedding API | — |
+| `AiEmbedding__Dimensions` | Must equal the `vector(1024)` column; sent as `dimensions` where the API supports it | `1024` |
 
 Whatever the format, the Worker parses the reply against the schema in code; a reply that does not match is an `INVALID` call (not retried automatically, see [class design](10-class-design.md#5-ai-screening)).
 
@@ -482,6 +492,11 @@ Ai__BaseUrl=https://api.deepseek.com
 Ai__Model=<model id from DeepSeek docs>
 Ai__ApiKey=<secret>
 Ai__ResponseFormat=JsonObject
+AiEmbedding__Provider=OpenAICompatible
+AiEmbedding__BaseUrl=https://api.openai.com/v1      # or http://localhost:11434/v1 with bge-m3
+AiEmbedding__Model=text-embedding-3-small
+AiEmbedding__ApiKey=<secret>
+AiEmbedding__Dimensions=1024
 ```
 
 ## 8. Order of creation

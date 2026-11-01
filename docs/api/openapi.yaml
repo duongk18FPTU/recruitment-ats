@@ -337,6 +337,59 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
         '409': { $ref: '#/components/responses/Conflict' }
+  /api/positions/criteria-suggestions:
+    post:
+      tags: [Positions]
+      operationId: suggestCriteria
+      summary: AI draft of weighted criteria from a job description (US32, BR-26)
+      description: |
+        Returns a draft only; nothing is saved. When `positionId` is given the caller must be allowed to
+        edit that position (Recruiter: owner only). At most 30 suggestion calls per user per hour; the
+        AI call has a 30 s timeout and is logged.
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CriteriaSuggestionRequest' }
+      responses:
+        '200':
+          description: Draft criteria
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CriteriaSuggestionResult' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+        '502': { $ref: '#/components/responses/AiUnavailable' }
+  /api/positions/{positionId}/pool-matches:
+    parameters:
+      - $ref: '#/components/parameters/PositionId'
+    get:
+      tags: [Talent pool]
+      operationId: listPoolMatches
+      summary: Consented pool candidates ranked by semantic similarity to a position (US33, BR-27)
+      description: |
+        Embeds the position (cached per criteria version) and searches embeddings of active pool
+        candidates who have not applied to it. A ranking hint only; adding a candidate uses
+        `addCandidateToPosition`.
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 50, default: 20 }
+      responses:
+        '200':
+          description: Ranked matches, most similar first
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PoolMatchList' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '502': { $ref: '#/components/responses/AiUnavailable' }
   /api/positions/{positionId}/status:
     parameters:
       - $ref: '#/components/parameters/PositionId'
@@ -879,6 +932,31 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/InterviewPage' }
         '401': { $ref: '#/components/responses/Unauthorized' }
+  /api/applications/{applicationId}/interview-question-suggestions:
+    parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+    post:
+      tags: [Interviews]
+      operationId: suggestInterviewQuestions
+      summary: AI draft of interview questions for unproven criteria (US34, BR-28)
+      description: |
+        Sends criteria, current analysis results, and verified quotes — never contact data. Returns up to
+        10 questions, criteria judged PARTIAL, NOT_MET, or UNVERIFIED first. Nothing is saved: the
+        scheduler keeps at most 8 in `InterviewRequest.questions`. Application must be in `INTERVIEW`
+        (409 `APPLICATION_NOT_IN_INTERVIEW`). Same rate limit as `suggestCriteria`.
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      responses:
+        '200':
+          description: Draft questions
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/InterviewQuestionSuggestions' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+        '502': { $ref: '#/components/responses/AiUnavailable' }
   /api/applications/{applicationId}/interviews:
     parameters:
       - $ref: '#/components/parameters/ApplicationId'
@@ -2117,6 +2195,11 @@ components:
       content:
         application/problem+json:
           schema: { $ref: '#/components/schemas/ProblemDetails' }
+    AiUnavailable:
+      description: The AI service failed, timed out, or returned an invalid result (`AI_UNAVAILABLE`)
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
     PayloadTooLarge:
       description: File larger than allowed (`FILE_TOO_LARGE`)
       content:
@@ -2175,6 +2258,7 @@ components:
         - CAPTCHA_FAILED
         - RATE_LIMITED
         - CONSENT_TOKEN_INVALID
+        - AI_UNAVAILABLE
         - INTERNAL_ERROR
     ProblemDetails:
       type: object
@@ -2925,6 +3009,11 @@ components:
           maxItems: 10
           items: { type: string, format: uuid }
           description: Active INTERVIEWER or HR_MANAGER users
+        questions:
+          type: array
+          maxItems: 8
+          description: Questions attached to the interview (BR-28); replaces the stored list on update
+          items: { $ref: '#/components/schemas/InterviewQuestionInput' }
         rowVersion: { type: string, description: Required on update }
     InterviewSummary:
       type: object
@@ -2964,6 +3053,10 @@ components:
                       - $ref: '#/components/schemas/ScorecardStatus'
                     nullable: true
             cancelReason: { type: string, nullable: true }
+            questions:
+              type: array
+              description: Attached questions; visible to panel members without any AI result or score
+              items: { $ref: '#/components/schemas/InterviewQuestion' }
             rowVersion: { type: string }
     InterviewPage:
       allOf:
@@ -2974,6 +3067,94 @@ components:
             items:
               type: array
               items: { $ref: '#/components/schemas/InterviewSummary' }
+    CriteriaSuggestionRequest:
+      type: object
+      required: [title, description]
+      properties:
+        positionId: { type: string, format: uuid, description: Set when editing an existing position }
+        title: { type: string, minLength: 2, maxLength: 150 }
+        level: { $ref: '#/components/schemas/Level' }
+        description: { type: string, minLength: 50, maxLength: 20000, description: Internal job description }
+    CriterionSuggestion:
+      type: object
+      required: [name, type, weight, rationale]
+      properties:
+        name: { type: string, maxLength: 150 }
+        description: { type: string, maxLength: 500, nullable: true }
+        type: { $ref: '#/components/schemas/CriterionType' }
+        weight: { type: integer, minimum: 1, maximum: 5 }
+        rationale: { type: string, maxLength: 300, description: 'Why the AI suggests it, quoting the job description' }
+    CriteriaSuggestionResult:
+      type: object
+      required: [model, suggestions]
+      properties:
+        model: { type: string }
+        suggestions:
+          type: array
+          maxItems: 12
+          items: { $ref: '#/components/schemas/CriterionSuggestion' }
+    PoolMatch:
+      type: object
+      required: [candidate, similarity, matchedSkills, poolConsentExpiresAt]
+      properties:
+        candidate: { $ref: '#/components/schemas/CandidateSummary' }
+        similarity: { type: number, format: double, minimum: 0, maximum: 1, description: 1 − cosine distance }
+        matchedSkills:
+          type: array
+          description: Candidate skills that overlap the position criteria
+          items: { type: string }
+        latestApplication:
+          type: object
+          nullable: true
+          properties:
+            positionTitle: { type: string }
+            stage: { $ref: '#/components/schemas/Stage' }
+            appliedAt: { type: string, format: date-time }
+        poolConsentExpiresAt: { type: string, format: date-time }
+    PoolMatchList:
+      type: object
+      required: [positionId, criteriaVersion, model, items]
+      properties:
+        positionId: { type: string, format: uuid }
+        criteriaVersion: { type: integer }
+        model: { type: string, description: Embedding model }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/PoolMatch' }
+    InterviewQuestionDraft:
+      type: object
+      required: [criterionId, criterionName, question, purpose]
+      properties:
+        criterionId: { type: string, format: uuid }
+        criterionName: { type: string }
+        question: { type: string, maxLength: 500 }
+        purpose: { type: string, maxLength: 200, description: What the answer should confirm }
+    InterviewQuestionSuggestions:
+      type: object
+      required: [basis, model, questions]
+      properties:
+        basis: { type: string, enum: [ANALYSIS, CRITERIA_ONLY] }
+        model: { type: string }
+        questions:
+          type: array
+          maxItems: 10
+          items: { $ref: '#/components/schemas/InterviewQuestionDraft' }
+    InterviewQuestionInput:
+      type: object
+      required: [text, source]
+      properties:
+        criterionId: { type: string, format: uuid, nullable: true }
+        text: { type: string, minLength: 5, maxLength: 500 }
+        source: { type: string, enum: [AI, MANUAL], description: AI for an accepted or edited draft }
+    InterviewQuestion:
+      type: object
+      required: [id, text, order]
+      properties:
+        id: { type: string, format: uuid }
+        criterionId: { type: string, format: uuid, nullable: true }
+        criterionName: { type: string, nullable: true }
+        text: { type: string }
+        order: { type: integer, minimum: 1, maximum: 8 }
     ReasonRequest:
       type: object
       required: [reason]

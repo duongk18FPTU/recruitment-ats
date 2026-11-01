@@ -141,6 +141,8 @@ Spacing variables follow a 4 px grid (`space/4` … `space/48`); radii are `radi
 
 Remaining screens from the [screen inventory](04-information-architecture.md#screen-inventory) (position overview and criteria tabs, add-application modal, move / reject modal, edit candidate, schedule interview, my interviews, assign inbox item, add pool candidate, audit log, profile, 403) reuse the same shell and components.
 
+**Not yet in Figma (added with US32–US34):** the pool-matches tab `SCR-15`, the "Gợi ý tiêu chí bằng AI" draft list in `SCR-11`, the "Gợi ý câu hỏi" draft list in `SCR-30`, and the attached-questions block in `SCR-32`. Their behaviour and states are specified in the [information architecture](04-information-architecture.md#ai-suggestion-states-criteria-interview-questions-pool-matches); they reuse the existing list, tag, and modal components.
+
 ![SCR-01 Login](images/screens/scr-01-login.png)
 
 ![SCR-02 Dashboard](images/screens/scr-02-dashboard.png)

@@ -52,6 +52,10 @@ erDiagram
     inbox_items |o--o| applications : "converted to"
     import_batches ||--o{ applications : creates
     users ||--o{ audit_logs : performs
+    candidates ||--o| candidate_embeddings : "embedded as"
+    positions ||--o| position_embeddings : "queried as"
+    interviews ||--o{ interview_questions : asks
+    position_criteria ||--o{ interview_questions : targets
 ```
 
 `mail_settings` (one row) has no relationships other than `updated_by`.
@@ -233,7 +237,9 @@ erDiagram
     }
     ai_call_logs {
         uuid id PK
-        uuid analysis_id FK
+        varchar purpose "ANALYSIS, suggestions, embeddings"
+        uuid analysis_id FK "only for ANALYSIS"
+        uuid actor_id FK "suggestion calls"
         smallint attempt
         varchar model
         int duration_ms
@@ -389,6 +395,55 @@ erDiagram
 - **Bulk import (BR-16).** Preview validates and stores the rows in `preview_rows` with the uploaded files in a staging folder; confirm re-checks and creates every application in one transaction or none. Unconfirmed previews expire after 24 hours.
 - **Audit (US19).** Written in the same transaction as the change. `details` holds before/after values of changed fields, never passwords, tokens, or CV text. Audit rows are never updated or deleted; candidate names in `summary` are replaced by the candidate code on anonymization.
 
+## AI matching and assistance
+
+```mermaid
+erDiagram
+    candidate_embeddings {
+        uuid candidate_id PK, FK
+        uuid cv_file_id FK
+        varchar model
+        vector embedding "1024 dims, HNSW cosine"
+        timestamptz created_at
+    }
+    position_embeddings {
+        uuid position_id PK, FK
+        int criteria_version
+        varchar model
+        vector embedding "1024 dims"
+        timestamptz created_at
+    }
+    interview_questions {
+        uuid id PK
+        uuid interview_id FK
+        uuid criterion_id FK
+        varchar text
+        varchar source "AI MANUAL"
+        smallint sort_order "1-8"
+        uuid created_by FK
+    }
+    candidates ||--o| candidate_embeddings : ""
+    cv_files ||--o{ candidate_embeddings : ""
+    positions ||--o| position_embeddings : ""
+    interviews ||--o{ interview_questions : ""
+    position_criteria ||--o{ interview_questions : ""
+```
+
+- **Embeddings (US33, BR-27).** `pgvector` with a fixed `vector(1024)` (AD-13). `candidate_embeddings` holds one row per pool candidate for the CV file it was computed from; when the latest CV changes the `EmbeddingRunner` replaces the row. `position_embeddings` caches the query vector of a position for one `criteria_version`; a criteria change makes it stale and the next match request recomputes it. Matching is one query:
+
+```sql
+SELECT c.id, 1 - (e.embedding <=> :position_vector) AS similarity
+FROM candidate_embeddings e
+JOIN talent_pool c ON c.id = e.candidate_id
+WHERE NOT EXISTS (SELECT 1 FROM applications a
+                  WHERE a.candidate_id = c.id AND a.position_id = :position_id)
+ORDER BY e.embedding <=> :position_vector
+LIMIT 20;
+```
+
+- **Interview questions (US34, BR-28).** Rows exist only after the scheduler saves the interview; an AI draft that is accepted or edited is stored with `source = 'AI'`. The table has no AI result, quote, or score, so nothing an Interviewer can read through it reveals the analysis.
+- **AI call log (BR-26).** Every call — analysis, suggestion, or embedding — is one `ai_call_logs` row with its `purpose`. Suggestion calls carry `actor_id`, and the API counts that user's rows from the last hour before calling the AI.
+
 ## Queues
 
 Both queues use row locks so several Worker replicas can run safely.
@@ -434,6 +489,7 @@ The Worker's `RetentionJob` runs daily and audits every deletion as `CV_DELETE` 
 | BR-22 | Inbox items `DISMISSED` more than 7 days ago | Delete the item, its attachments, and their files |
 | Import staging | `import_batches.expires_at < now()` and `PREVIEWED` | Delete staging files; status `EXPIRED` |
 | Refresh tokens | Expired more than 30 days ago | Delete rows |
+| BR-27 | `candidate_embeddings` whose candidate is no longer in the pool (`talent_pool` view) or is anonymized | Delete rows (the `EmbeddingRunner` also removes them on its next run) |
 
 **Anonymize** (also used for "Xoá toàn bộ dữ liệu", US31): delete all CV files from storage and set `cv_files.deleted_at`, clear `extracted_text`; set `candidates.full_name = 'Ứng viên ' || short id`, clear `email*`, `phone*`, `notes`, `skills`, pool fields; increase `consent_token_version`; clear `cover_message` and `analysis_criterion_results.ai_quote`; replace `email_messages.to_address`, `subject`, and `body_html` with a placeholder; reject open applications with `CANDIDATE_WITHDREW`. Stage history, scores, and sources remain, so reports stay correct.
 
@@ -456,6 +512,9 @@ The Worker's `RetentionJob` runs daily and audits every deletion as `CV_DELETE` 
 | AC-US14 | `ex_panelist_overlap` exclusion constraint |
 | AC-US15 | `ux_scorecard_interviewer`; submitted requires recommendation |
 | US19 | `audit_logs` |
+| BR-26 | `ai_call_logs.purpose`, `actor_id`, and index `ix_ai_call_logs_actor` for the 30-per-hour count |
+| BR-27 | `candidate_embeddings` (one per candidate, cascades with the candidate and CV file), view `talent_pool` filter |
+| BR-28 | `interview_questions.sort_order BETWEEN 1 AND 8`; no AI result columns in the table |
 
 ## Seed data
 

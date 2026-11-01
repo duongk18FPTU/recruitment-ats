@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1101" height="1033" viewBox="0 0 1101 1033" font-family="Liberation Sans, Arial, Helvetica, sans-serif">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<g transform="translate(7.0,16.0)">
+<rect x="9.0" y="0.0" width="1069.0" height="1001.0" fill="none" stroke="#000" stroke-width="1.1"/><path d="M9.0,0.0 L253.0,0.0 L253.0,14.0 L247.0,20.0 L9.0,20.0 Z" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="16.0" y="14.5" font-size="12" fill="#000000" text-anchor="start" font-weight="bold" xml:space="preserve">sd</text><text x="30.0" y="14.5" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve"> Suggest criteria from a job description</text>
+<path d="M57.0,99.0 L57.0,989.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M281.0,99.0 L281.0,989.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M494.0,99.0 L494.0,989.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M683.0,99.0 L683.0,989.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M910.0,99.0 L910.0,989.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M1030.0,99.0 L1030.0,989.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<circle cx="57.0" cy="40" r="6" fill="#fff" stroke="#000" stroke-width="1.3"/><line x1="57.0" y1="46" x2="57.0" y2="61" stroke="#000" stroke-width="1.3" fill="none"/><line x1="46.0" y1="51" x2="68.0" y2="51" stroke="#000" stroke-width="1.3" fill="none"/><line x1="57.0" y1="61" x2="47.0" y2="74" stroke="#000" stroke-width="1.3" fill="none"/><line x1="57.0" y1="61" x2="67.0" y2="74" stroke="#000" stroke-width="1.3" fill="none"/><text x="57.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">Recruiter</text>
+<line x1="262.0" y1="40" x2="262.0" y2="68" stroke="#000" stroke-width="1.3" fill="none"/><line x1="262.0" y1="54" x2="272.0" y2="54" stroke="#000" stroke-width="1.3" fill="none"/><circle cx="286.0" cy="54" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><text x="281.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:Position form</text>
+<circle cx="494.0" cy="56" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><path d="M499.0,37 L493.0,42 L499.0,47" fill="none" stroke="#000" stroke-width="1.3"/><text x="494.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:PositionsController</text>
+<circle cx="683.0" cy="56" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><path d="M688.0,37 L682.0,42 L688.0,47" fill="none" stroke="#000" stroke-width="1.3"/><text x="683.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:CriteriaSuggestionService</text>
+<circle cx="910.0" cy="53" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><line x1="895.0" y1="69" x2="925.0" y2="69" stroke="#000" stroke-width="1.3"/><text x="910.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:Database</text>
+<circle cx="1030.0" cy="40" r="6" fill="#fff" stroke="#000" stroke-width="1.3"/><line x1="1030.0" y1="46" x2="1030.0" y2="61" stroke="#000" stroke-width="1.3" fill="none"/><line x1="1019.0" y1="51" x2="1041.0" y2="51" stroke="#000" stroke-width="1.3" fill="none"/><line x1="1030.0" y1="61" x2="1020.0" y2="74" stroke="#000" stroke-width="1.3" fill="none"/><line x1="1030.0" y1="61" x2="1040.0" y2="74" stroke="#000" stroke-width="1.3" fill="none"/><text x="1030.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">AI Service</text>
+<rect x="905.0" y="222.0" width="10.0" height="29.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="678.0" y="193.0" width="10.0" height="115.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="489.0" y="164.0" width="10.0" height="173.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="276.0" y="135.0" width="10.0" height="231.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="905.0" y="491.0" width="10.0" height="29.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="678.0" y="375.0" width="10.0" height="174.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="489.0" y="375.0" width="10.0" height="203.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="276.0" y="375.0" width="10.0" height="232.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="905.0" y="730.0" width="10.0" height="29.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="678.0" y="619.0" width="10.0" height="169.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="489.0" y="619.0" width="10.0" height="198.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="276.0" y="619.0" width="10.0" height="227.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="489.0" y="914.0" width="10.0" height="29.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="276.0" y="885.0" width="10.0" height="87.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="33.0" y="262.0" width="666.0" height="113.0" fill="none" stroke="#000" stroke-width="1.1"/><path d="M33.0,262.0 L88.0,262.0 L88.0,276.0 L82.0,282.0 L33.0,282.0 Z" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="40.0" y="276.5" font-size="12" fill="#000000" text-anchor="start" font-weight="bold" xml:space="preserve">break</text><rect x="94.0" y="264.0" width="100.0" height="16.0" fill="#fff"/><text x="96.0" y="277.0" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">[30 calls reached]</text>
+<rect x="33.0" y="416.0" width="1013.0" height="439.0" fill="none" stroke="#000" stroke-width="1.1"/><path d="M33.0,416.0 L69.0,416.0 L69.0,430.0 L63.0,436.0 L33.0,436.0 Z" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="40.0" y="430.5" font-size="12" fill="#000000" text-anchor="start" font-weight="bold" xml:space="preserve">alt</text><rect x="75.0" y="418.0" width="170.0" height="16.0" fill="#fff"/><text x="77.0" y="431.0" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">[error, timeout or invalid JSON]</text>
+<path d="M33.0,619.0 L1046.0,619.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/>
+<rect x="39.0" y="621.0" width="69.0" height="17.0" fill="#ffffff"/><text x="41.0" y="633.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">[valid result]</text>
+<path d="M57.0,135.0 L276.0,135.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M276.0,135.0 L266.0,139.5 L266.0,130.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M286.0,164.0 L489.0,164.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M489.0,164.0 L479.0,168.5 L479.0,159.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M499.0,193.0 L678.0,193.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M678.0,193.0 L668.0,197.5 L668.0,188.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M688.0,222.0 L905.0,222.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M905.0,222.0 L895.0,226.5 L895.0,217.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M905.0,251.0 L688.0,251.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M698.0,246.0 L688.0,251.0 L698.0,256.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M678.0,308.0 L499.0,308.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M509.0,303.0 L499.0,308.0 L509.0,313.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M489.0,337.0 L286.0,337.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M296.0,332.0 L286.0,337.0 L296.0,342.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M276.0,366.0 L57.0,366.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M67.0,361.0 L57.0,366.0 L67.0,371.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M688.0,405.0 L1030.0,405.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M1030.0,405.0 L1020.0,409.5 L1020.0,400.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M1030.0,462.0 L688.0,462.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M698.0,457.0 L688.0,462.0 L698.0,467.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M688.0,491.0 L905.0,491.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M905.0,491.0 L895.0,495.5 L895.0,486.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M905.0,520.0 L688.0,520.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M698.0,515.0 L688.0,520.0 L698.0,525.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M678.0,549.0 L499.0,549.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M509.0,544.0 L499.0,549.0 L509.0,554.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M489.0,578.0 L286.0,578.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M296.0,573.0 L286.0,578.0 L296.0,583.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M276.0,607.0 L57.0,607.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M67.0,602.0 L57.0,607.0 L67.0,612.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M1030.0,660.0 L688.0,660.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M698.0,655.0 L688.0,660.0 L698.0,665.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M688.0,689.0 L714.0,689.0 L714.0,701.0 L688.0,701.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M688.0,701.0 L698.0,696.5 L698.0,705.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M688.0,730.0 L905.0,730.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M905.0,730.0 L895.0,734.5 L895.0,725.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M905.0,759.0 L688.0,759.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M698.0,754.0 L688.0,759.0 L698.0,764.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M678.0,788.0 L499.0,788.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M509.0,783.0 L499.0,788.0 L509.0,793.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M489.0,817.0 L286.0,817.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M296.0,812.0 L286.0,817.0 L296.0,822.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M276.0,846.0 L57.0,846.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M67.0,841.0 L57.0,846.0 L67.0,851.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M57.0,885.0 L276.0,885.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M276.0,885.0 L266.0,889.5 L266.0,880.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M286.0,914.0 L489.0,914.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M489.0,914.0 L479.0,918.5 L479.0,909.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M489.0,943.0 L286.0,943.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M296.0,938.0 L286.0,943.0 L296.0,948.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M276.0,972.0 L57.0,972.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M67.0,967.0 L57.0,972.0 L67.0,977.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<rect x="61.0" y="116.0" width="187.0" height="17.0" fill="#ffffff"/><text x="63.0" y="128.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">1. title, description, &quot;Gợi ý tiêu chí&quot;</text>
+<rect x="290.0" y="145.0" width="174.0" height="17.0" fill="#ffffff"/><text x="292.0" y="157.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">2. POST …/criteria-suggestions</text>
+<rect x="503.0" y="174.0" width="144.0" height="17.0" fill="#ffffff"/><text x="505.0" y="186.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">3. SuggestAsync(request)</text>
+<rect x="692.0" y="203.0" width="161.0" height="17.0" fill="#ffffff"/><text x="694.0" y="215.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">4. count my AI calls, last hour</text>
+<rect x="692.0" y="232.0" width="47.0" height="17.0" fill="#ffffff"/><text x="694.0" y="244.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">5. count</text>
+<rect x="503.0" y="289.0" width="103.0" height="17.0" fill="#ffffff"/><text x="505.0" y="301.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">6. RATE_LIMITED</text>
+<rect x="290.0" y="318.0" width="127.0" height="17.0" fill="#ffffff"/><text x="292.0" y="330.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">7. 429 RATE_LIMITED</text>
+<rect x="61.0" y="347.0" width="145.0" height="17.0" fill="#ffffff"/><text x="63.0" y="359.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">8. &quot;Thử lại sau&quot;, input kept</text>
+<rect x="692.0" y="386.0" width="168.0" height="17.0" fill="#ffffff"/><text x="694.0" y="398.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">9. title, level, description (30 s)</text>
+<rect x="692.0" y="443.0" width="50.0" height="17.0" fill="#ffffff"/><text x="694.0" y="455.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">10. error</text>
+<rect x="692.0" y="472.0" width="63.0" height="17.0" fill="#ffffff"/><text x="694.0" y="484.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">11. log call</text>
+<rect x="692.0" y="501.0" width="57.0" height="17.0" fill="#ffffff"/><text x="694.0" y="513.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">12. saved</text>
+<rect x="503.0" y="530.0" width="125.0" height="17.0" fill="#ffffff"/><text x="505.0" y="542.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">13. AI_UNAVAILABLE</text>
+<rect x="290.0" y="559.0" width="149.0" height="17.0" fill="#ffffff"/><text x="292.0" y="571.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">14. 502 AI_UNAVAILABLE</text>
+<rect x="61.0" y="588.0" width="133.0" height="17.0" fill="#ffffff"/><text x="63.0" y="600.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">15. message, input kept</text>
+<rect x="692.0" y="641.0" width="186.0" height="17.0" fill="#ffffff"/><text x="694.0" y="653.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">16. criteria, type, weight, rationale</text>
+<rect x="692.0" y="670.0" width="181.0" height="17.0" fill="#ffffff"/><text x="694.0" y="682.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">17. check ≤ 12 items, weight 1–5</text>
+<rect x="692.0" y="711.0" width="63.0" height="17.0" fill="#ffffff"/><text x="694.0" y="723.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">18. log call</text>
+<rect x="692.0" y="740.0" width="57.0" height="17.0" fill="#ffffff"/><text x="694.0" y="752.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">19. saved</text>
+<rect x="503.0" y="769.0" width="161.0" height="17.0" fill="#ffffff"/><text x="505.0" y="781.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">20. CriteriaSuggestionResult</text>
+<rect x="290.0" y="798.0" width="185.0" height="17.0" fill="#ffffff"/><text x="292.0" y="810.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">21. 200 CriteriaSuggestionResult</text>
+<rect x="61.0" y="827.0" width="196.0" height="17.0" fill="#ffffff"/><text x="63.0" y="839.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">22. drafts &quot;Gợi ý bởi AI — chưa lưu&quot;</text>
+<rect x="61.0" y="866.0" width="122.0" height="17.0" fill="#ffffff"/><text x="63.0" y="878.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">23. accept, edit, &quot;Lưu&quot;</text>
+<rect x="290.0" y="895.0" width="131.0" height="17.0" fill="#ffffff"/><text x="292.0" y="907.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">24. POST /api/positions</text>
+<rect x="290.0" y="924.0" width="124.0" height="17.0" fill="#ffffff"/><text x="292.0" y="936.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">25. 201 PositionDetail</text>
+<rect x="61.0" y="953.0" width="175.0" height="17.0" fill="#ffffff"/><text x="63.0" y="965.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">26. position with chosen criteria</text>
+</g></svg>

@@ -31,7 +31,7 @@ flowchart TB
 
     ats["<b>Recruitment ATS</b><br/>[Software system]<br/>Positions, career site, CV intake, pipeline,<br/>AI-assisted screening, interviews, candidate emails,<br/>talent pool, reports, audit log"]
 
-    ai["<b>AI Service</b><br/>[External system: LLM API]<br/>Extracts facts and judges criteria<br/>from redacted CV text"]
+    ai["<b>AI Service</b><br/>[External system: LLM + embedding API]<br/>Judges criteria on redacted CVs, drafts<br/>criteria and interview questions, embeds text"]
     smtp["<b>Email Service</b><br/>[External system: SMTP]<br/>Delivers candidate emails"]
     imap["<b>Recruitment Mailbox</b><br/>[External system: IMAP]<br/>Receives CVs by email"]
     turnstile["<b>Cloudflare Turnstile</b><br/>[External system]<br/>CAPTCHA for public apply"]
@@ -44,7 +44,7 @@ flowchart TB
     hr -.->|"Shares source-tagged links"| social
     social -->|"Fetches link preview [HTTPS]"| ats
 
-    ats -->|"Sends redacted CV text<br/>and criteria [HTTPS/JSON]"| ai
+    ats -->|"Redacted CV text, job descriptions,<br/>criteria, verified quotes [HTTPS/JSON]"| ai
     ats -->|"Sends emails [SMTP + STARTTLS]"| smtp
     smtp -.->|"Delivers"| cand
     ats -->|"Reads new messages,<br/>read-only [IMAPS]"| imap
@@ -62,7 +62,7 @@ flowchart TB
 |---|---|---|
 | Hiring team | Four internal roles (see README 1.5) | Everything they are permitted to see |
 | Candidate | Public user without an account | Published job posts only; their own consent record via a signed link |
-| AI Service | Returns structured JSON: skills, experience, education, languages, per-criterion result with quote | **Redacted** CV text and public criteria text; no names, contacts, photo, birth date, gender, address (BR-10) |
+| AI Service | LLM: per-criterion result with quote, criteria drafts from a job description, interview-question drafts. Embedding API: vectors for redacted CVs and positions (may be a different provider, AD-13) | **Redacted** CV text, criteria, verified quotes, and internal job descriptions; never names, contacts, photo, birth date, gender, address (BR-10, BR-27, BR-28) |
 | Email Service | Outgoing SMTP of the company's domain (SPF/DKIM) | Rendered emails to candidates and users |
 | Recruitment Mailbox | Company mailbox that candidates and job boards send CVs to | Messages with PDF/DOCX attachments, read-only |
 | Cloudflare Turnstile | Bot check on the apply form | Turnstile token and client IP |
@@ -102,10 +102,11 @@ flowchart TB
     api -->|"Stores, streams CVs"| files
     api -->|"siteverify [HTTPS]"| turnstile
     api -.->|"Connection test, test email only"| smtp
+    api -->|"Criteria and question drafts,<br/>position embedding [HTTPS/JSON]"| ai
 
     worker -->|"Claims jobs, writes results<br/>[EF Core/TCP]"| db
     worker -->|"Reads, stores, deletes files"| files
-    worker -->|"Redacted text [HTTPS/JSON]"| ai
+    worker -->|"Redacted text: analysis,<br/>CV embeddings [HTTPS/JSON]"| ai
     worker -->|"Sends queued emails [SMTP]"| smtp
     worker -->|"Polls every 5 min [IMAPS]"| imap
 
@@ -124,9 +125,9 @@ All browser and crawler traffic passes through the reverse proxy shown in the [D
 |---|---|---|---|
 | Career site | React + Vite, static files on `careers.<domain>` | Public, mobile-first pages; renders the Turnstile widget; reads `src` from the share link and sends it with the application | API public routes only (same origin through the proxy) |
 | Internal app | React + Vite, static files on `ats.<domain>` | All authenticated screens; polls AI status while an analysis is pending | API internal routes (same origin through the proxy) |
-| API | ASP.NET Core (.NET 10 LTS), EF Core, Npgsql | Authentication, RBAC and record rules, validation, business transactions, audit, Excel/PDF export, enqueuing AI jobs and emails, Open Graph pages for crawlers | Database, file store, Turnstile; SMTP/IMAP only for the Admin connection test |
-| Worker | .NET Worker Service (`BackgroundService`), same core libraries as the API | Everything slow, scheduled, or external: AI analysis, email dispatch with retries, mailbox intake, retention and consent expiry | Database, file store, AI Service, SMTP, IMAP |
-| Database | PostgreSQL 16 | Single source of truth, including the two queues and the audit log | — |
+| API | ASP.NET Core (.NET 10 LTS), EF Core, Npgsql | Authentication, RBAC and record rules, validation, business transactions, audit, Excel/PDF export, enqueuing AI jobs and emails, Open Graph pages for crawlers, short synchronous AI suggestions (criteria, interview questions) and the pool-match vector search | Database, file store, Turnstile, AI Service; SMTP/IMAP only for the Admin connection test |
+| Worker | .NET Worker Service (`BackgroundService`), same core libraries as the API | Everything slow, scheduled, or external: AI analysis, CV embeddings for the talent pool, email dispatch with retries, mailbox intake, retention and consent expiry | Database, file store, AI Service, SMTP, IMAP |
+| Database | PostgreSQL 16 with the `pgvector` extension | Single source of truth, including the two queues, the audit log, and candidate/position embeddings | — |
 | CV file store | Docker volume behind `IFileStorage` | Binary files; keys stored in the database, never public URLs | — |
 
 ### Key interactions
@@ -136,6 +137,10 @@ All browser and crawler traffic passes through the reverse proxy shown in the [D
 **Candidate emails (US27, BR-23).** The action that triggers an email (receipt, stage change, interview saved) inserts a rendered `email_messages` row with `scheduled_at` (now, or now + 10 min) in the **same transaction**, so an email exists only if the action committed. Edit and cancel are `UPDATE … WHERE status = 'PENDING'`; the Worker claims due emails with `UPDATE … SET status = 'SENDING' WHERE status = 'PENDING'`, so a cancel and a send can never both succeed. Failures are retried after 1, 5, and 30 min, then marked `FAILED`.
 
 **Public apply (US24, BR-21).** Career site → `POST /api/public/applications` with the Turnstile token. The API verifies the token with Cloudflare, applies the per-IP rate limit (ASP.NET Core rate limiter, real client IP from the proxy's `X-Forwarded-For`) and the per-email daily limit (database), validates the file, and then runs the same intake transaction as manual entry. Duplicate applications get the same neutral response.
+
+**AI drafts (US32, US34, BR-26).** "Gợi ý tiêu chí bằng AI" and "Gợi ý câu hỏi" call the API synchronously; the API sends only internal job text, criteria, and verified quotes to the LLM (30 s timeout), validates the JSON, and returns a draft. Nothing is stored except the call log; the user saves the position or interview through the ordinary operations.
+
+**Pool matches (US33, BR-27).** The Worker's `EmbeddingRunner` keeps one vector per pool candidate from the redacted text of their latest CV. Opening a position's "Gợi ý từ kho ứng viên" tab makes the API embed the position (title, description, current criteria; cached per criteria version) and run one `pgvector` cosine-distance query over active pool candidates who have not applied, returning the top 20 with the overlapping skills. A candidate is added only by the user.
 
 **Link previews (US22).** Requests to `careers.<domain>/jobs/{slug}` from crawler user agents (`facebookexternalhit`, `LinkedInBot`, `Twitterbot`, …) are routed by the proxy to `GET /api/public/share/jobs/{slug}`, which returns a small HTML page with Open Graph tags built from public job-post fields (BR-20). Browsers receive the SPA as usual.
 
@@ -154,11 +159,11 @@ flowchart TB
         subgraph web["Endpoints"]
             direction LR
             authC["<b>Auth</b><br/>login, refresh, logout,<br/>profile, password"]
-            posC["<b>Positions & Job posts</b><br/>criteria, publish,<br/>share links"]
+            posC["<b>Positions & Job posts</b><br/>criteria + AI drafts, publish,<br/>share links"]
             appC["<b>Applications & Pipeline</b><br/>candidates, CV upload,<br/>stage moves, history"]
             scrC["<b>Screening</b><br/>analysis status, re-run,<br/>override"]
-            intC["<b>Interviews</b><br/>schedule, scorecards"]
-            intakeC["<b>Intake</b><br/>bulk import, CV inbox,<br/>talent pool"]
+            intC["<b>Interviews</b><br/>schedule, AI questions,<br/>scorecards"]
+            intakeC["<b>Intake</b><br/>bulk import, CV inbox,<br/>talent pool, pool matches"]
             commC["<b>Communication</b><br/>pending emails, templates,<br/>mail settings"]
             govC["<b>Insight & Admin</b><br/>dashboard, reports, export,<br/>audit log, users"]
             pubC["<b>Public API</b><br/>job posts, apply, consent,<br/>Open Graph pages"]
@@ -176,6 +181,7 @@ flowchart TB
             store["<b>IFileStorage</b><br/>[local volume]"]
             extract["<b>ITextExtractor</b><br/>[PdfPig, OpenXML]"]
             captcha["<b>ICaptchaVerifier</b><br/>[Turnstile]"]
+            assist["<b>IAiAssistant · IEmbeddingClient</b><br/>[OpenAI-compatible]"]
             protect["<b>Secret & token protection</b><br/>[Data Protection API]"]
         end
     end
@@ -183,6 +189,7 @@ flowchart TB
     db[("<b>Database</b>")]
     files[("<b>CV file store</b>")]
     turnstile["<b>Cloudflare Turnstile</b>"]
+    aiApi["<b>AI Service</b>"]
 
     internal -->|"JSON + JWT"| web
     career -->|"JSON"| pubC
@@ -198,12 +205,14 @@ flowchart TB
     ef --> db
     store --> files
     captcha -->|"siteverify [HTTPS]"| turnstile
+    svc --> assist
+    assist -->|"drafts, query embedding [HTTPS/JSON]"| aiApi
 
     classDef container fill:#438dd5,color:#fff,stroke:#2e6295
     classDef component fill:#85bbf0,color:#000,stroke:#5d82a8
     classDef external fill:#999,color:#fff,stroke:#6b6b6b
     class internal,career,db,files container
-    class authC,posC,appC,scrC,intC,intakeC,commC,govC,pubC,authz,svc,enqueue,audit,ef,store,extract,captcha,protect component
+    class authC,posC,appC,scrC,intC,intakeC,commC,govC,pubC,authz,svc,enqueue,audit,ef,store,extract,captcha,protect,assist component
     class crawler,turnstile external
     style api fill:#f8fbff,stroke:#438dd5,stroke-dasharray:5 5
     style web fill:#fff,stroke:#bbb
@@ -214,11 +223,11 @@ flowchart TB
 | Component | Responsibility | Stories / rules |
 |---|---|---|
 | Auth | Login with lockout, JWT access token, rotating refresh token in an `httpOnly` cookie, logout, profile, password change | US01, US02, US21 |
-| Positions & Job posts | Position CRUD with weighted criteria, close/reopen, publish/unpublish, source-tagged share links | US04–07, US22, BR-05, BR-14, BR-20 |
+| Positions & Job posts | Position CRUD with weighted criteria, AI criteria drafts from the job description, close/reopen, publish/unpublish, source-tagged share links | US04–07, US22, US32, BR-05, BR-14, BR-20, BR-26 |
 | Applications & Pipeline | Candidate de-duplication, CV upload and replacement, stage moves, rejection reasons, stage history | US08–11, BR-01–06, BR-15, BR-18 |
 | Screening | Analysis status and history, re-run, per-criterion override with reason | US12, US13, BR-09, BR-13 |
-| Interviews | Scheduling with panel; blind scorecards | US14, US15, BR-07, BR-08 |
-| Intake | Bulk import preview and atomic commit; CV inbox assign/dismiss; talent pool search and add to position | US16, US25, US26, BR-16, BR-22, BR-24 |
+| Interviews | Scheduling with panel; AI-suggested questions attached by the scheduler; blind scorecards | US14, US15, US34, BR-07, BR-08, BR-28 |
+| Intake | Bulk import preview and atomic commit; CV inbox assign/dismiss; talent pool search, semantic pool matches for a position, add to position | US16, US25, US26, US33, BR-16, BR-22, BR-24, BR-27 |
 | Communication | List, edit, cancel, resend candidate emails; templates with preview; mailbox and sender settings with connection test | US27–29, BR-23 |
 | Insight & Admin | Dashboard, reports and export, candidate Excel export, audit log, user management | US03, US17–20, US30, BR-25 |
 | Public API | Published job posts, apply, consent read/update by signed token, Open Graph HTML; anonymous, rate-limited, never returns internal fields | US23, US24, US31, BR-19–21 |
@@ -228,6 +237,7 @@ flowchart TB
 | Audit writer | Writes audit entries inside the caller's transaction | US19, G5 |
 | Text extractor | Extracts text at upload so files without text are rejected immediately | BR-15 |
 | Secret & token protection | Encrypts mailbox and SMTP passwords at rest; signs consent links | US29, US31 |
+| AI assistant and embedding client | Synchronous calls for criteria and interview-question drafts (30 s timeout, 30 calls per user per hour) and the position query embedding; every call logged | US32–34, BR-26 |
 
 ### Worker
 
@@ -241,6 +251,7 @@ flowchart TB
             mailer["<b>EmailDispatcher</b><br/>every 15 s"]
             poller["<b>MailboxPoller</b><br/>every 5 min"]
             retention["<b>RetentionJob</b><br/>daily 02:00"]
+            embedder["<b>EmbeddingRunner</b><br/>every 1 min"]
         end
         subgraph pipeline["Screening pipeline"]
             direction LR
@@ -252,6 +263,7 @@ flowchart TB
         analyzer["<b>IResumeAnalyzer</b><br/>[OpenAI-compatible adapter]"]
         sender["<b>IEmailSender</b><br/>[MailKit SMTP]"]
         reader["<b>IMailboxReader</b><br/>[MailKit IMAP]"]
+        embedClient["<b>IEmbeddingClient</b><br/>[OpenAI-compatible]"]
     end
 
     db[("<b>Database</b>")]
@@ -273,12 +285,16 @@ flowchart TB
     analyzer -->|"[HTTPS/JSON]"| ai
     sender -->|"[SMTP]"| smtp
     reader -->|"[IMAPS]"| imap
+    embedder --> redact
+    embedder --> embedClient
+    embedder --> core
+    embedClient -->|"[HTTPS/JSON]"| ai
 
     classDef container fill:#438dd5,color:#fff,stroke:#2e6295
     classDef component fill:#85bbf0,color:#000,stroke:#5d82a8
     classDef external fill:#999,color:#fff,stroke:#6b6b6b
     class db,files container
-    class aiRunner,mailer,poller,retention,redact,verify,score,core,analyzer,sender,reader component
+    class aiRunner,mailer,poller,retention,embedder,redact,verify,score,core,analyzer,sender,reader,embedClient component
     class ai,smtp,imap external
     style worker fill:#f8fbff,stroke:#438dd5,stroke-dasharray:5 5
     style jobs fill:#fff,stroke:#bbb
@@ -294,6 +310,7 @@ flowchart TB
 | EmailDispatcher | Claims due emails, sends, records the result, schedules retries (1, 5, 30 min) | US27, BR-23 |
 | MailboxPoller | Reads unseen messages read-only, de-duplicates by Message-ID, stores attachments, creates CV inbox items, auto-creates applications for `[JOB-xxx]` subjects | US25, BR-22 |
 | RetentionJob | BR-17 deletion and anonymization, BR-24 renewal emails and pool expiry, deletion of dismissed inbox items after 7 days; every deletion audited | US31, BR-17, BR-22, BR-24 |
+| EmbeddingRunner | Finds pool candidates whose latest CV has no current embedding, redacts and embeds the text, stores a 1024-dimension vector; deletes embeddings of candidates who left the pool or were anonymized | US33, BR-27 |
 | Adapters | Replaceable implementations with fakes for tests | Constraints |
 
 Every background service can run in more than one Worker replica: queue rows are claimed with row locks, and scheduled jobs take a PostgreSQL advisory lock so only one instance runs them at a time.
@@ -311,7 +328,7 @@ flowchart TB
         internalC["<b>internal-web</b><br/>[nginx: Internal app build]"]
         apiC["<b>api</b><br/>[ASP.NET Core]"]
         workerC["<b>worker</b><br/>[.NET Worker Service]"]
-        pg[("<b>postgres</b><br/>[PostgreSQL 16]")]
+        pg[("<b>postgres</b><br/>[PostgreSQL 16 + pgvector]")]
         vol[("Volumes: pgdata · cv-files ·<br/>dp-keys · caddy-data")]
     end
 
@@ -362,6 +379,7 @@ flowchart TB
 | AD-10 | **Mermaid flowcharts with C4 styling** | Mermaid `C4Context` syntax; Structurizr; PlantUML | Renders reliably on GitHub, same style as the existing diagrams |
 | AD-11 | **Simplified Clean Architecture**: Application, Infrastructure, and two thin hosts (Api, Worker) — see [folder structures](09-folder-structure.md#1-architecture-choice) | Layered N-tier; full Clean Architecture with Domain project and MediatR; vertical slices | Both hosts reuse the same use cases; every external service is a replaceable port; no layers without a driver |
 | AD-12 | **One OpenAI-compatible adapter, provider chosen by environment variables.** Development and demo use **DeepSeek V4.1 Flash** (paid) with synthetic CVs only; tests use `FakeResumeAnalyzer` — see [AI configuration](09-folder-structure.md#71-ai-provider-configuration) | Free tiers (rate limits, slow); a provider SDK per vendor | Cheapest paid option, no rate-limit waits; DeepSeek, GLM, OpenAI, Gemini, and local Ollama all speak the same API, so switching is configuration only |
+| AD-13 | **Embeddings in PostgreSQL with `pgvector`**, fixed 1024 dimensions, HNSW index; embedding provider configured separately (`AiEmbedding__*`) because DeepSeek has no embedding API — development uses OpenAI `text-embedding-3-small` at 1024 dimensions or local `bge-m3` through Ollama, both on synthetic CVs | A separate vector database; keyword search only | One database, one backup, transactional deletion with the candidate (BR-27); 1024 dimensions fit both a hosted and a local multilingual model |
 
 ## Open items
 

@@ -13,6 +13,7 @@
 --     column xmin as the optimistic concurrency token.
 
 CREATE EXTENSION IF NOT EXISTS btree_gist;
+CREATE EXTENSION IF NOT EXISTS vector;     -- pgvector: talent-pool matching (BR-27)
 
 -- ---------------------------------------------------------------------------
 -- Identity and access
@@ -360,10 +361,15 @@ CREATE TABLE analysis_criterion_results (
 );
 
 -- One row per call to the external AI service (cross-cutting constraint in 03).
+-- Suggestion calls are counted per actor for the 30-per-hour limit (BR-26).
 CREATE TABLE ai_call_logs (
     id             uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    analysis_id    uuid NOT NULL REFERENCES cv_analyses (id) ON DELETE CASCADE,
-    attempt        smallint NOT NULL,
+    purpose        varchar(20) NOT NULL DEFAULT 'ANALYSIS'
+                   CHECK (purpose IN ('ANALYSIS', 'CRITERIA_SUGGESTION', 'INTERVIEW_QUESTIONS',
+                                      'CV_EMBEDDING', 'POSITION_EMBEDDING')),
+    analysis_id    uuid REFERENCES cv_analyses (id) ON DELETE CASCADE,
+    actor_id       uuid REFERENCES users (id),        -- null for Worker calls
+    attempt        smallint NOT NULL DEFAULT 1,
     model          varchar(100) NOT NULL,
     started_at     timestamptz NOT NULL,
     duration_ms    integer NOT NULL,
@@ -372,9 +378,35 @@ CREATE TABLE ai_call_logs (
     input_chars    integer NOT NULL,
     input_tokens   integer,
     output_tokens  integer,
-    error_message  varchar(1000)
+    error_message  varchar(1000),
+    CHECK ((purpose = 'ANALYSIS') = (analysis_id IS NOT NULL))
 );
 CREATE INDEX ix_ai_call_logs_started ON ai_call_logs (started_at DESC);
+CREATE INDEX ix_ai_call_logs_actor ON ai_call_logs (actor_id, started_at DESC) WHERE actor_id IS NOT NULL;
+
+-- ---------------------------------------------------------------------------
+-- AI matching — embeddings (US33, BR-27); fixed 1024 dimensions (AD-13)
+-- ---------------------------------------------------------------------------
+
+-- One vector per pool candidate, from the redacted text of their latest CV.
+-- Deleted with the candidate's pool consent or anonymization.
+CREATE TABLE candidate_embeddings (
+    candidate_id  uuid PRIMARY KEY REFERENCES candidates (id) ON DELETE CASCADE,
+    cv_file_id    uuid NOT NULL REFERENCES cv_files (id) ON DELETE CASCADE,
+    model         varchar(100) NOT NULL,
+    embedding     vector(1024) NOT NULL,
+    created_at    timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX ix_candidate_embeddings_hnsw ON candidate_embeddings USING hnsw (embedding vector_cosine_ops);
+
+-- Query vector of a position, cached per criteria version.
+CREATE TABLE position_embeddings (
+    position_id       uuid PRIMARY KEY REFERENCES positions (id) ON DELETE CASCADE,
+    criteria_version  integer NOT NULL,
+    model             varchar(100) NOT NULL,
+    embedding         vector(1024) NOT NULL,
+    created_at        timestamptz NOT NULL DEFAULT now()
+);
 
 -- ---------------------------------------------------------------------------
 -- Interviews and scorecards
@@ -409,6 +441,20 @@ CREATE TABLE interview_panelists (
     CONSTRAINT ex_panelist_overlap EXCLUDE USING gist (user_id WITH =, slot WITH &&) WHERE (slot IS NOT NULL)
 );
 CREATE INDEX ix_interview_panelists_user ON interview_panelists (user_id);
+
+-- Questions attached to an interview (US34, BR-28); AI drafts become rows only when
+-- the scheduler saves them. Interviewers see text and criterion, never AI results.
+CREATE TABLE interview_questions (
+    id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    interview_id  uuid NOT NULL REFERENCES interviews (id) ON DELETE CASCADE,
+    criterion_id  uuid REFERENCES position_criteria (id),
+    text          varchar(500) NOT NULL,
+    source        varchar(6) NOT NULL CHECK (source IN ('AI', 'MANUAL')),   -- AI = accepted or edited draft
+    sort_order    smallint NOT NULL CHECK (sort_order BETWEEN 1 AND 8),       -- at most 8 (BR-28)
+    created_by    uuid NOT NULL REFERENCES users (id),
+    created_at    timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT ux_interview_question_order UNIQUE (interview_id, sort_order)
+);
 
 CREATE TABLE scorecards (
     id               uuid PRIMARY KEY DEFAULT gen_random_uuid(),

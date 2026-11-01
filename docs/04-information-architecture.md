@@ -29,9 +29,10 @@ Internal app (Recruitment ATS) — hiring team
     │   ├── Create / edit modal (details + criteria builder)
     │   └── Detail
     │       ├── Overview
-    │       ├── Criteria
+    │       ├── Criteria (AI-suggested drafts available in the create / edit modal)
     │       ├── Job post (public content, publish / unpublish, share links)
-    │       └── Pipeline (Kanban board)
+    │       ├── Pipeline (Kanban board)
+    │       └── Pool matches (Gợi ý từ kho ứng viên — AI semantic matches)
     ├── Candidates (Ứng viên)
     │   ├── Table across positions (filters, sort by fit score, export Excel)
     │   ├── Add application modal (CV upload)
@@ -49,7 +50,7 @@ Internal app (Recruitment ATS) — hiring team
     │   └── Add to position modal
     ├── Interviews (Lịch phỏng vấn)
     │   ├── My interviews (list / week)
-    │   └── Scorecard form
+    │   └── Scorecard form (with the attached interview questions)
     ├── Bulk import (Nhập hàng loạt)
     │   ├── Wizard: upload → preview → result
     │   └── Import history
@@ -100,10 +101,11 @@ Unauthorized items are **not rendered** in the sidebar; direct URL access shows 
 | `SCR-01` | Login | Page (two-column) | US01, US02 |
 | `SCR-02` | Dashboard | Page | US03 |
 | `SCR-10` | Position list | Page | US04, US07 |
-| `SCR-11` | Position create / edit | Modal on `SCR-10` | US05, US06 |
+| `SCR-11` | Position create / edit, with AI-suggested criteria | Modal on `SCR-10` | US05, US06, US32 |
 | `SCR-12` | Position detail | Tabbed page | US04, US07 |
 | `SCR-13` | Pipeline board (Kanban) | Tab of `SCR-12` | US08, US11 |
 | `SCR-14` | Job post editor + share links | Tab of `SCR-12` | US22 |
+| `SCR-15` | Pool matches (AI semantic matches) | Tab of `SCR-12` | US33 |
 | `SCR-20` | Candidate table + export | Page | US08, US30 |
 | `SCR-21` | Add application | Modal | US09 |
 | `SCR-22` | Application detail | Tabbed page | US08, US10, US11 |
@@ -113,9 +115,9 @@ Unauthorized items are **not rendered** in the sidebar; direct URL access shows 
 | `SCR-26` | Edit candidate | Modal | US10 |
 | `SCR-27` | Candidate emails | Tab of `SCR-22` | US27 |
 | `SCR-28` | Edit / cancel pending email | Modal on `SCR-27` | US27 |
-| `SCR-30` | Schedule / reschedule interview | Modal | US14 |
+| `SCR-30` | Schedule / reschedule interview, with AI-suggested questions | Modal | US14, US34 |
 | `SCR-31` | My interviews | Page | US03, US15 |
-| `SCR-32` | Scorecard form | Page | US15 |
+| `SCR-32` | Scorecard form with attached questions | Page | US15, US34 |
 | `SCR-40` | Bulk import wizard + history | Page | US16 |
 | `SCR-41` | CV inbox | Page | US25 |
 | `SCR-42` | Assign inbox item to position | Modal on `SCR-41` | US25 |
@@ -170,6 +172,9 @@ Unauthorized items are **not rendered** in the sidebar; direct URL access shows 
 | US29 | `SCR-76` enter settings → test connection → save |
 | US30 | `SCR-20` / `SCR-45` "Xuất Excel" |
 | US31 | Email link → `PUB-06` choose action → confirm |
+| US32 | `SCR-11` "Gợi ý tiêu chí bằng AI" → review drafts → accept / edit → save |
+| US33 | `SCR-12` → `SCR-15` ranked matches → "Thêm vào vị trí" (`SCR-46`) |
+| US34 | `SCR-30` "Gợi ý câu hỏi" → edit, keep ≤ 8 → save; panel sees them on `SCR-32` |
 
 ## Screen hierarchy
 
@@ -187,6 +192,7 @@ flowchart TB
     Jobs --> JobForm["SCR-11 Create / edit position modal"]
     Jobs --> JobDetail["SCR-12 Position detail"]
     JobDetail --> Post["SCR-14 Job post tab"]
+    JobDetail --> Matches["SCR-15 Pool matches tab"] --> AddPoolMatch["SCR-46 Add to position modal"]
     JobDetail --> Pipeline["SCR-13 Pipeline board"]
     Shell --> Candidates["SCR-20 Candidate table"]
     Candidates --> AddApp["SCR-21 Add application modal"]
@@ -339,6 +345,16 @@ flowchart LR
 
 The score is shown as a plain number; AI output gets no special colour. Criterion results use a status dot plus text (Đạt / Một phần / Không đạt), never colour alone. Every AI result carries the provenance line **"Gợi ý bởi AI · phân tích lúc …"**, and the override modal states that the original AI result is kept.
 
+### AI suggestion states (criteria, interview questions, pool matches)
+
+| State | Behavior |
+|---|---|
+| Idle | Button "Gợi ý tiêu chí bằng AI" / "Gợi ý câu hỏi"; disabled with a hint when the input is too short |
+| Loading | Button shows "AI đang gợi ý…"; the form stays editable; pool-match tab shows a skeleton list |
+| Draft shown | Suggestions in a side list marked "Gợi ý bởi AI — chưa lưu", each with accept / edit / discard; nothing is saved until the form is saved |
+| Error / limit | Short message ("Không gợi ý được, thử lại sau"); everything typed is kept |
+| Pool matches empty | "Chưa có ứng viên phù hợp trong kho" with a link to the talent-pool search |
+
 ### Email, inbox, and job post states
 
 | Object | Status | Badge (UI) | Behavior |
@@ -372,14 +388,15 @@ The score is shown as a plain number; AI output gets no special colour. Criterio
 |---|---|
 | Login | `login`, `refreshToken`, `logout` |
 | Dashboard | `getDashboard` |
-| Positions | `listPositions`, `getPosition`, `createPosition`, `updatePosition`, `updatePositionStatus`, `listDepartments`, `listUserOptions` |
+| Positions | `listPositions`, `getPosition`, `createPosition`, `updatePosition`, `updatePositionStatus`, `suggestCriteria`, `listDepartments`, `listUserOptions` |
+| Pool matches | `listPoolMatches`, `addCandidateToPosition` |
 | Job post | `getJobPost`, `updateJobPost`, `publishJobPost`, `unpublishJobPost`, `getShareLinks` |
 | Pipeline / candidates | `getPipeline`, `listApplications`, `getApplication`, `matchCandidate`, `createApplication`, `updateApplication`, `replaceCv`, `getCvFileContent`, `moveApplicationStage`, `getStageHistory`, `exportApplications` |
 | AI analysis | `getAnalysis`, `listAnalyses`, `requestAnalysis`, `overrideCriterionResult` |
 | Candidate emails | `listApplicationEmails`, `listEmails`, `updatePendingEmail`, `cancelPendingEmail`, `resendEmail` |
 | CV inbox | `listInboxItems`, `getInboxItem`, `getInboxAttachmentContent`, `assignInboxItem`, `dismissInboxItem` |
 | Talent pool | `searchTalentPool`, `getCandidate`, `addCandidateToPosition`, `exportTalentPool` |
-| Interviews | `listInterviews`, `getInterview`, `createInterview`, `updateInterview`, `cancelInterview`, `getScorecards`, `getMyScorecard`, `saveScorecardDraft`, `submitScorecard` |
+| Interviews | `suggestInterviewQuestions`, `listInterviews`, `getInterview`, `createInterview`, `updateInterview`, `cancelInterview`, `getScorecards`, `getMyScorecard`, `saveScorecardDraft`, `submitScorecard` |
 | Import | `downloadImportTemplate`, `previewImport`, `confirmImport`, `listImports`, `getImport` |
 | Reports | `getReport`, `exportReport` |
 | Audit | `listAuditLogs` |

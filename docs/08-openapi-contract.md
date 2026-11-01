@@ -2,7 +2,7 @@
 
 > Design status: TARGET
 >
-> Contract: [`api/openapi.yaml`](api/openapi.yaml) (OpenAPI 3.0.3, 85 operations, passes `redocly lint` with the recommended rules). Preview it with `npx @redocly/cli preview-docs docs/api/openapi.yaml` or paste it into [Swagger Editor](https://editor.swagger.io).
+> Contract: [`api/openapi.yaml`](api/openapi.yaml) (OpenAPI 3.0.3, 88 operations, passes `redocly lint` with the recommended rules). Preview it with `npx @redocly/cli preview-docs docs/api/openapi.yaml` or paste it into [Swagger Editor](https://editor.swagger.io).
 
 The contract is the agreement between the two SPAs and the API. Operation IDs are final and replace the provisional names in the [screen-to-API mapping](04-information-architecture.md#screen-to-api-mapping-target); generated TypeScript clients use them as function names.
 
@@ -36,7 +36,8 @@ The contract is the agreement between the two SPAs and the API. Operation IDs ar
 | 404 | Not found, or not visible to the caller |
 | 409 | Business rule conflict: duplicate, invalid transition, overlap, already submitted, email no longer pending, stale `rowVersion` |
 | 413 | File too large |
-| 429 | Rate limit reached |
+| 429 | Rate limit reached (public apply, login, or 30 AI suggestion calls per user per hour) |
+| 502 | The AI service failed or returned an invalid result; the page keeps all user input |
 
 ## Error codes
 
@@ -68,8 +69,9 @@ The contract is the agreement between the two SPAs and the API. Operation IDs ar
 | `SELF_DEACTIVATION` | 409 | `updateUserStatus` |
 | `JOB_POST_EXPIRED` | 409 | `submitPublicApplication` after the closing date |
 | `CAPTCHA_FAILED` | 400 | `submitPublicApplication` |
-| `RATE_LIMITED` | 429 | Public endpoints, `login` |
+| `RATE_LIMITED` | 429 | Public endpoints, `login`, AI suggestion operations |
 | `CONSENT_TOKEN_INVALID` | 404 | `getConsent`, `updateConsent` |
+| `AI_UNAVAILABLE` | 502 | `suggestCriteria`, `listPoolMatches`, `suggestInterviewQuestions` when the AI service fails, times out, or returns invalid JSON |
 | `INTERNAL_ERROR` | 500 | Unexpected errors (details only in logs, linked by `traceId`) |
 
 Example:
@@ -127,7 +129,17 @@ Roles: **A** Admin · **H** HR Manager · **R** Recruiter · **I** Interviewer. 
 | `POST` | `/api/positions` | `createPosition` | A H R | Create a position with criteria (US05) |
 | `GET` | `/api/positions/{positionId}` | `getPosition` | A H R I | Position detail with current criteria (US04) |
 | `PUT` | `/api/positions/{positionId}` | `updatePosition` | A H R | Edit a position (US06) |
+| `POST` | `/api/positions/criteria-suggestions` | `suggestCriteria` | A H R | AI draft of weighted criteria from a job description (US32, BR-26) |
 | `PUT` | `/api/positions/{positionId}/status` | `updatePositionStatus` | A H R | Open, close, or reopen a position (US07) |
+
+### Talent pool
+
+| Method | Path | Operation | Roles | Summary |
+|---|---|---|---|---|
+| `GET` | `/api/positions/{positionId}/pool-matches` | `listPoolMatches` | A H R | Consented pool candidates ranked by semantic similarity to a position (US33, BR-27) |
+| `GET` | `/api/talent-pool` | `searchTalentPool` | A H R | Search consented candidates (US26, BR-24) |
+| `GET` | `/api/talent-pool/export` | `exportTalentPool` | A H R | Export the filtered talent pool to Excel (US30, BR-25) |
+| `POST` | `/api/talent-pool/{candidateId}/applications` | `addCandidateToPosition` | A H R | Add a pool candidate to an open position (US26) |
 
 ### Applications
 
@@ -175,6 +187,7 @@ Roles: **A** Admin · **H** HR Manager · **R** Recruiter · **I** Interviewer. 
 | Method | Path | Operation | Roles | Summary |
 |---|---|---|---|---|
 | `GET` | `/api/interviews` | `listInterviews` | A H R I | Interviews in a period (US03, US15) |
+| `POST` | `/api/applications/{applicationId}/interview-question-suggestions` | `suggestInterviewQuestions` | A H R | AI draft of interview questions for unproven criteria (US34, BR-28) |
 | `POST` | `/api/applications/{applicationId}/interviews` | `createInterview` | A H R | Schedule an interview (US14) |
 | `GET` | `/api/interviews/{interviewId}` | `getInterview` | A H R I | Interview detail |
 | `PUT` | `/api/interviews/{interviewId}` | `updateInterview` | A H R | Reschedule or change the panel (US14) |
@@ -203,14 +216,6 @@ Roles: **A** Admin · **H** HR Manager · **R** Recruiter · **I** Interviewer. 
 | `GET` | `/api/inbox-items/{inboxItemId}/attachments/{attachmentId}/content` | `getInboxAttachmentContent` | A H R | Stream an attachment for preview |
 | `POST` | `/api/inbox-items/{inboxItemId}/assign` | `assignInboxItem` | A H R | Turn an inbox item into an application (US25) |
 | `POST` | `/api/inbox-items/{inboxItemId}/dismiss` | `dismissInboxItem` | A H R | Dismiss an item (deleted after 7 days, BR-22) |
-
-### Talent pool
-
-| Method | Path | Operation | Roles | Summary |
-|---|---|---|---|---|
-| `GET` | `/api/talent-pool` | `searchTalentPool` | A H R | Search consented candidates (US26, BR-24) |
-| `GET` | `/api/talent-pool/export` | `exportTalentPool` | A H R | Export the filtered talent pool to Excel (US30, BR-25) |
-| `POST` | `/api/talent-pool/{candidateId}/applications` | `addCandidateToPosition` | A H R | Add a pool candidate to an open position (US26) |
 
 ### Imports
 
@@ -298,8 +303,11 @@ Roles: **A** Admin · **H** HR Manager · **R** Recruiter · **I** Interviewer. 
 | US29 | `getMailSettings`, `updateMailSettings`, `testMailSettings` |
 | US30 | `exportApplications`, `exportTalentPool` |
 | US31 | `getConsent`, `updateConsent` |
+| US32 | `suggestCriteria`, then `createPosition` / `updatePosition` |
+| US33 | `listPoolMatches`, then `addCandidateToPosition` |
+| US34 | `suggestInterviewQuestions`, then `createInterview` / `updateInterview` with `questions` |
 | Supporting forms and filters | `listDepartments`, `listUserOptions` |
 
-Work done by the Worker (AI analysis, sending emails, mailbox polling, retention) has no endpoint; its results appear through the operations above.
+Work done by the Worker (AI analysis, CV embeddings, sending emails, mailbox polling, retention) has no endpoint; its results appear through the operations above.
 
 **Related:** [Database design](07-database-design.md) · [C4 architecture](06-c4-architecture.md) · [Information architecture](04-information-architecture.md)

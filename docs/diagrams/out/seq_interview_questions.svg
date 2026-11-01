@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1205" height="854" viewBox="0 0 1205 854" font-family="Liberation Sans, Arial, Helvetica, sans-serif">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<g transform="translate(7.0,16.0)">
+<rect x="9.0" y="0.0" width="1173.0" height="822.0" fill="none" stroke="#000" stroke-width="1.1"/><path d="M9.0,0.0 L201.0,0.0 L201.0,14.0 L195.0,20.0 L9.0,20.0 Z" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="16.0" y="14.5" font-size="12" fill="#000000" text-anchor="start" font-weight="bold" xml:space="preserve">sd</text><text x="30.0" y="14.5" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve"> Suggest interview questions</text>
+<path d="M57.0,99.0 L57.0,810.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M254.0,99.0 L254.0,810.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M519.0,99.0 L519.0,810.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M737.0,99.0 L737.0,810.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M1014.0,99.0 L1014.0,810.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M1134.0,99.0 L1134.0,810.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<circle cx="57.0" cy="40" r="6" fill="#fff" stroke="#000" stroke-width="1.3"/><line x1="57.0" y1="46" x2="57.0" y2="61" stroke="#000" stroke-width="1.3" fill="none"/><line x1="46.0" y1="51" x2="68.0" y2="51" stroke="#000" stroke-width="1.3" fill="none"/><line x1="57.0" y1="61" x2="47.0" y2="74" stroke="#000" stroke-width="1.3" fill="none"/><line x1="57.0" y1="61" x2="67.0" y2="74" stroke="#000" stroke-width="1.3" fill="none"/><text x="57.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">Recruiter</text>
+<line x1="235.0" y1="40" x2="235.0" y2="68" stroke="#000" stroke-width="1.3" fill="none"/><line x1="235.0" y1="54" x2="245.0" y2="54" stroke="#000" stroke-width="1.3" fill="none"/><circle cx="259.0" cy="54" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><text x="254.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:Schedule interview modal</text>
+<circle cx="519.0" cy="56" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><path d="M524.0,37 L518.0,42 L524.0,47" fill="none" stroke="#000" stroke-width="1.3"/><text x="519.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:InterviewsController</text>
+<circle cx="737.0" cy="56" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><path d="M742.0,37 L736.0,42 L742.0,47" fill="none" stroke="#000" stroke-width="1.3"/><text x="737.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:InterviewQuestionService</text>
+<circle cx="1013.984375" cy="53" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><line x1="998.984375" y1="69" x2="1028.984375" y2="69" stroke="#000" stroke-width="1.3"/><text x="1014.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:Database</text>
+<circle cx="1133.984375" cy="40" r="6" fill="#fff" stroke="#000" stroke-width="1.3"/><line x1="1133.984375" y1="46" x2="1133.984375" y2="61" stroke="#000" stroke-width="1.3" fill="none"/><line x1="1122.984375" y1="51" x2="1144.984375" y2="51" stroke="#000" stroke-width="1.3" fill="none"/><line x1="1133.984375" y1="61" x2="1123.984375" y2="74" stroke="#000" stroke-width="1.3" fill="none"/><line x1="1133.984375" y1="61" x2="1143.984375" y2="74" stroke="#000" stroke-width="1.3" fill="none"/><text x="1134.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">AI Service</text>
+<rect x="1009.0" y="222.0" width="10.0" height="29.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="732.0" y="193.0" width="10.0" height="115.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="514.0" y="164.0" width="10.0" height="173.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="249.0" y="135.0" width="10.0" height="231.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="1009.0" y="504.0" width="10.0" height="29.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="732.0" y="375.0" width="10.0" height="187.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="514.0" y="375.0" width="10.0" height="216.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="249.0" y="375.0" width="10.0" height="245.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="514.0" y="678.0" width="10.0" height="86.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="249.0" y="649.0" width="10.0" height="144.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="505.0" y="691.0" width="523.0" height="43.0" fill="#ffffff" stroke="#000" stroke-width="1.1"/><path d="M505.0,691.0 L543.0,691.0 L543.0,705.0 L537.0,711.0 L505.0,711.0 Z" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="512.0" y="705.5" font-size="12" fill="#000000" text-anchor="start" font-weight="bold" xml:space="preserve">ref</text>
+<text x="766.5" y="724.4" font-size="12" fill="#000000" text-anchor="middle" xml:space="preserve">Schedule interview</text>
+<rect x="33.0" y="262.0" width="720.0" height="113.0" fill="none" stroke="#000" stroke-width="1.1"/><path d="M33.0,262.0 L88.0,262.0 L88.0,276.0 L82.0,282.0 L33.0,282.0 Z" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="40.0" y="276.5" font-size="12" fill="#000000" text-anchor="start" font-weight="bold" xml:space="preserve">break</text><rect x="94.0" y="264.0" width="183.0" height="16.0" fill="#fff"/><text x="96.0" y="277.0" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">[not INTERVIEW or limit reached]</text>
+<path d="M57.0,135.0 L249.0,135.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M249.0,135.0 L239.0,139.5 L239.0,130.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M259.0,164.0 L514.0,164.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M514.0,164.0 L504.0,168.5 L504.0,159.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M524.0,193.0 L732.0,193.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M732.0,193.0 L722.0,197.5 L722.0,188.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M742.0,222.0 L1009.0,222.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M1009.0,222.0 L999.0,226.5 L999.0,217.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M1009.0,251.0 L742.0,251.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M752.0,246.0 L742.0,251.0 L752.0,256.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M732.0,308.0 L524.0,308.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M534.0,303.0 L524.0,308.0 L534.0,313.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M514.0,337.0 L259.0,337.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M269.0,332.0 L259.0,337.0 L269.0,342.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M249.0,366.0 L57.0,366.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M67.0,361.0 L57.0,366.0 L67.0,371.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M742.0,405.0 L768.0,405.0 L768.0,417.0 L742.0,417.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M742.0,417.0 L752.0,412.5 L752.0,421.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M742.0,446.0 L1134.0,446.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M1134.0,446.0 L1124.0,450.5 L1124.0,441.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M1134.0,475.0 L742.0,475.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M752.0,470.0 L742.0,475.0 L752.0,480.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M742.0,504.0 L1009.0,504.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M1009.0,504.0 L999.0,508.5 L999.0,499.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M1009.0,533.0 L742.0,533.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M752.0,528.0 L742.0,533.0 L752.0,538.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M732.0,562.0 L524.0,562.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M534.0,557.0 L524.0,562.0 L534.0,567.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M514.0,591.0 L259.0,591.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M269.0,586.0 L259.0,591.0 L269.0,596.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M249.0,620.0 L57.0,620.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M67.0,615.0 L57.0,620.0 L67.0,625.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M57.0,649.0 L249.0,649.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M249.0,649.0 L239.0,653.5 L239.0,644.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M259.0,678.0 L514.0,678.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M514.0,678.0 L504.0,682.5 L504.0,673.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M514.0,764.0 L259.0,764.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M269.0,759.0 L259.0,764.0 L269.0,769.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M249.0,793.0 L57.0,793.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M67.0,788.0 L57.0,793.0 L67.0,798.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<rect x="61.0" y="116.0" width="124.0" height="17.0" fill="#ffffff"/><text x="63.0" y="128.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">1. click &quot;Gợi ý câu hỏi&quot;</text>
+<rect x="263.0" y="145.0" width="237.0" height="17.0" fill="#ffffff"/><text x="265.0" y="157.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">2. POST …/interview-question-suggestions</text>
+<rect x="528.0" y="174.0" width="173.0" height="17.0" fill="#ffffff"/><text x="530.0" y="186.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">3. SuggestAsync(applicationId)</text>
+<rect x="746.0" y="203.0" width="206.0" height="17.0" fill="#ffffff"/><text x="748.0" y="215.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">4. call count, criteria, analysis, quotes</text>
+<rect x="746.0" y="232.0" width="41.0" height="17.0" fill="#ffffff"/><text x="748.0" y="244.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">5. data</text>
+<rect x="528.0" y="289.0" width="73.0" height="17.0" fill="#ffffff"/><text x="530.0" y="301.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">6. error code</text>
+<rect x="263.0" y="318.0" width="160.0" height="17.0" fill="#ffffff"/><text x="265.0" y="330.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">7. 409 or 429 with error code</text>
+<rect x="61.0" y="347.0" width="67.0" height="17.0" fill="#ffffff"/><text x="63.0" y="359.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">8. message</text>
+<rect x="746.0" y="386.0" width="231.0" height="17.0" fill="#ffffff"/><text x="748.0" y="398.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">9. UNVERIFIED, NOT_MET, PARTIAL first</text>
+<rect x="746.0" y="427.0" width="180.0" height="17.0" fill="#ffffff"/><text x="748.0" y="439.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">10. criteria, results, quotes (30 s)</text>
+<rect x="746.0" y="456.0" width="124.0" height="17.0" fill="#ffffff"/><text x="748.0" y="468.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">11. up to 10 questions</text>
+<rect x="746.0" y="485.0" width="63.0" height="17.0" fill="#ffffff"/><text x="748.0" y="497.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">12. log call</text>
+<rect x="746.0" y="514.0" width="57.0" height="17.0" fill="#ffffff"/><text x="748.0" y="526.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">13. saved</text>
+<rect x="528.0" y="543.0" width="190.0" height="17.0" fill="#ffffff"/><text x="530.0" y="555.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">14. InterviewQuestionSuggestions</text>
+<rect x="263.0" y="572.0" width="214.0" height="17.0" fill="#ffffff"/><text x="265.0" y="584.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">15. 200 InterviewQuestionSuggestions</text>
+<rect x="61.0" y="601.0" width="166.0" height="17.0" fill="#ffffff"/><text x="63.0" y="613.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">16. drafts grouped by criterion</text>
+<rect x="61.0" y="630.0" width="155.0" height="17.0" fill="#ffffff"/><text x="63.0" y="642.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">17. edit, keep ≤ 8, &quot;Lưu lịch&quot;</text>
+<rect x="263.0" y="659.0" width="193.0" height="17.0" fill="#ffffff"/><text x="265.0" y="671.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">18. POST …/interviews {questions}</text>
+<rect x="263.0" y="745.0" width="97.0" height="17.0" fill="#ffffff"/><text x="265.0" y="757.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">19. 201 Interview</text>
+<rect x="61.0" y="774.0" width="169.0" height="17.0" fill="#ffffff"/><text x="63.0" y="786.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">20. interview with its questions</text>
+</g></svg>

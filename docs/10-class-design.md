@@ -663,6 +663,7 @@ classDiagram
         +Reschedule(InterviewRequest, now) void
         +Cancel(string reason) void
         +HasPanelist(Guid userId) bool
+        +ReplaceQuestions(InterviewQuestionInput[] questions, Guid userId) void
     }
     class InterviewPanelist {
         <<entity>>
@@ -1112,7 +1113,98 @@ classDiagram
 - Read models are built by `I*Queries` in Infrastructure with EF Core projections (no entity loading); they apply the caller's visibility (Interviewer variant, role filters).
 - `ReportService.ExportAsync` produces the same figures as `GetAsync` and writes an `EXPORT` audit entry; `ExportAsync` in `ApplicationService` and `TalentPoolService` use `ISpreadsheetWriter` with the BR-25 columns and the 5,000-row limit.
 
-## 11. API-to-code traceability
+## 11. AI assistance — criteria drafts, pool matching, interview questions
+
+```mermaid
+classDiagram
+    direction TB
+    class PositionsController {
+        +SuggestCriteria(CriteriaSuggestionRequest) CriteriaSuggestionResult
+    }
+    class TalentPoolController {
+        +ListPoolMatches(Guid positionId, int limit) PoolMatchList
+    }
+    class InterviewsController {
+        +SuggestQuestions(Guid applicationId) InterviewQuestionSuggestions
+    }
+    class EmbeddingRunner {
+        <<Worker job>>
+        #RunOnceAsync(IServiceProvider) void
+    }
+    class CriteriaSuggestionService {
+        +SuggestAsync(CriteriaSuggestionRequest) CriteriaSuggestionResult
+    }
+    class PoolMatchingService {
+        +ListMatchesAsync(Guid positionId, int limit) PoolMatchList
+    }
+    class CandidateEmbeddingService {
+        +EmbedPendingAsync() int
+        +DeleteStaleAsync() int
+    }
+    class InterviewQuestionService {
+        +SuggestAsync(Guid applicationId) InterviewQuestionSuggestions
+    }
+    class AiCallLimiter {
+        +EnsureAllowedAsync(Guid userId) void
+    }
+    class SkillOverlap {
+        <<static>>
+        +Match(string[] candidateSkills, PositionCriterion[] criteria)$ string[]
+    }
+    class Redactor {
+        <<static>>
+        +Redact(string cvText, CandidateIdentity identity)$ string
+    }
+    class IAiAssistant {
+        <<interface>>
+        +SuggestCriteriaAsync(JobDescriptionInput) CriterionSuggestion[]
+        +SuggestQuestionsAsync(QuestionContext) InterviewQuestionDraft[]
+    }
+    class IEmbeddingClient {
+        <<interface>>
+        +EmbedAsync(string text) float[]
+        +Model string
+    }
+    class IEmbeddingRepository {
+        <<interface>>
+        +PendingCandidatesAsync(int batch) PendingEmbedding[]
+        +UpsertCandidateAsync(Guid candidateId, Guid cvFileId, float[] vector, string model) void
+        +GetPositionAsync(Guid positionId, int criteriaVersion) float[]?
+        +SavePositionAsync(Guid positionId, int criteriaVersion, float[] vector, string model) void
+        +NearestPoolCandidatesAsync(float[] vector, Guid positionId, int limit) PoolHit[]
+        +DeleteStaleAsync() int
+    }
+    class OpenAiCompatibleAssistant
+    class OpenAiCompatibleEmbeddingClient
+    class FakeAiAssistant
+    class FakeEmbeddingClient
+
+    PositionsController --> CriteriaSuggestionService
+    TalentPoolController --> PoolMatchingService
+    InterviewsController --> InterviewQuestionService
+    EmbeddingRunner --> CandidateEmbeddingService
+    CriteriaSuggestionService --> AiCallLimiter
+    CriteriaSuggestionService --> IAiAssistant
+    InterviewQuestionService --> AiCallLimiter
+    InterviewQuestionService --> IAiAssistant
+    PoolMatchingService --> IEmbeddingClient
+    PoolMatchingService --> IEmbeddingRepository
+    PoolMatchingService --> SkillOverlap
+    CandidateEmbeddingService --> Redactor
+    CandidateEmbeddingService --> IEmbeddingClient
+    CandidateEmbeddingService --> IEmbeddingRepository
+    OpenAiCompatibleAssistant ..|> IAiAssistant
+    FakeAiAssistant ..|> IAiAssistant
+    OpenAiCompatibleEmbeddingClient ..|> IEmbeddingClient
+    FakeEmbeddingClient ..|> IEmbeddingClient
+```
+
+- **Drafts only (BR-26).** `CriteriaSuggestionService` and `InterviewQuestionService` call `AiCallLimiter` (30 calls per user per hour, counted from `ai_call_logs`), call `IAiAssistant` with a 30 s timeout, validate the JSON (types, weights 1–5, at most 12 criteria / 10 questions), log the call, and return the draft. Neither writes business data; criteria are saved by `PositionService`, questions by `InterviewService` through `Interview.ReplaceQuestions` (at most 8, BR-28).
+- **Question context (BR-28).** `InterviewQuestionService` builds `QuestionContext` from the current criteria, the current analysis results, and their verified quotes — no candidate identity — and orders criteria `UNVERIFIED`, `NOT_MET`, `PARTIAL` first. Without a completed analysis it sends the criteria alone and returns `basis = CRITERIA_ONLY`.
+- **Embeddings (BR-27).** `CandidateEmbeddingService.EmbedPendingAsync` takes pool candidates whose latest CV differs from their stored embedding, redacts the CV text with the same `Redactor` as screening, embeds it, and upserts the vector; `DeleteStaleAsync` removes vectors of candidates who left the pool or were anonymized. `PoolMatchingService` embeds the position text (title, description, current criteria) once per criteria version, asks the repository for the nearest pool candidates who have not applied, and adds `SkillOverlap` from the candidates' extracted skills. It never creates an application.
+- **Failures.** Any AI timeout, HTTP error, or invalid JSON becomes `AppException(AI_UNAVAILABLE)` → 502; the user's form keeps its input.
+
+## 12. API-to-code traceability
 
 Every OpenAPI operation maps to one controller action and one Application method. Controller actions carry `Name = operationId`, which the contract test compares with `openapi.yaml`.
 
@@ -1133,6 +1225,8 @@ Roles: **A** Admin · **H** HR Manager · **R** Recruiter · **I** Interviewer �
 | `createPosition` | `POST /api/positions` | A H R | `PositionsController.Create` | `PositionService.CreateAsync` |  |
 | `getPosition` | `GET /api/positions/{positionId}` | A H R I | `PositionsController.Get` | `PositionService.GetAsync` |  |
 | `updatePosition` | `PUT /api/positions/{positionId}` | A H R | `PositionsController.Update` | `PositionService.UpdateAsync` |  |
+| `suggestCriteria` | `POST /api/positions/criteria-suggestions` | A H R | `PositionsController.SuggestCriteria` | `CriteriaSuggestionService.SuggestAsync` | [seq_suggest_criteria](11-sequence-and-state-diagrams.md#seq-suggest-criteria) |
+| `listPoolMatches` | `GET /api/positions/{positionId}/pool-matches` | A H R | `TalentPoolController.ListPoolMatches` | `PoolMatchingService.ListMatchesAsync` | [seq_pool_matches](11-sequence-and-state-diagrams.md#seq-pool-matches) |
 | `updatePositionStatus` | `PUT /api/positions/{positionId}/status` | A H R | `PositionsController.UpdateStatus` | `PositionService.ChangeStatusAsync` | [st_position](11-sequence-and-state-diagrams.md#st-position) |
 | `getPipeline` | `GET /api/positions/{positionId}/pipeline` | A H R I | `ApplicationsController.GetPipeline` | `ApplicationService.GetPipelineAsync` |  |
 | `getJobPost` | `GET /api/positions/{positionId}/job-post` | A H R | `JobPostsController.Get` | `JobPostService.GetAsync` |  |
@@ -1156,6 +1250,7 @@ Roles: **A** Admin · **H** HR Manager · **R** Recruiter · **I** Interviewer �
 | `getAnalysis` | `GET /api/applications/{applicationId}/analysis` | A H R | `ScreeningController.GetCurrent` | `ScreeningService.GetCurrentAsync` | [seq_analyze_cv](11-sequence-and-state-diagrams.md#seq-analyze-cv) |
 | `overrideCriterionResult` | `PUT /api/analyses/{analysisId}/criteria/{criterionId}/override` | A H R | `ScreeningController.Override` | `ScreeningService.OverrideAsync` | [seq_override_ai](11-sequence-and-state-diagrams.md#seq-override-ai) |
 | `listInterviews` | `GET /api/interviews` | A H R I | `InterviewsController.List` | `InterviewService.ListAsync` |  |
+| `suggestInterviewQuestions` | `POST /api/applications/{applicationId}/interview-question-suggestions` | A H R | `InterviewsController.SuggestQuestions` | `InterviewQuestionService.SuggestAsync` | [seq_interview_questions](11-sequence-and-state-diagrams.md#seq-interview-questions) |
 | `createInterview` | `POST /api/applications/{applicationId}/interviews` | A H R | `InterviewsController.Create` | `InterviewService.ScheduleAsync` | [seq_schedule_interview](11-sequence-and-state-diagrams.md#seq-schedule-interview) |
 | `getInterview` | `GET /api/interviews/{interviewId}` | A H R I | `InterviewsController.Get` | `InterviewService.GetAsync` |  |
 | `updateInterview` | `PUT /api/interviews/{interviewId}` | A H R | `InterviewsController.Update` | `InterviewService.RescheduleAsync` | [seq_schedule_interview](11-sequence-and-state-diagrams.md#seq-schedule-interview) |

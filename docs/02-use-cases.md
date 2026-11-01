@@ -42,6 +42,9 @@ Two records describe an opening:
 | Move pipeline stage | ✓ | ✓ | Up to `INTERVIEW`, and reject | |
 | Run / view AI analysis | ✓ | ✓ | ✓ | |
 | Override AI result | ✓ | ✓ | ✓ | |
+| AI-suggested criteria while creating / editing a position | ✓ | ✓ | Own positions | |
+| AI matches from the talent pool for a position | ✓ | ✓ | ✓ | |
+| AI-suggested interview questions | ✓ | ✓ | ✓ | Sees the attached questions only |
 | Schedule / reschedule / cancel interview | ✓ | ✓ | ✓ | |
 | Submit scorecard | | ✓ (if on panel) | | ✓ (if on panel) |
 | View scorecards | ✓ | ✓ | ✓ | Only after submitting own |
@@ -89,6 +92,9 @@ Menus and buttons are **not displayed** when the user lacks permission. Unauthor
 | BR-23 | **Automatic emails** are rendered from templates and logged per application (template, recipient, time, status). Delays: receipt — immediately; interview invitation, interview change, interview cancellation, rejection, offer notice — queued for **10 minutes**, during which Admin, HR Manager, or Recruiter can edit or cancel them. When an interview is changed or cancelled while its invitation is still pending, the pending email is replaced or cancelled instead of sending both. Sending failures are retried 3 times (after 1, 5, 30 minutes), then marked `FAILED` and listed under *Cần xử lý*. No email is sent to an invalid address; the application is flagged instead. |
 | BR-24 | **Talent pool:** contains only candidates with active pool consent. Consent lasts 24 months from the candidate's latest application or confirmation; 30 days before expiry the candidate receives a renewal email. Without renewal, the candidate leaves the pool and BR-17 applies. Every candidate email contains a signed link to leave the pool or delete all data; deletion removes CVs, anonymizes the candidate, and rejects open applications with reason "Ứng viên rút hồ sơ", and is logged. |
 | BR-25 | **Excel export** of candidates or the talent pool contains only rows and columns the user may see, at most 5,000 rows, never CV files; each export writes an `EXPORT` audit entry with the filters used. |
+| BR-26 | **AI suggestions are drafts:** criteria suggestions (UC32) and interview-question suggestions (UC34) are shown beside the editable form and take effect only when a user saves them; the user may accept, edit, or discard each item. A suggestion call is limited to 30 per user per hour and every call is logged with model, duration, and outcome. Job descriptions sent for criteria suggestion are internal text, not candidate data. |
+| BR-27 | **Talent-pool matching:** only candidates with active pool consent (BR-24) are embedded and matched. Embeddings are computed from the same redacted CV text as BR-10, never from contact data, and are deleted when the candidate leaves the pool or is anonymized. A match is a ranking hint with a similarity value and the skills that overlap; it never creates an application — a user adds the candidate through UC26, after which normal screening applies. Candidates who already applied to the position are excluded. |
+| BR-28 | **Interview questions:** suggestions are generated from the position criteria, the current analysis results, and their verified quotes — never from contact data. The scheduler reviews them and attaches at most 8 to the interview. Interviewers see the attached questions grouped by criterion, but never the AI result, quote, or score (BR-08). |
 
 ## Use case diagram
 
@@ -140,6 +146,9 @@ flowchart LR
             direction LR
             uc12["UC12 Analyze CV with AI"]
             uc13["UC13 Override AI Result"]
+            uc32["UC32 Suggest Criteria from JD"]
+            uc33["UC33 Match Talent Pool to Position"]
+            uc34["UC34 Suggest Interview Questions"]
         end
         subgraph interviews["Interviews"]
             direction LR
@@ -171,12 +180,12 @@ flowchart LR
         mailbox(["Recruitment Mailbox<br/>(external)"])
     end
 
-    manager --> uc01 & uc02 & uc03 & uc04 & uc05 & uc06 & uc07 & uc22 & uc08 & uc09 & uc10 & uc11 & uc16 & uc25 & uc26 & uc30 & uc12 & uc13 & uc14 & uc15 & uc27 & uc28 & uc17 & uc18 & uc19 & uc21
-    recruiter --> uc01 & uc02 & uc03 & uc04 & uc05 & uc06 & uc22 & uc08 & uc09 & uc10 & uc11 & uc16 & uc25 & uc26 & uc30 & uc12 & uc13 & uc14 & uc27 & uc21
+    manager --> uc01 & uc02 & uc03 & uc04 & uc05 & uc06 & uc07 & uc22 & uc08 & uc09 & uc10 & uc11 & uc16 & uc25 & uc26 & uc30 & uc12 & uc13 & uc32 & uc33 & uc34 & uc14 & uc15 & uc27 & uc28 & uc17 & uc18 & uc19 & uc21
+    recruiter --> uc01 & uc02 & uc03 & uc04 & uc05 & uc06 & uc22 & uc08 & uc09 & uc10 & uc11 & uc16 & uc25 & uc26 & uc30 & uc12 & uc13 & uc32 & uc33 & uc34 & uc14 & uc27 & uc21
     interviewer --> uc01 & uc02 & uc03 & uc04 & uc08 & uc15 & uc21
-    admin --> uc01 & uc02 & uc03 & uc04 & uc05 & uc06 & uc07 & uc22 & uc08 & uc09 & uc10 & uc11 & uc16 & uc25 & uc26 & uc30 & uc12 & uc13 & uc14 & uc27 & uc28 & uc17 & uc18 & uc19 & uc20 & uc29 & uc21
+    admin --> uc01 & uc02 & uc03 & uc04 & uc05 & uc06 & uc07 & uc22 & uc08 & uc09 & uc10 & uc11 & uc16 & uc25 & uc26 & uc30 & uc12 & uc13 & uc32 & uc33 & uc34 & uc14 & uc27 & uc28 & uc17 & uc18 & uc19 & uc20 & uc29 & uc21
     candidate --> uc23 & uc24 & uc31
-    uc12 -.-> aiService
+    uc12 & uc32 & uc33 & uc34 -.-> aiService
     uc27 -.-> mailService
     uc25 -.-> mailbox
 
@@ -188,7 +197,7 @@ flowchart LR
     class manager,recruiter,interviewer,admin,candidate actor
     class aiService,mailService,mailbox external
     class uc01,uc02,uc03,uc04,uc05,uc06,uc07,uc08,uc09,uc10,uc11,uc14,uc15,uc16,uc17,uc18,uc19,uc20,uc21,uc22,uc25,uc26,uc27,uc28,uc29,uc30 usecase
-    class uc12,uc13 aiCase
+    class uc12,uc13,uc32,uc33,uc34 aiCase
     class uc23,uc24,uc31 publicCase
     style left fill:#fff,stroke:#bbb,stroke-dasharray:5 5
     style right fill:#fff,stroke:#bbb,stroke-dasharray:5 5
@@ -225,6 +234,11 @@ flowchart LR
     uc14["UC14 Schedule Interview"] -->|include: invitation| queue
     queue --> uc27["UC27 Send / Manage Candidate Emails"]
     uc12 -->|include| redact
+    uc32["UC32 Suggest Criteria from JD"] -.->|extend| uc05["UC05 Create Position"]
+    uc32 -.->|extend| uc06
+    uc33["UC33 Match Talent Pool to Position"] -.->|extend| uc26
+    uc34["UC34 Suggest Interview Questions"] -.->|extend| uc14
+    uc33 & uc34 -->|include| redact
     uc13["UC13 Override AI Result"] -->|include| audit
     uc11 -->|include| audit
     uc30["UC30 Export Candidates"] -->|include| audit
@@ -434,5 +448,29 @@ flowchart LR
 - **Actor:** Candidate (public), via the signed link in any email
 - **Main flow:** open the link → see which data is held (positions applied for, pool status, expiry) → choose **Tham gia kho ứng viên**, **Rút khỏi kho ứng viên**, or **Xoá toàn bộ dữ liệu** → confirm
 - **Result:** consent updated or data deleted as in BR-24; confirmation email (except after full deletion, which shows an on-screen confirmation); audited
+
+### UC32 Suggest criteria from a job description
+
+- **Actor:** Admin, HR Manager; Recruiter for own positions (BR-14); secondary actor: AI service
+- **Trigger:** in the create / edit position form (UC05, UC06), the user clicks **"Gợi ý tiêu chí bằng AI"** after entering the title and internal job description
+- **Main flow:** the API sends the title, level, and job description to the AI → receives up to 12 criteria, each with name, short description, type (`MUST_HAVE` / `NICE_TO_HAVE`), suggested weight 1–5, and a one-line rationale → the form shows them as a draft list beside the criteria builder → the user accepts, edits, or discards each item → **Lưu** saves the position as in UC05 / UC06 (BR-26)
+- **Alternative:** description shorter than 50 characters → the button stays disabled with a hint; AI error or timeout (30 s) → message, the form keeps everything typed; limit reached → "Thử lại sau"
+- **Result:** criteria are written only by the user's save; the AI call is logged
+
+### UC33 Match talent pool to a position
+
+- **Actor:** Admin, HR Manager, Recruiter; secondary actor: AI service (embeddings)
+- **Background:** the Worker keeps one embedding per pool candidate from the redacted text of their latest CV (BR-27)
+- **Main flow:** open a position → tab **"Gợi ý từ kho ứng viên"** → the API embeds the position (title, description, current criteria; cached per criteria version) → vector search over active pool candidates who have not applied to this position → up to 20 candidates ranked by similarity, each with latest position applied for, the skills that overlap the criteria, and consent expiry → **"Thêm vào vị trí"** continues with UC26
+- **Alternative:** no candidate above the similarity floor → empty state "Chưa có ứng viên phù hợp trong kho"; embedding service unavailable → message, keyword search in UC26 still works
+- **Result:** a ranked list for the user to act on; nothing is created automatically
+
+### UC34 Suggest interview questions
+
+- **Actor:** Admin, HR Manager, Recruiter; secondary actor: AI service
+- **Preconditions:** application in `INTERVIEW` (UC14)
+- **Main flow:** in the schedule-interview form, click **"Gợi ý câu hỏi"** → the API sends the criteria, the current analysis results, and their verified quotes (no contact data) → receives up to 10 questions, each linked to a criterion with a short purpose, criteria judged `PARTIAL`, `NOT_MET`, or `UNVERIFIED` first → the user edits, removes, or adds questions and keeps at most 8 → saving the interview stores them with it (BR-26, BR-28)
+- **Alternative:** no completed analysis → questions are generated from the criteria alone and the form says so; AI error → the interview can still be saved without questions
+- **Result:** panel members see the questions on their interview and scorecard page, grouped by criterion, without any AI result or score
 
 **Related:** [Research](01-research-top-down.md) · [INVEST requirements](03-invest-requirements.md) · [Information architecture](04-information-architecture.md)

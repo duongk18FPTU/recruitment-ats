@@ -38,7 +38,7 @@ Small and medium companies (10–100 employees) in Vietnam usually recruit with 
 | Recruiter | `RECRUITER` | Daily work: positions, job posts, CV intake, screening, scheduling, candidate communication |
 | Interviewer (department head, team lead, engineer) | `INTERVIEWER` | Only the candidates assigned to them; submit feedback quickly |
 | Candidate | Public user **without an account** | Find open jobs, apply easily, be informed, have personal data handled lawfully |
-| AI service provider | External system | Receives redacted CV text; returns structured analysis |
+| AI service provider | External system | Receives redacted CV text, job descriptions, and redacted evidence; returns structured analysis, criteria and interview-question suggestions, and embeddings |
 | Email service (SMTP) | External system | Delivers emails to candidates |
 | Recruitment mailbox | External system | Receives CVs sent by email; read by the system |
 
@@ -57,6 +57,7 @@ A separate Hiring Manager role (department head who requests and approves hiring
 | G7 — Candidates are informed | Every applicant receives a receipt email; every scheduled interview and final outcome triggers an email; no email is lost silently |
 | G8 — Reuse of talent | Candidates who consented can be found in the talent pool and added to another position in one action |
 | G9 — Channel effectiveness | Applications per source are reported, including LinkedIn and Facebook posts that link to the career site |
+| G10 — AI across the hiring flow | AI drafts position criteria from a job description, finds matching consented candidates in the talent pool, and suggests interview questions for unverified criteria — every suggestion is reviewed by a person before it takes effect |
 
 ## 4. Market research
 
@@ -88,6 +89,7 @@ A separate Hiring Manager role (department head who requests and approves hiring
 3. **Independent interview evaluation** — scorecards stay hidden until the interviewer submits their own.
 4. **Consent-first talent pool** — candidates enter the pool only with explicit consent and can withdraw from a link in any email.
 5. **Safe automatic emails** — outcome emails wait 10 minutes in a queue so a mistaken stage change can be undone before the candidate is told.
+6. **AI across the hiring flow, always as a draft** — AI suggests criteria when a position is created, finds consented past candidates by meaning (semantic search) when it opens, scores CVs with evidence during screening, and proposes questions for the interview; a person accepts, edits, or ignores each suggestion.
 
 ## 5. Recruitment process (to-be)
 
@@ -128,6 +130,7 @@ Recruitment ATS
 │   ├── F2.1 Browse & search positions               → US04
 │   ├── F2.2 Create / edit position with criteria    → US05, US06
 │   ├── F2.3 Close / reopen position                 → US07
+│   ├── F2.5 AI-suggested criteria from a job description → US32
 │   └── F2.4 Publish job post & share links          → US22
 ├── E3 Career site (public)
 │   ├── F3.1 Browse job posts                        → US23
@@ -141,12 +144,14 @@ Recruitment ATS
 │   ├── F4.5 Bulk import (Excel + ZIP of CVs)        → US16
 │   ├── F4.6 CV inbox from recruitment mailbox       → US25, US29
 │   ├── F4.7 Talent pool                             → US26
+│   ├── F4.9 AI matching of pool candidates to a position → US33
 │   └── F4.8 Export candidates to Excel              → US30
 ├── E5 AI screening
 │   ├── F5.1 Analyze CV and score fit                → US12
 │   └── F5.2 Override AI result with reason          → US13
 ├── E6 Interviews
 │   ├── F6.1 Schedule interview & assign panel       → US14
+│   ├── F6.3 AI-suggested interview questions        → US34
 │   └── F6.2 Submit blind scorecard                  → US15
 ├── E7 Candidate communication
 │   ├── F7.1 Automatic emails with cancel window     → US27
@@ -171,6 +176,7 @@ Recruitment ATS
 - Interview scheduling (date, time, location/link, panel) and blind scorecards.
 - Automatic candidate emails from editable templates, with a 10-minute cancel window for everything except the receipt email.
 - Talent pool of consented candidates; add a pool candidate to another position.
+- AI assistance outside screening: criteria drafted from a job description, semantic matching of consented pool candidates to a position, and interview questions drafted for criteria that need checking — all reviewed by a person before use.
 - Excel export of candidates and talent pool; dashboard, reports, report export, audit log, user management, profile.
 - Consent-based retention and automatic deletion of candidate data.
 
@@ -203,6 +209,7 @@ Recruitment ATS
 |---|---|
 | AI bias against groups of candidates | Redact personal attributes; AI only ranks; every override is logged |
 | AI hallucinates skills | Each criterion result must include a quote; backend verifies the quote exists in the CV text |
+| AI suggestions accepted without thought | Suggestions are drafts shown beside the editable form; nothing takes effect until a user saves; pool matches never create applications automatically |
 | AI unavailable or slow | Analysis is asynchronous; status `FAILED` with retry; manual screening always possible |
 | Personal-data leakage | Role and assignment checks in the API; public API exposes only job posts; redaction before external calls; retention job |
 | Spam or malicious uploads on the career site | CAPTCHA, rate limits per IP and email, server-side file validation (BR-21) |

@@ -1,6 +1,6 @@
 # Recruitment ATS
 
-Recruitment ATS is a mini applicant tracking system for small companies. It brings open positions, a public career site, CVs from the career site, a recruitment mailbox, and manual entry, a staged hiring pipeline, automatic candidate emails, interview scorecards, a consent-based talent pool, reports, and an audit log into one place — with **AI-assisted CV screening that explains every score with evidence from the CV and never makes the hiring decision**.
+Recruitment ATS is a mini applicant tracking system for small companies. It brings open positions, a public career site, CVs from the career site, a recruitment mailbox, and manual entry, a staged hiring pipeline, automatic candidate emails, interview scorecards, a consent-based talent pool, reports, and an audit log into one place — with **AI-assisted CV screening that explains every score with evidence from the CV and never makes the hiring decision**, plus AI help at the other steps: criteria drafted from a job description, past candidates found in the talent pool by meaning, and interview questions aimed at what the CV did not prove.
 
 ## 1. Requirements — Research, INVEST, Use Cases, and Acceptance Criteria
 
@@ -21,6 +21,7 @@ Small hiring teams collect CVs from many channels, screen them manually, track p
 | G7 Candidates are informed | Receipt, interview, and result emails for every applicant; failures visible |
 | G8 Reuse of talent | Consented candidates searchable and addable to another position |
 | G9 Channel effectiveness | Applications per source, including LinkedIn and Facebook share links |
+| G10 AI across the hiring flow | Criteria drafts, semantic pool matches, and interview-question drafts — each reviewed by a person before use |
 
 What makes this project different from a generic ATS:
 
@@ -29,6 +30,7 @@ What makes this project different from a generic ATS:
 3. **Independent interviews** — an interviewer sees other scorecards only after submitting their own.
 4. **Consent-first talent pool** — candidates join only with explicit consent and can leave from any email.
 5. **Safe automatic emails** — outcome emails wait 10 minutes so a mistake can be cancelled.
+6. **AI across the hiring flow, always as a draft** — create position (AI drafts criteria) → find candidates (semantic search in the consented talent pool) → screen (AI judges each criterion with evidence) → interview (AI suggests questions) → a person decides.
 
 ### Scope
 
@@ -48,7 +50,7 @@ Editable source: [`docs/mindmap/recruitment-ats.xmind`](docs/mindmap/recruitment
 
 ### 1.3 INVEST requirements
 
-The backlog contains **31 user stories (133 story points)**, grouped by epic. Every story passes the INVEST review and has Given/When/Then acceptance criteria.
+The backlog contains **34 user stories (149 story points)**, grouped by epic. Every story passes the INVEST review and has Given/When/Then acceptance criteria.
 
 | Criterion | Meaning in Recruitment ATS |
 |---|---|
@@ -79,6 +81,9 @@ US27–US28   Automatic candidate emails, email templates
 US29        Mailbox and sender settings
 US30        Export candidates to Excel
 US31        Candidate data consent (join, leave, delete)
+US32        AI-suggested criteria from a job description
+US33        AI matching of pool candidates to a position (embeddings)
+US34        AI-suggested interview questions
 ```
 
 Backlog, per-story INVEST review, and acceptance criteria: [INVEST requirements](docs/03-invest-requirements.md).
@@ -98,10 +103,10 @@ flowchart TB
 
     subgraph system["Recruitment ATS — System Boundary"]
         direction LR
-        adminCases["<b>Administrator</b><br/><br/>UC01–03 Login, logout, dashboard<br/>UC04–07 · UC22 Positions, job posts<br/>UC08–11 Applications<br/>UC16 Import · UC25 CV inbox<br/>UC26 Talent pool · UC30 Export<br/>UC12–13 AI analysis, override<br/>UC14 Schedule interview<br/>UC27–28 Emails, templates<br/>UC17–19 Reports, audit<br/>UC20 Users · UC29 Mailbox & sender<br/>UC21 Profile"]
-        managerCases["<b>HR Manager</b><br/><br/>UC01–03 Login, logout, dashboard<br/>UC04–07 · UC22 Positions, job posts<br/>UC08–11 Applications incl. Offer/Hire<br/>UC16 Import · UC25 CV inbox<br/>UC26 Talent pool · UC30 Export<br/>UC12–13 AI analysis, override<br/>UC14 Schedule · UC15 Scorecard<br/>UC27–28 Emails, templates<br/>UC17–19 Reports, audit<br/>UC21 Profile"]
-        recruiterCases["<b>Recruiter</b><br/><br/>UC01–03 Login, logout, dashboard<br/>UC04–06 · UC22 Own positions, job posts<br/>UC08–11 Applications up to Interview<br/>UC16 Import · UC25 CV inbox<br/>UC26 Talent pool · UC30 Export<br/>UC12–13 AI analysis, override<br/>UC14 Schedule interview<br/>UC27 Candidate emails<br/>UC21 Profile"]
-        interviewerCases["<b>Interviewer</b><br/><br/>UC01–03 Login, logout, dashboard<br/>UC04 Assigned positions<br/>UC08 Assigned applications, no AI score<br/>UC15 Submit blind scorecard<br/>UC21 Profile"]
+        adminCases["<b>Administrator</b><br/><br/>UC01–03 Login, logout, dashboard<br/>UC04–07 · UC22 Positions, job posts<br/>UC08–11 Applications<br/>UC16 Import · UC25 CV inbox<br/>UC26 Talent pool · UC30 Export<br/>UC12–13 AI analysis, override<br/>UC32–34 AI criteria, pool matches, questions<br/>UC14 Schedule interview<br/>UC27–28 Emails, templates<br/>UC17–19 Reports, audit<br/>UC20 Users · UC29 Mailbox & sender<br/>UC21 Profile"]
+        managerCases["<b>HR Manager</b><br/><br/>UC01–03 Login, logout, dashboard<br/>UC04–07 · UC22 Positions, job posts<br/>UC08–11 Applications incl. Offer/Hire<br/>UC16 Import · UC25 CV inbox<br/>UC26 Talent pool · UC30 Export<br/>UC12–13 AI analysis, override<br/>UC32–34 AI criteria, pool matches, questions<br/>UC14 Schedule · UC15 Scorecard<br/>UC27–28 Emails, templates<br/>UC17–19 Reports, audit<br/>UC21 Profile"]
+        recruiterCases["<b>Recruiter</b><br/><br/>UC01–03 Login, logout, dashboard<br/>UC04–06 · UC22 Own positions, job posts<br/>UC08–11 Applications up to Interview<br/>UC16 Import · UC25 CV inbox<br/>UC26 Talent pool · UC30 Export<br/>UC12–13 AI analysis, override<br/>UC32–34 AI criteria, pool matches, questions<br/>UC14 Schedule interview<br/>UC27 Candidate emails<br/>UC21 Profile"]
+        interviewerCases["<b>Interviewer</b><br/><br/>UC01–03 Login, logout, dashboard<br/>UC04 Assigned positions<br/>UC08 Assigned applications, no AI score<br/>UC15 Submit blind scorecard<br/>Sees attached interview questions<br/>UC21 Profile"]
         candidateCases["<b>Candidate</b><br/><br/>UC23 Browse job posts<br/>UC24 Apply online<br/>UC31 Manage data consent"]
     end
 
@@ -117,7 +122,7 @@ flowchart TB
     recruiter --> recruiterCases
     interviewer --> interviewerCases
     candidate --> candidateCases
-    system -.->|UC12 redacted CV text| ai
+    system -.->|UC12 · UC32–34 redacted text,<br/>job descriptions, embeddings| ai
     system -.->|UC27 candidate emails| mail
     mailbox -.->|UC25 emailed CVs| system
 
@@ -151,6 +156,7 @@ Four internal roles have accounts; candidates use the public career site without
 | Add / edit applications, bulk import, CV inbox | Yes | Yes | Yes | No |
 | Move pipeline stage | Yes | Yes | Up to Interview, and reject | No |
 | Run / override AI analysis (reason required) | Yes | Yes | Yes | No |
+| AI criteria drafts, pool matches, interview-question drafts | Yes | Yes | Yes (criteria: own positions) | Sees attached questions only |
 | Schedule interviews | Yes | Yes | Yes | No |
 | Submit scorecard | No | If on panel | No | If on panel |
 | Candidate emails (view, edit or cancel pending) | Yes | Yes | Yes | No |
@@ -233,7 +239,7 @@ flowchart TB
     Shell --> Forbidden["403"]
 ```
 
-Screen inventory (37 screens, including 6 public career-site screens), requirement-to-screen mapping, task flows, state contract, accessibility rules, and screen-to-API mapping: [Information architecture](docs/04-information-architecture.md).
+Screen inventory (38 screens, including 6 public career-site screens), requirement-to-screen mapping, task flows, state contract, accessibility rules, and screen-to-API mapping: [Information architecture](docs/04-information-architecture.md).
 
 ### 2.3 UI prototype
 
@@ -282,7 +288,7 @@ flowchart LR
     hr["<b>Hiring team</b><br/>[Person]<br/>Admin, HR Manager,<br/>Recruiter, Interviewer"]
     cand["<b>Candidate</b><br/>[Person, no account]"]
     ats["<b>Recruitment ATS</b><br/>[Software system]"]
-    ai["<b>AI Service</b><br/>[LLM API]"]
+    ai["<b>AI Service</b><br/>[LLM + embedding API]"]
     smtp["<b>Email Service</b><br/>[SMTP]"]
     imap["<b>Recruitment Mailbox</b><br/>[IMAP]"]
     turnstile["<b>Cloudflare Turnstile</b><br/>[CAPTCHA]"]
@@ -290,7 +296,7 @@ flowchart LR
 
     hr -->|"Manages hiring [HTTPS]"| ats
     cand -->|"Browses, applies, consent [HTTPS]"| ats
-    ats -->|"Redacted CV text [HTTPS/JSON]"| ai
+    ats -->|"Redacted text, job descriptions [HTTPS/JSON]"| ai
     ats -->|"Candidate emails [SMTP]"| smtp
     ats -->|"Reads CVs, read-only [IMAPS]"| imap
     ats -->|"Verifies token [HTTPS]"| turnstile
@@ -334,6 +340,7 @@ flowchart TB
     worker --> db
     worker --> files
     worker -->|"HTTPS · SMTP · IMAPS"| ext
+    api -->|"AI drafts, embeddings [HTTPS]"| ext
 
     classDef person fill:#08427b,color:#fff,stroke:#052e56
     classDef container fill:#438dd5,color:#fff,stroke:#2e6295
@@ -360,6 +367,7 @@ flowchart TB
 | AD-10 | Mermaid flowcharts with C4 styling |
 | AD-11 | Simplified Clean Architecture (see section 5) |
 | AD-12 | One OpenAI-compatible AI adapter chosen by environment variables; DeepSeek V4.1 Flash for development and demo with synthetic CVs only; `Fake` analyzer for tests |
+| AD-13 | Embeddings in PostgreSQL with `pgvector` (1024 dimensions); embedding provider configured separately because DeepSeek has no embedding API |
 
 Architecture drivers, full context and container diagrams, component diagrams for the API and the Worker, key interactions (AI analysis, email queue, public apply, link previews), deployment, and open items: [C4 architecture](docs/06-c4-architecture.md).
 
@@ -367,7 +375,7 @@ Architecture drivers, full context and container diagrams, component diagrams fo
 
 ### 4.1 Database
 
-PostgreSQL 16 with 25 tables. The schema enforces the rules that must hold even under concurrent requests: one application per candidate and position, no duplicate candidates by email or phone, a rejection reason exactly when rejected, and no overlapping interviews for a panel member (exclusion constraint). The AI analysis queue and the email queue are ordinary tables claimed with `FOR UPDATE SKIP LOCKED`.
+PostgreSQL 16 (with `pgvector`) and 28 tables. The schema enforces the rules that must hold even under concurrent requests: one application per candidate and position, no duplicate candidates by email or phone, a rejection reason exactly when rejected, and no overlapping interviews for a panel member (exclusion constraint). The AI analysis queue and the email queue are ordinary tables claimed with `FOR UPDATE SKIP LOCKED`.
 
 ```mermaid
 erDiagram
@@ -392,6 +400,9 @@ erDiagram
     inbox_items |o--o| applications : "converted to"
     import_batches ||--o{ applications : creates
     users ||--o{ audit_logs : performs
+    candidates ||--o| candidate_embeddings : "embedded as"
+    positions ||--o| position_embeddings : "queried as"
+    interviews ||--o{ interview_questions : asks
 ```
 
 | Decision | Choice |
@@ -407,14 +418,14 @@ Full ER diagrams per domain, queue claims, retention jobs, and rule-to-constrain
 
 ### 4.2 OpenAPI 3.0 contract
 
-[`docs/api/openapi.yaml`](docs/api/openapi.yaml) — OpenAPI 3.0.3, **85 operations**, validated with `redocly lint`.
+[`docs/api/openapi.yaml`](docs/api/openapi.yaml) — OpenAPI 3.0.3, **88 operations**, validated with `redocly lint`.
 
 | Group | Base path | Operations |
 |---|---|---|
 | Auth, profile, dashboard, lookups | `/api/auth`, `/api/me`, `/api/dashboard`, `/api/lookups` | 9 |
-| Positions and job posts | `/api/positions` | 10 |
+| Positions, job posts, pool matches, AI criteria drafts | `/api/positions` | 12 |
 | Applications, candidates, AI screening | `/api/applications`, `/api/candidates`, `/api/cv-files`, `/api/analyses` | 16 |
-| Interviews and scorecards | `/api/interviews`, `/api/applications/{id}/scorecards` | 9 |
+| Interviews, scorecards, AI question drafts | `/api/interviews`, `/api/applications/{id}/scorecards`, `/api/applications/{id}/interview-question-suggestions` | 10 |
 | Emails, CV inbox, talent pool, imports | `/api/emails`, `/api/inbox-items`, `/api/talent-pool`, `/api/imports` | 18 |
 | Reports, audit, users, settings | `/api/reports`, `/api/audit-logs`, `/api/users`, `/api/settings` | 15 |
 | Public career site | `/api/public` | 8 |
@@ -480,8 +491,8 @@ Class diagrams are written in Mermaid, as in the course reference project. Seque
 
 | Artifact | Content |
 |---|---|
-| [Class design](docs/10-class-design.md) | 10 class diagrams (cross-cutting, auth, positions, applications and intake, AI screening, interviews, communication, inbox/import/pool, career site and consent, reports) and traceability of all 85 OpenAPI operations to controller actions and Application methods |
-| [Sequence and state diagrams](docs/11-sequence-and-state-diagrams.md) | 16 sequence diagrams for the main flows and error paths; 6 state diagrams (application stage, CV analysis, candidate email, position, job post, inbox item) |
+| [Class design](docs/10-class-design.md) | 11 class diagrams (cross-cutting, auth, positions, applications and intake, AI screening, interviews, communication, inbox/import/pool, career site and consent, reports, AI assistance) and traceability of all 88 OpenAPI operations to controller actions and Application methods |
+| [Sequence and state diagrams](docs/11-sequence-and-state-diagrams.md) | 20 sequence diagrams for the main flows and error paths, including the four AI-assistance flows; 6 state diagrams (application stage, CV analysis, candidate email, position, job post, inbox item) |
 
 ### 6.1 AI screening classes
 

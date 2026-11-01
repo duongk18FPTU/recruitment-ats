@@ -21,7 +21,7 @@ Lifelines use the class names of the [class design](10-class-design.md), so ever
 | User, Candidate, AI Service, SMTP, Mailbox, Cloudflare Turnstile | Actor: a person or an external system |
 | `:Login page`, `:Career site`, … | Boundary: the screen the user works on |
 | `:…Controller`, `:…Service`, `:…Runner` | Control: API controller, Application service, or Worker job |
-| `:Database`, `:CV file store` | Entity: PostgreSQL and the CV file volume |
+| `:Database`, `:CV file store` | Entity: PostgreSQL (with `pgvector`) and the CV file volume |
 | Arrows | Solid with filled head: call. Dashed with open head: return. A bar on a lifeline: the object is working |
 | `alt`, `opt`, `loop`, `break` | `alt` takes one branch by the condition in [ ]; `opt` runs only when the condition holds; `loop` repeats; `break` runs its content and ends the flow |
 | `ref` | Reuses another diagram, drawn in its own section (here: [Intake](#seq-intake)) |
@@ -48,6 +48,10 @@ Lifelines use the class names of the [class design](10-class-design.md), so ever
 | [seq_delete_my_data](#seq-delete-my-data) | Candidate deletes all data from an email link | US31, BR-24 |
 | [seq_publish_job_post](#seq-publish-job-post) | Publish a job post, copy a share link | US22, BR-05 |
 | [seq_link_preview](#seq-link-preview) | LinkedIn crawler gets the Open Graph page | US22, AD-04 |
+| [seq_suggest_criteria](#seq-suggest-criteria) | AI drafts criteria from a job description | US32, BR-26 |
+| [seq_embed_candidates](#seq-embed-candidates) | Worker embeds pool candidates' redacted CVs | US33, BR-27 |
+| [seq_pool_matches](#seq-pool-matches) | Rank pool candidates for a position by meaning | US33, BR-27 |
+| [seq_interview_questions](#seq-interview-questions) | AI drafts interview questions for unproven criteria | US34, BR-28 |
 
 <a id="seq-login"></a>
 ### Login
@@ -160,6 +164,34 @@ Share links are built from the slug and the source list (BR-18), e.g. `https://c
 ![Link preview for a shared job post](diagrams/out/seq_link_preview.png)
 
 Only crawler user agents are routed to the API; browsers on the same URL receive the career-site SPA (AD-04). The page contains public fields only (BR-20).
+
+<a id="seq-suggest-criteria"></a>
+### Suggest criteria from a job description
+
+![Suggest criteria from a job description](diagrams/out/seq_suggest_criteria.png)
+
+The AI returns a draft only; the position is saved through the ordinary create or update call with exactly the criteria the user kept (BR-26). Only internal job text is sent — no candidate data.
+
+<a id="seq-embed-candidates"></a>
+### Embed pool candidates
+
+![Embed pool candidates](diagrams/out/seq_embed_candidates.png)
+
+Only candidates with active pool consent are embedded, from the same redacted text used for screening (BR-27). A failed call is retried on the next run; vectors of candidates who left the pool or were anonymized are deleted.
+
+<a id="seq-pool-matches"></a>
+### Match talent pool to a position
+
+![Match talent pool to a position](diagrams/out/seq_pool_matches.png)
+
+The position vector is computed once per criteria version. The vector search excludes candidates who already applied to the position; adding a candidate runs the ordinary [Intake](#seq-intake), so the new application is screened like any other.
+
+<a id="seq-interview-questions"></a>
+### Suggest interview questions
+
+![Suggest interview questions](diagrams/out/seq_interview_questions.png)
+
+Questions target the criteria the CV did not clearly prove. The saved interview stores the kept questions without any AI result, so panel members see the questions but never the analysis or score (BR-28). `Schedule interview` refers to [seq_schedule_interview](#seq-schedule-interview).
 
 ## State diagrams
 

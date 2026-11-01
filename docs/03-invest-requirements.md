@@ -53,7 +53,11 @@ Priority uses MoSCoW (`M` must, `S` should, `C` could). Story points use the Fib
 | US30 | As an Admin, HR Manager, or Recruiter, I want to export the filtered candidate list or talent pool to Excel so that I can share or process it offline. | Portable data | US08, US26 | M | 3 |
 | US31 | As a candidate, I want to join or leave the talent pool or delete my data from a link in any email so that I control my personal data. | Lawful processing | US24, US27 | M | 3 |
 
-**Total:** 31 stories, 133 points. Must-have stories: 26 (115 points).
+| US32 | As an Admin, HR Manager, or position owner, I want AI to suggest weighted criteria from the job description so that I can set up a position faster and more consistently. | Faster, consistent setup | US05 | S | 3 |
+| US33 | As an Admin, HR Manager, or Recruiter, I want the system to find consented pool candidates whose CVs match a position by meaning so that I can reuse past talent without guessing keywords. | Talent reuse | US26, US12 | S | 8 |
+| US34 | As an Admin, HR Manager, or Recruiter, I want AI to suggest interview questions aimed at the criteria the CV did not clearly prove so that interviewers check what matters. | Focused interviews | US14, US12 | S | 5 |
+
+**Total:** 34 stories, 149 points. Must-have stories: 26 (115 points); the three AI-assistance stories are Should-have.
 
 ## Per-story INVEST review
 
@@ -92,6 +96,9 @@ Priority uses MoSCoW (`M` must, `S` should, `C` could). Story points use the Fib
 | US29 | PASS | PASS | PASS | PASS | PASS | PASS | Secrets are never returned by the API after saving. |
 | US30 | PASS | PASS | PASS | PASS | PASS | PASS | Columns and row limit are explicit (BR-25). |
 | US31 | PASS | PASS | PASS | PASS | PASS | PASS | Signed link replaces a login; deletion effects are listed in BR-24. |
+| US32 | PASS | PASS | PASS | PASS | PASS | PASS | Synchronous draft-only call (BR-26); fake assistant in tests. |
+| US33 | PASS | PASS | PASS | PASS | PASS | PASS | 8 points. Splits into: embedding job, position-vector cache, vector search, UI tab. Fake embedding client in tests. |
+| US34 | PASS | PASS | PASS | PASS | PASS | PASS | Draft-only; interviewer view excludes every AI field (BR-28). |
 
 ## Acceptance criteria
 
@@ -290,11 +297,35 @@ Format: **Given** context, **When** action, **Then** observable result.
 2. Given a valid signed link, when the candidate deletes all data, then CVs are deleted, the candidate is anonymized, open applications become `REJECTED` with reason "Ứng viên rút hồ sơ", and an audit entry is written.
 3. Given an invalid or expired link, then the page explains that a new link arrives with the next email or can be requested by replying to the recruitment mailbox.
 
+### AC-US32 Suggest criteria from a job description
+
+1. Given a position form with a title and a job description of at least 50 characters, when "Gợi ý tiêu chí bằng AI" is clicked, then up to 12 suggestions with name, type, weight 1–5, and rationale appear as a draft within 30 seconds and nothing is saved.
+2. Given suggestions, when the user accepts some, edits one, and saves, then exactly the accepted and edited criteria are stored, as in US05 / US06.
+3. Given the AI service fails or times out, then the form keeps all input and shows an error; the API returns 502 `AI_UNAVAILABLE`.
+4. Given a user who made 30 suggestion calls in the last hour, then the next call returns 429.
+5. Given a Recruiter editing a position they do not own, then the call returns 403.
+
+### AC-US33 Match talent pool to a position
+
+1. Given embedded pool candidates and a position, when the "Gợi ý từ kho ứng viên" tab opens, then up to 20 candidates are listed by similarity, highest first, with overlapping skills, latest position, and consent expiry; candidates who already applied to the position are excluded.
+2. Given a candidate without active pool consent or already anonymized, then they never appear, and any embedding they had is deleted by the next Worker run.
+3. Given a candidate joins the pool or uploads a new CV, then the Worker stores an embedding of the redacted CV text within 5 minutes; the request to the embedding service contains no name, email, phone, or address.
+4. Given the user clicks "Thêm vào vị trí", then US26 applies (application in `NEW`, analysis queued, receipt email).
+5. Given the embedding service fails, then the tab shows an error and links to the keyword search; the API returns 502 `AI_UNAVAILABLE`.
+
+### AC-US34 Suggest interview questions
+
+1. Given an application in `INTERVIEW` with a completed analysis, when "Gợi ý câu hỏi" is clicked, then up to 10 questions appear within 30 seconds, each linked to a criterion, those for `PARTIAL`, `NOT_MET`, or `UNVERIFIED` criteria first.
+2. Given the request sent to the AI service, then it contains criteria, results, and verified quotes but no name, email, phone, or address (verified with a fake assistant).
+3. Given the user keeps at most 8 questions and saves the interview, then they are stored with it; more than 8 returns 400.
+4. Given a panel member opens the interview or scorecard, then they see the questions grouped by criterion and no AI result, quote, or score.
+5. Given no completed analysis, then questions are generated from the criteria alone and the response marks the basis `CRITERIA_ONLY`.
+
 ## Cross-cutting acceptance constraints
 
 - Only `ADMIN`, `HR_MANAGER`, `RECRUITER`, and `INTERVIEWER` have accounts. Candidates use public endpoints without an account; these expose only published job posts, the apply action, and the signed consent action.
 - The API, not the React client, enforces RBAC, position ownership, panel assignment, and blind scorecards.
-- AI output is advisory; no endpoint lets the AI change application stage.
+- AI output is advisory; no endpoint lets the AI change application stage, save criteria, create applications, or attach interview questions — users do.
 - Every call to the external AI service uses redacted text and is logged with model, duration, and status.
 - API errors use RFC 7807 `ProblemDetails` with a stable `errorCode` and `traceId`.
 - File type and size are validated server-side before parsing or storage.

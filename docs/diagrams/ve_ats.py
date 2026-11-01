@@ -585,6 +585,134 @@ def seq_link_preview():
     return s.build()
 
 
+# ------------------------------------------------------------------ AI assistance
+
+def seq_suggest_criteria():
+    s = Seq('Suggest criteria from a job description', [
+        user('R', 'Recruiter'), page('UI', ':Position form'), ctl('API', ':PositionsController'),
+        ctl('S', ':CriteriaSuggestionService'), DB, user('AI', 'AI Service')])
+    s.call('R', 'UI', 'title, description, "Gợi ý tiêu chí"')
+    s.call('UI', 'API', 'POST …/criteria-suggestions')
+    s.call('API', 'S', 'SuggestAsync(request)')
+    s.call('S', 'DB', 'count my AI calls, last hour')
+    s.reply('DB', 'S', 'count')
+    s.frag('break', '30 calls reached')
+    s.reply('S', 'API', 'RATE_LIMITED')
+    s.reply('API', 'UI', '429 RATE_LIMITED')
+    s.reply('UI', 'R', '"Thử lại sau", input kept')
+    s.end()
+    s.call('S', 'AI', 'title, level, description (30 s)')
+    s.frag('alt', 'error, timeout or invalid JSON')
+    s.reply('AI', 'S', 'error')
+    s.call('S', 'DB', 'log call')
+    s.reply('DB', 'S', 'saved')
+    s.reply('S', 'API', 'AI_UNAVAILABLE')
+    s.reply('API', 'UI', '502 AI_UNAVAILABLE')
+    s.reply('UI', 'R', 'message, input kept')
+    s.else_('valid result')
+    s.reply('AI', 'S', 'criteria, type, weight, rationale')
+    s.self_('S', 'check ≤ 12 items, weight 1–5')
+    s.call('S', 'DB', 'log call')
+    s.reply('DB', 'S', 'saved')
+    s.reply('S', 'API', 'CriteriaSuggestionResult')
+    s.reply('API', 'UI', '200 CriteriaSuggestionResult')
+    s.reply('UI', 'R', 'drafts "Gợi ý bởi AI — chưa lưu"')
+    s.end()
+    s.call('R', 'UI', 'accept, edit, "Lưu"')
+    s.call('UI', 'API', 'POST /api/positions')
+    s.reply('API', 'UI', '201 PositionDetail')
+    s.reply('UI', 'R', 'position with chosen criteria')
+    return s.build()
+
+
+def seq_embed_candidates():
+    s = Seq('Embed pool candidates', [ctl('S', ':CandidateEmbeddingService'), DB,
+                                      user('AI', 'Embedding API'), ctl('J', ':EmbeddingRunner')])
+    s.frag('loop', 'every minute')
+    s.call('J', 'S', 'EmbedPendingAsync()')
+    s.call('S', 'DB', 'pool candidates with new CV')
+    s.reply('DB', 'S', 'pending batch')
+    s.frag('loop', 'each pending candidate')
+    s.self_('S', 'redact name, contacts, birth date')
+    s.call('S', 'AI', 'redacted CV text')
+    s.frag('alt', 'success')
+    s.reply('AI', 'S', 'vector, 1024 dimensions')
+    s.call('S', 'DB', 'upsert vector, log call')
+    s.reply('DB', 'S', 'saved')
+    s.else_('error')
+    s.reply('AI', 'S', 'error')
+    s.call('S', 'DB', 'log call, retry next run')
+    s.reply('DB', 'S', 'saved')
+    s.end()
+    s.end()
+    s.reply('S', 'J', 'number embedded')
+    s.call('J', 'S', 'DeleteStaleAsync()')
+    s.call('S', 'DB', 'delete vectors outside the pool')
+    s.reply('DB', 'S', 'rows deleted')
+    s.reply('S', 'J', 'number deleted')
+    s.end()
+    return s.build()
+
+
+def seq_pool_matches():
+    s = Seq('Match talent pool to a position', [
+        user('R', 'Recruiter'), page('UI', ':Pool matches tab'), ctl('API', ':TalentPoolController'),
+        ctl('S', ':PoolMatchingService'), DB, user('AI', 'Embedding API')])
+    s.call('R', 'UI', 'open "Gợi ý từ kho ứng viên"')
+    s.call('UI', 'API', 'GET …/{id}/pool-matches')
+    s.call('API', 'S', 'ListMatchesAsync(positionId, 20)')
+    s.call('S', 'DB', 'position, criteria, cached vector')
+    s.reply('DB', 'S', 'position, vector or none')
+    s.frag('opt', 'no vector for this criteria version')
+    s.call('S', 'AI', 'title, description, criteria')
+    s.reply('AI', 'S', 'position vector')
+    s.call('S', 'DB', 'cache vector, log call')
+    s.reply('DB', 'S', 'saved')
+    s.end()
+    s.call('S', 'DB', 'nearest pool candidates, not applied')
+    s.reply('DB', 'S', 'top 20 with distance')
+    s.self_('S', 'skills that overlap the criteria')
+    s.reply('S', 'API', 'PoolMatchList')
+    s.reply('API', 'UI', '200 PoolMatchList')
+    s.reply('UI', 'R', 'ranked candidates, similarity, skills')
+    s.call('R', 'UI', '"Thêm vào vị trí" on one candidate')
+    s.call('UI', 'API', 'POST …/talent-pool/{id}/applications')
+    s.ref('API', 'DB', 'Intake')
+    s.reply('API', 'UI', '201 ApplicationCreated')
+    s.reply('UI', 'R', 'card in NEW, analysis queued')
+    return s.build()
+
+
+def seq_interview_questions():
+    s = Seq('Suggest interview questions', [
+        user('R', 'Recruiter'), page('UI', ':Schedule interview modal'), ctl('API', ':InterviewsController'),
+        ctl('S', ':InterviewQuestionService'), DB, user('AI', 'AI Service')])
+    s.call('R', 'UI', 'click "Gợi ý câu hỏi"')
+    s.call('UI', 'API', 'POST …/interview-question-suggestions')
+    s.call('API', 'S', 'SuggestAsync(applicationId)')
+    s.call('S', 'DB', 'call count, criteria, analysis, quotes')
+    s.reply('DB', 'S', 'data')
+    s.frag('break', 'not INTERVIEW or limit reached')
+    s.reply('S', 'API', 'error code')
+    s.reply('API', 'UI', '409 or 429 with error code')
+    s.reply('UI', 'R', 'message')
+    s.end()
+    s.self_('S', 'UNVERIFIED, NOT_MET, PARTIAL first')
+    s.call('S', 'AI', 'criteria, results, quotes (30 s)')
+    s.reply('AI', 'S', 'up to 10 questions')
+    s.call('S', 'DB', 'log call')
+    s.reply('DB', 'S', 'saved')
+    s.reply('S', 'API', 'InterviewQuestionSuggestions')
+    s.reply('API', 'UI', '200 InterviewQuestionSuggestions')
+    s.reply('UI', 'R', 'drafts grouped by criterion')
+    s.call('R', 'UI', 'edit, keep ≤ 8, "Lưu lịch"')
+    s.call('UI', 'API', 'POST …/interviews {questions}')
+    s.ref('API', 'DB', 'Schedule interview')
+    s.reply('API', 'UI', '201 Interview')
+    s.reply('UI', 'R', 'interview with its questions')
+    return s.build()
+
+
 # ------------------------------------------------------------------ state diagrams
 
 def st_application():
@@ -719,6 +847,10 @@ ALL = {
     'seq_delete_my_data': (seq_delete_my_data, 'Delete my data'),
     'seq_publish_job_post': (seq_publish_job_post, 'Publish job post'),
     'seq_link_preview': (seq_link_preview, 'Link preview'),
+    'seq_suggest_criteria': (seq_suggest_criteria, 'Suggest criteria'),
+    'seq_embed_candidates': (seq_embed_candidates, 'Embed pool candidates'),
+    'seq_pool_matches': (seq_pool_matches, 'Pool matches'),
+    'seq_interview_questions': (seq_interview_questions, 'Interview questions'),
     'st_application': (st_application, 'Application stage'),
     'st_cv_analysis': (st_cv_analysis, 'CV analysis status'),
     'st_email_message': (st_email_message, 'Email status'),
