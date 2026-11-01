@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="969" height="630" viewBox="0 0 969 630" font-family="Liberation Sans, Arial, Helvetica, sans-serif">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<g transform="translate(4.0,16.0)">
+<rect x="12.0" y="0.0" width="937.0" height="598.0" fill="none" stroke="#000" stroke-width="1.1"/><path d="M12.0,0.0 L234.0,0.0 L234.0,14.0 L228.0,20.0 L12.0,20.0 Z" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="19.0" y="14.5" font-size="12" fill="#000000" text-anchor="start" font-weight="bold" xml:space="preserve">sd</text><text x="33.0" y="14.5" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve"> Link preview for a shared job post</text>
+<path d="M77.0,99.0 L77.0,586.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M262.0,99.0 L262.0,586.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M484.0,99.0 L484.0,586.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M696.0,99.0 L696.0,586.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M901.0,99.0 L901.0,586.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<circle cx="77.0" cy="40" r="6" fill="#fff" stroke="#000" stroke-width="1.3"/><line x1="77.0" y1="46" x2="77.0" y2="61" stroke="#000" stroke-width="1.3" fill="none"/><line x1="66.0" y1="51" x2="88.0" y2="51" stroke="#000" stroke-width="1.3" fill="none"/><line x1="77.0" y1="61" x2="67.0" y2="74" stroke="#000" stroke-width="1.3" fill="none"/><line x1="77.0" y1="61" x2="87.0" y2="74" stroke="#000" stroke-width="1.3" fill="none"/><text x="77.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">LinkedIn crawler</text>
+<line x1="243.0" y1="40" x2="243.0" y2="68" stroke="#000" stroke-width="1.3" fill="none"/><line x1="243.0" y1="54" x2="253.0" y2="54" stroke="#000" stroke-width="1.3" fill="none"/><circle cx="267.0" cy="54" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><text x="262.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:Caddy proxy</text>
+<circle cx="484.0" cy="56" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><path d="M489.0,37 L483.0,42 L489.0,47" fill="none" stroke="#000" stroke-width="1.3"/><text x="484.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:SharePageController</text>
+<circle cx="696.0" cy="56" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><path d="M701.0,37 L695.0,42 L701.0,47" fill="none" stroke="#000" stroke-width="1.3"/><text x="696.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:PublicJobPostService</text>
+<circle cx="901.0" cy="53" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><line x1="886.0" y1="69" x2="916.0" y2="69" stroke="#000" stroke-width="1.3"/><text x="901.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:Database</text>
+<rect x="896.0" y="263.0" width="10.0" height="29.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="691.0" y="234.0" width="10.0" height="115.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="479.0" y="205.0" width="10.0" height="173.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="257.0" y="135.0" width="10.0" height="272.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="691.0" y="419.0" width="10.0" height="82.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="479.0" y="419.0" width="10.0" height="111.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="257.0" y="419.0" width="10.0" height="140.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="53.0" y="303.0" width="659.0" height="265.0" fill="none" stroke="#000" stroke-width="1.1"/><path d="M53.0,303.0 L89.0,303.0 L89.0,317.0 L83.0,323.0 L53.0,323.0 Z" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="60.0" y="317.5" font-size="12" fill="#000000" text-anchor="start" font-weight="bold" xml:space="preserve">alt</text><rect x="95.0" y="305.0" width="84.0" height="16.0" fill="#fff"/><text x="97.0" y="318.0" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">[not published]</text>
+<path d="M53.0,419.0 L712.0,419.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/>
+<rect x="59.0" y="421.0" width="64.0" height="17.0" fill="#ffffff"/><text x="61.0" y="433.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">[published]</text>
+<path d="M77.0,135.0 L257.0,135.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M257.0,135.0 L247.0,139.5 L247.0,130.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M267.0,164.0 L293.0,164.0 L293.0,176.0 L267.0,176.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M267.0,176.0 L277.0,171.5 L277.0,180.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M267.0,205.0 L479.0,205.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M479.0,205.0 L469.0,209.5 L469.0,200.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M489.0,234.0 L691.0,234.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M691.0,234.0 L681.0,238.5 L681.0,229.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M701.0,263.0 L896.0,263.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M896.0,263.0 L886.0,267.5 L886.0,258.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M896.0,292.0 L701.0,292.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M711.0,287.0 L701.0,292.0 L711.0,297.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M691.0,349.0 L489.0,349.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M499.0,344.0 L489.0,349.0 L499.0,354.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M479.0,378.0 L267.0,378.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M277.0,373.0 L267.0,378.0 L277.0,383.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M257.0,407.0 L77.0,407.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M87.0,402.0 L77.0,407.0 L87.0,412.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M701.0,460.0 L727.0,460.0 L727.0,472.0 L701.0,472.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M701.0,472.0 L711.0,467.5 L711.0,476.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M691.0,501.0 L489.0,501.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M499.0,496.0 L489.0,501.0 L499.0,506.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M479.0,530.0 L267.0,530.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M277.0,525.0 L267.0,530.0 L277.0,535.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M257.0,559.0 L77.0,559.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M87.0,554.0 L77.0,559.0 L87.0,564.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<rect x="81.0" y="116.0" width="157.0" height="17.0" fill="#ffffff"/><text x="83.0" y="128.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">1. GET careers…/jobs/{slug}</text>
+<rect x="271.0" y="145.0" width="140.0" height="17.0" fill="#ffffff"/><text x="273.0" y="157.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">2. user agent is a crawler</text>
+<rect x="271.0" y="186.0" width="194.0" height="17.0" fill="#ffffff"/><text x="273.0" y="198.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">3. GET /api/public/share/jobs/{slug}</text>
+<rect x="493.0" y="215.0" width="184.0" height="17.0" fill="#ffffff"/><text x="495.0" y="227.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">4. RenderSharePageAsync(slug)</text>
+<rect x="705.0" y="244.0" width="124.0" height="17.0" fill="#ffffff"/><text x="707.0" y="256.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">5. load published post</text>
+<rect x="705.0" y="273.0" width="105.0" height="17.0" fill="#ffffff"/><text x="707.0" y="285.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">6. job post or none</text>
+<rect x="493.0" y="330.0" width="45.0" height="17.0" fill="#ffffff"/><text x="495.0" y="342.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">7. none</text>
+<rect x="271.0" y="359.0" width="86.0" height="17.0" fill="#ffffff"/><text x="273.0" y="371.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">8. 404 text/html</text>
+<rect x="81.0" y="388.0" width="38.0" height="17.0" fill="#ffffff"/><text x="83.0" y="400.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">9. 404</text>
+<rect x="705.0" y="441.0" width="159.0" height="17.0" fill="#ffffff"/><text x="707.0" y="453.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">10. og tags from public fields</text>
+<rect x="493.0" y="482.0" width="57.0" height="17.0" fill="#ffffff"/><text x="495.0" y="494.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">11. HTML</text>
+<rect x="271.0" y="511.0" width="93.0" height="17.0" fill="#ffffff"/><text x="273.0" y="523.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">12. 200 text/html</text>
+<rect x="81.0" y="540.0" width="149.0" height="17.0" fill="#ffffff"/><text x="83.0" y="552.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">13. title, description, image</text>
+</g></svg>

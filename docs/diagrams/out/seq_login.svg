@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1054" height="784" viewBox="0 0 1054 784" font-family="Liberation Sans, Arial, Helvetica, sans-serif">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<g transform="translate(10.0,16.0)">
+<rect x="6.0" y="0.0" width="1022.0" height="752.0" fill="none" stroke="#000" stroke-width="1.1"/><path d="M6.0,0.0 L76.0,0.0 L76.0,14.0 L70.0,20.0 L6.0,20.0 Z" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="13.0" y="14.5" font-size="12" fill="#000000" text-anchor="start" font-weight="bold" xml:space="preserve">sd</text><text x="27.0" y="14.5" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve"> Login</text>
+<path d="M54.0,99.0 L54.0,740.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M296.0,99.0 L296.0,740.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M536.0,99.0 L536.0,740.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M729.0,99.0 L729.0,740.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M980.0,99.0 L980.0,740.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<circle cx="54" cy="40" r="6" fill="#fff" stroke="#000" stroke-width="1.3"/><line x1="54" y1="46" x2="54" y2="61" stroke="#000" stroke-width="1.3" fill="none"/><line x1="43" y1="51" x2="65" y2="51" stroke="#000" stroke-width="1.3" fill="none"/><line x1="54" y1="61" x2="44" y2="74" stroke="#000" stroke-width="1.3" fill="none"/><line x1="54" y1="61" x2="64" y2="74" stroke="#000" stroke-width="1.3" fill="none"/><text x="54.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">User</text>
+<line x1="277.0" y1="40" x2="277.0" y2="68" stroke="#000" stroke-width="1.3" fill="none"/><line x1="277.0" y1="54" x2="287.0" y2="54" stroke="#000" stroke-width="1.3" fill="none"/><circle cx="301.0" cy="54" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><text x="296.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:Login page</text>
+<circle cx="536.0" cy="56" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><path d="M541.0,37 L535.0,42 L541.0,47" fill="none" stroke="#000" stroke-width="1.3"/><text x="536.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:AuthController</text>
+<circle cx="729.0" cy="56" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><path d="M734.0,37 L728.0,42 L734.0,47" fill="none" stroke="#000" stroke-width="1.3"/><text x="729.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:AuthService</text>
+<circle cx="980.0" cy="53" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><line x1="965.0" y1="69" x2="995.0" y2="69" stroke="#000" stroke-width="1.3"/><text x="980.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:Database</text>
+<rect x="975.0" y="222.0" width="10.0" height="29.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="975.0" y="377.0" width="10.0" height="29.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="724.0" y="193.0" width="10.0" height="252.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="531.0" y="164.0" width="10.0" height="310.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="291.0" y="135.0" width="10.0" height="368.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="975.0" y="597.0" width="10.0" height="29.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="724.0" y="515.0" width="10.0" height="140.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="531.0" y="515.0" width="10.0" height="169.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="291.0" y="515.0" width="10.0" height="198.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="20.0" y="303.0" width="986.0" height="419.0" fill="none" stroke="#000" stroke-width="1.1"/><path d="M20.0,303.0 L56.0,303.0 L56.0,317.0 L50.0,323.0 L20.0,323.0 Z" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="27.0" y="317.5" font-size="12" fill="#000000" text-anchor="start" font-weight="bold" xml:space="preserve">alt</text><rect x="62.0" y="305.0" width="257.0" height="16.0" fill="#fff"/><text x="64.0" y="318.0" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">[unknown, inactive, locked or wrong password]</text>
+<path d="M20.0,515.0 L1006.0,515.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/>
+<rect x="26.0" y="517.0" width="99.0" height="17.0" fill="#ffffff"/><text x="28.0" y="529.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">[credentials valid]</text>
+<rect x="713.0" y="331.0" width="283.0" height="84.0" fill="none" stroke="#000" stroke-width="1.1"/><path d="M713.0,331.0 L753.0,331.0 L753.0,345.0 L747.0,351.0 L713.0,351.0 Z" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="720.0" y="345.5" font-size="12" fill="#000000" text-anchor="start" font-weight="bold" xml:space="preserve">opt</text><rect x="759.0" y="333.0" width="68.0" height="16.0" fill="#fff"/><text x="761.0" y="346.0" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">[user exists]</text>
+<path d="M54.0,135.0 L291.0,135.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M291.0,135.0 L281.0,139.5 L281.0,130.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M301.0,164.0 L531.0,164.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M531.0,164.0 L521.0,168.5 L521.0,159.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M541.0,193.0 L724.0,193.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M724.0,193.0 L714.0,197.5 L714.0,188.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M734.0,222.0 L975.0,222.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M975.0,222.0 L965.0,226.5 L965.0,217.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M975.0,251.0 L734.0,251.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M744.0,246.0 L734.0,251.0 L744.0,256.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M734.0,280.0 L760.0,280.0 L760.0,292.0 L734.0,292.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M734.0,292.0 L744.0,287.5 L744.0,296.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M734.0,377.0 L975.0,377.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M975.0,377.0 L965.0,381.5 L965.0,372.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M975.0,406.0 L734.0,406.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M744.0,401.0 L734.0,406.0 L744.0,411.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M724.0,445.0 L541.0,445.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M551.0,440.0 L541.0,445.0 L551.0,450.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M531.0,474.0 L301.0,474.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M311.0,469.0 L301.0,474.0 L311.0,479.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M291.0,503.0 L54.0,503.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M64.0,498.0 L54.0,503.0 L64.0,508.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M734.0,556.0 L760.0,556.0 L760.0,568.0 L734.0,568.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M734.0,568.0 L744.0,563.5 L744.0,572.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M734.0,597.0 L975.0,597.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M975.0,597.0 L965.0,601.5 L965.0,592.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M975.0,626.0 L734.0,626.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M744.0,621.0 L734.0,626.0 L744.0,631.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M724.0,655.0 L541.0,655.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M551.0,650.0 L541.0,655.0 L551.0,660.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M531.0,684.0 L301.0,684.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M311.0,679.0 L301.0,684.0 L311.0,689.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M291.0,713.0 L54.0,713.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M64.0,708.0 L54.0,713.0 L64.0,718.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<rect x="58.0" y="116.0" width="212.0" height="17.0" fill="#ffffff"/><text x="60.0" y="128.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">1. enter email, password, &quot;Đăng nhập&quot;</text>
+<rect x="305.0" y="145.0" width="129.0" height="17.0" fill="#ffffff"/><text x="307.0" y="157.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">2. POST /api/auth/login</text>
+<rect x="545.0" y="174.0" width="165.0" height="17.0" fill="#ffffff"/><text x="547.0" y="186.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">3. LoginAsync(request, client)</text>
+<rect x="738.0" y="203.0" width="113.0" height="17.0" fill="#ffffff"/><text x="740.0" y="215.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">4. find user by email</text>
+<rect x="738.0" y="232.0" width="86.0" height="17.0" fill="#ffffff"/><text x="740.0" y="244.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">5. user or none</text>
+<rect x="738.0" y="261.0" width="205.0" height="17.0" fill="#ffffff"/><text x="740.0" y="273.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">6. check active, not locked, password</text>
+<rect x="738.0" y="358.0" width="182.0" height="17.0" fill="#ffffff"/><text x="740.0" y="370.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">7. count failure, lock after 5, audit</text>
+<rect x="738.0" y="387.0" width="50.0" height="17.0" fill="#ffffff"/><text x="740.0" y="399.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">8. saved</text>
+<rect x="545.0" y="426.0" width="156.0" height="17.0" fill="#ffffff"/><text x="547.0" y="438.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">9. INVALID_CREDENTIALS</text>
+<rect x="305.0" y="455.0" width="187.0" height="17.0" fill="#ffffff"/><text x="307.0" y="467.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">10. 401 INVALID_CREDENTIALS</text>
+<rect x="58.0" y="484.0" width="214.0" height="17.0" fill="#ffffff"/><text x="60.0" y="496.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">11. &quot;Email hoặc mật khẩu không đúng&quot;</text>
+<rect x="738.0" y="537.0" width="205.0" height="17.0" fill="#ffffff"/><text x="740.0" y="549.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">12. issue JWT (15 min), refresh token</text>
+<rect x="738.0" y="578.0" width="222.0" height="17.0" fill="#ffffff"/><text x="740.0" y="590.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">13. reset failures, save token hash, audit</text>
+<rect x="738.0" y="607.0" width="57.0" height="17.0" fill="#ffffff"/><text x="740.0" y="619.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">14. saved</text>
+<rect x="545.0" y="636.0" width="84.0" height="17.0" fill="#ffffff"/><text x="547.0" y="648.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">15. AuthResult</text>
+<rect x="305.0" y="665.0" width="212.0" height="17.0" fill="#ffffff"/><text x="307.0" y="677.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">16. 200 AuthResponse, refresh cookie</text>
+<rect x="58.0" y="694.0" width="142.0" height="17.0" fill="#ffffff"/><text x="60.0" y="706.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">17. Dashboard of the role</text>
+</g></svg>

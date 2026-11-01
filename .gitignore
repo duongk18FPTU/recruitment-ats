@@ -32,3 +32,5 @@ data/uploads/
 
 # Local Claude worktrees
 .claude/worktrees/
+
+__pycache__/

@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1166" height="1013" viewBox="0 0 1166 1013" font-family="Liberation Sans, Arial, Helvetica, sans-serif">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<g transform="translate(7.0,16.0)">
+<rect x="9.0" y="0.0" width="1134.0" height="981.0" fill="none" stroke="#000" stroke-width="1.1"/><path d="M9.0,0.0 L152.0,0.0 L152.0,14.0 L146.0,20.0 L9.0,20.0 Z" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="16.0" y="14.5" font-size="12" fill="#000000" text-anchor="start" font-weight="bold" xml:space="preserve">sd</text><text x="30.0" y="14.5" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve"> Schedule interview</text>
+<path d="M57.0,99.0 L57.0,969.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M293.0,99.0 L293.0,969.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M499.0,99.0 L499.0,969.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M754.0,99.0 L754.0,969.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M975.0,99.0 L975.0,969.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M1095.0,99.0 L1095.0,969.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<circle cx="57.0" cy="40" r="6" fill="#fff" stroke="#000" stroke-width="1.3"/><line x1="57.0" y1="46" x2="57.0" y2="61" stroke="#000" stroke-width="1.3" fill="none"/><line x1="46.0" y1="51" x2="68.0" y2="51" stroke="#000" stroke-width="1.3" fill="none"/><line x1="57.0" y1="61" x2="47.0" y2="74" stroke="#000" stroke-width="1.3" fill="none"/><line x1="57.0" y1="61" x2="67.0" y2="74" stroke="#000" stroke-width="1.3" fill="none"/><text x="57.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">Recruiter</text>
+<line x1="274.0" y1="40" x2="274.0" y2="68" stroke="#000" stroke-width="1.3" fill="none"/><line x1="274.0" y1="54" x2="284.0" y2="54" stroke="#000" stroke-width="1.3" fill="none"/><circle cx="298.0" cy="54" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><text x="293.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:Schedule interview modal</text>
+<circle cx="499.0" cy="56" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><path d="M504.0,37 L498.0,42 L504.0,47" fill="none" stroke="#000" stroke-width="1.3"/><text x="499.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:InterviewsController</text>
+<circle cx="754.0" cy="56" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><path d="M759.0,37 L753.0,42 L759.0,47" fill="none" stroke="#000" stroke-width="1.3"/><text x="754.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:InterviewService</text>
+<circle cx="975.0" cy="56" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><path d="M980.0,37 L974.0,42 L980.0,47" fill="none" stroke="#000" stroke-width="1.3"/><text x="975.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:EmailScheduler</text>
+<circle cx="1095.0" cy="53" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><line x1="1080.0" y1="69" x2="1110.0" y2="69" stroke="#000" stroke-width="1.3"/><text x="1095.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:Database</text>
+<rect x="1090.0" y="222.0" width="10.0" height="29.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="749.0" y="193.0" width="10.0" height="115.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="494.0" y="164.0" width="10.0" height="173.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="288.0" y="135.0" width="10.0" height="231.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="1090.0" y="405.0" width="10.0" height="29.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="749.0" y="375.0" width="10.0" height="116.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="494.0" y="375.0" width="10.0" height="145.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="288.0" y="375.0" width="10.0" height="174.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="970.0" y="629.0" width="10.0" height="29.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="1090.0" y="687.0" width="10.0" height="29.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="749.0" y="558.0" width="10.0" height="215.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="494.0" y="558.0" width="10.0" height="244.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="288.0" y="558.0" width="10.0" height="273.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="749.0" y="843.0" width="10.0" height="41.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="494.0" y="843.0" width="10.0" height="70.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="288.0" y="843.0" width="10.0" height="99.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="33.0" y="262.0" width="737.0" height="113.0" fill="none" stroke="#000" stroke-width="1.1"/><path d="M33.0,262.0 L88.0,262.0 L88.0,276.0 L82.0,282.0 L33.0,282.0 Z" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="40.0" y="276.5" font-size="12" fill="#000000" text-anchor="start" font-weight="bold" xml:space="preserve">break</text><rect x="94.0" y="264.0" width="141.0" height="16.0" fill="#fff"/><text x="96.0" y="277.0" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">[stage is not INTERVIEW]</text>
+<rect x="33.0" y="445.0" width="737.0" height="113.0" fill="none" stroke="#000" stroke-width="1.1"/><path d="M33.0,445.0 L88.0,445.0 L88.0,459.0 L82.0,465.0 L33.0,465.0 Z" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="40.0" y="459.5" font-size="12" fill="#000000" text-anchor="start" font-weight="bold" xml:space="preserve">break</text><rect x="94.0" y="447.0" width="140.0" height="16.0" fill="#fff"/><text x="96.0" y="460.0" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">[a panel member is busy]</text>
+<rect x="33.0" y="727.0" width="737.0" height="224.0" fill="none" stroke="#000" stroke-width="1.1"/><path d="M33.0,727.0 L69.0,727.0 L69.0,741.0 L63.0,747.0 L33.0,747.0 Z" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="40.0" y="741.5" font-size="12" fill="#000000" text-anchor="start" font-weight="bold" xml:space="preserve">alt</text><rect x="75.0" y="729.0" width="164.0" height="16.0" fill="#fff"/><text x="77.0" y="742.0" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">[exclusion constraint violated]</text>
+<path d="M33.0,843.0 L770.0,843.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/>
+<rect x="39.0" y="845.0" width="43.0" height="17.0" fill="#ffffff"/><text x="41.0" y="857.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">[saved]</text>
+<path d="M57.0,135.0 L288.0,135.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M288.0,135.0 L278.0,139.5 L278.0,130.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M298.0,164.0 L494.0,164.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M494.0,164.0 L484.0,168.5 L484.0,159.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M504.0,193.0 L749.0,193.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M749.0,193.0 L739.0,197.5 L739.0,188.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M759.0,222.0 L1090.0,222.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M1090.0,222.0 L1080.0,226.5 L1080.0,217.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M1090.0,251.0 L759.0,251.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M769.0,246.0 L759.0,251.0 L769.0,256.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M749.0,308.0 L504.0,308.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M514.0,303.0 L504.0,308.0 L514.0,313.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M494.0,337.0 L298.0,337.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M308.0,332.0 L298.0,337.0 L308.0,342.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M288.0,366.0 L57.0,366.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M67.0,361.0 L57.0,366.0 L67.0,371.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M759.0,405.0 L1090.0,405.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M1090.0,405.0 L1080.0,409.5 L1080.0,400.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M1090.0,434.0 L759.0,434.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M769.0,429.0 L759.0,434.0 L769.0,439.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M749.0,491.0 L504.0,491.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M514.0,486.0 L504.0,491.0 L514.0,496.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M494.0,520.0 L298.0,520.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M308.0,515.0 L298.0,520.0 L308.0,525.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M288.0,549.0 L57.0,549.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M67.0,544.0 L57.0,549.0 L67.0,554.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M759.0,588.0 L785.0,588.0 L785.0,600.0 L759.0,600.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M759.0,600.0 L769.0,595.5 L769.0,604.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M759.0,629.0 L970.0,629.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M970.0,629.0 L960.0,633.5 L960.0,624.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M970.0,658.0 L759.0,658.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M769.0,653.0 L759.0,658.0 L769.0,663.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M759.0,687.0 L1090.0,687.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M1090.0,687.0 L1080.0,691.5 L1080.0,682.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M1090.0,716.0 L759.0,716.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M769.0,711.0 L759.0,716.0 L769.0,721.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M749.0,773.0 L504.0,773.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M514.0,768.0 L504.0,773.0 L514.0,778.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M494.0,802.0 L298.0,802.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M308.0,797.0 L298.0,802.0 L308.0,807.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M288.0,831.0 L57.0,831.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M67.0,826.0 L57.0,831.0 L67.0,836.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M749.0,884.0 L504.0,884.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M514.0,879.0 L504.0,884.0 L514.0,889.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M494.0,913.0 L298.0,913.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M308.0,908.0 L298.0,913.0 L308.0,918.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M288.0,942.0 L57.0,942.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M67.0,937.0 L57.0,942.0 L67.0,947.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<rect x="61.0" y="116.0" width="171.0" height="17.0" fill="#ffffff"/><text x="63.0" y="128.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">1. time, place, panel, &quot;Lưu lịch&quot;</text>
+<rect x="302.0" y="145.0" width="143.0" height="17.0" fill="#ffffff"/><text x="304.0" y="157.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">2. POST …/{id}/interviews</text>
+<rect x="508.0" y="174.0" width="227.0" height="17.0" fill="#ffffff"/><text x="510.0" y="186.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">3. ScheduleAsync(applicationId, request)</text>
+<rect x="763.0" y="203.0" width="174.0" height="17.0" fill="#ffffff"/><text x="765.0" y="215.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">4. load application, panel users</text>
+<rect x="763.0" y="232.0" width="113.0" height="17.0" fill="#ffffff"/><text x="765.0" y="244.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">5. application, users</text>
+<rect x="508.0" y="289.0" width="220.0" height="17.0" fill="#ffffff"/><text x="510.0" y="301.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">6. APPLICATION_NOT_IN_INTERVIEW</text>
+<rect x="302.0" y="318.0" width="122.0" height="17.0" fill="#ffffff"/><text x="304.0" y="330.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">7. 409 with error code</text>
+<rect x="61.0" y="347.0" width="169.0" height="17.0" fill="#ffffff"/><text x="63.0" y="359.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">8. message, modal stays open</text>
+<rect x="763.0" y="386.0" width="163.0" height="17.0" fill="#ffffff"/><text x="765.0" y="398.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">9. find overlapping interviews</text>
+<rect x="763.0" y="415.0" width="71.0" height="17.0" fill="#ffffff"/><text x="765.0" y="427.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">10. overlaps</text>
+<rect x="508.0" y="472.0" width="204.0" height="17.0" fill="#ffffff"/><text x="510.0" y="484.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">11. INTERVIEW_OVERLAP, conflicts</text>
+<rect x="302.0" y="501.0" width="178.0" height="17.0" fill="#ffffff"/><text x="304.0" y="513.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">12. 409 INTERVIEW_OVERLAP</text>
+<rect x="61.0" y="530.0" width="208.0" height="17.0" fill="#ffffff"/><text x="63.0" y="542.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">13. names the busy member and time</text>
+<rect x="763.0" y="569.0" width="175.0" height="17.0" fill="#ffffff"/><text x="765.0" y="581.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">14. create interview, panel slots</text>
+<rect x="763.0" y="610.0" width="183.0" height="17.0" fill="#ffffff"/><text x="765.0" y="622.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">15. ScheduleAsync(INVITATION)</text>
+<rect x="763.0" y="639.0" width="162.0" height="17.0" fill="#ffffff"/><text x="765.0" y="651.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">16. email PENDING, +10 min</text>
+<rect x="763.0" y="668.0" width="171.0" height="17.0" fill="#ffffff"/><text x="765.0" y="680.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">17. save interview, email, audit</text>
+<rect x="763.0" y="697.0" width="175.0" height="17.0" fill="#ffffff"/><text x="765.0" y="709.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">18. saved or exclusion violation</text>
+<rect x="508.0" y="754.0" width="154.0" height="17.0" fill="#ffffff"/><text x="510.0" y="766.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">19. INTERVIEW_OVERLAP</text>
+<rect x="302.0" y="783.0" width="178.0" height="17.0" fill="#ffffff"/><text x="304.0" y="795.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">20. 409 INTERVIEW_OVERLAP</text>
+<rect x="61.0" y="812.0" width="158.0" height="17.0" fill="#ffffff"/><text x="63.0" y="824.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">21. names the busy member</text>
+<rect x="508.0" y="865.0" width="73.0" height="17.0" fill="#ffffff"/><text x="510.0" y="877.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">22. Interview</text>
+<rect x="302.0" y="894.0" width="97.0" height="17.0" fill="#ffffff"/><text x="304.0" y="906.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">23. 201 Interview</text>
+<rect x="61.0" y="923.0" width="177.0" height="17.0" fill="#ffffff"/><text x="63.0" y="935.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">24. interview listed, &quot;Xem email&quot;</text>
+</g></svg>

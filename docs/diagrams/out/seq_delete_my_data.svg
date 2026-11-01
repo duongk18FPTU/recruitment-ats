@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1317" height="942" viewBox="0 0 1317 942" font-family="Liberation Sans, Arial, Helvetica, sans-serif">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<g transform="translate(5.0,16.0)">
+<rect x="11.0" y="0.0" width="1285.0" height="910.0" fill="none" stroke="#000" stroke-width="1.1"/><path d="M11.0,0.0 L132.0,0.0 L132.0,14.0 L126.0,20.0 L11.0,20.0 Z" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="18.0" y="14.5" font-size="12" fill="#000000" text-anchor="start" font-weight="bold" xml:space="preserve">sd</text><text x="32.0" y="14.5" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve"> Delete my data</text>
+<path d="M59.0,99.0 L59.0,898.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M272.0,99.0 L272.0,898.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M502.0,99.0 L502.0,898.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M708.0,99.0 L708.0,898.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M926.0,99.0 L926.0,898.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M1121.0,99.0 L1121.0,898.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M1241.0,99.0 L1241.0,898.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<circle cx="59.0" cy="40" r="6" fill="#fff" stroke="#000" stroke-width="1.3"/><line x1="59.0" y1="46" x2="59.0" y2="61" stroke="#000" stroke-width="1.3" fill="none"/><line x1="48.0" y1="51" x2="70.0" y2="51" stroke="#000" stroke-width="1.3" fill="none"/><line x1="59.0" y1="61" x2="49.0" y2="74" stroke="#000" stroke-width="1.3" fill="none"/><line x1="59.0" y1="61" x2="69.0" y2="74" stroke="#000" stroke-width="1.3" fill="none"/><text x="59.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">Candidate</text>
+<line x1="253.0" y1="40" x2="253.0" y2="68" stroke="#000" stroke-width="1.3" fill="none"/><line x1="253.0" y1="54" x2="263.0" y2="54" stroke="#000" stroke-width="1.3" fill="none"/><circle cx="277.0" cy="54" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><text x="272.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:Consent page</text>
+<circle cx="502.0" cy="56" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><path d="M507.0,37 L501.0,42 L507.0,47" fill="none" stroke="#000" stroke-width="1.3"/><text x="502.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:PublicConsentController</text>
+<circle cx="708.0" cy="56" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><path d="M713.0,37 L707.0,42 L713.0,47" fill="none" stroke="#000" stroke-width="1.3"/><text x="708.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:ConsentService</text>
+<circle cx="926.0" cy="56" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><path d="M931.0,37 L925.0,42 L931.0,47" fill="none" stroke="#000" stroke-width="1.3"/><text x="926.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:AnonymizationService</text>
+<circle cx="1121.0" cy="53" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><line x1="1106.0" y1="69" x2="1136.0" y2="69" stroke="#000" stroke-width="1.3"/><text x="1121.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:Database</text>
+<circle cx="1241.0" cy="53" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><line x1="1226.0" y1="69" x2="1256.0" y2="69" stroke="#000" stroke-width="1.3"/><text x="1241.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:CV file store</text>
+<rect x="703.0" y="193.0" width="10.0" height="98.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="497.0" y="164.0" width="10.0" height="156.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="267.0" y="135.0" width="10.0" height="214.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="1116.0" y="388.0" width="10.0" height="29.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="703.0" y="358.0" width="10.0" height="88.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="497.0" y="358.0" width="10.0" height="117.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="267.0" y="358.0" width="10.0" height="146.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="1121.0" y="678.0" width="10.0" height="29.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="1236.0" y="736.0" width="10.0" height="29.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="921.0" y="620.0" width="10.0" height="174.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="703.0" y="591.0" width="10.0" height="232.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="497.0" y="562.0" width="10.0" height="290.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="267.0" y="533.0" width="10.0" height="348.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="1116.0" y="649.0" width="10.0" height="64.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="35.0" y="245.0" width="689.0" height="113.0" fill="none" stroke="#000" stroke-width="1.1"/><path d="M35.0,245.0 L90.0,245.0 L90.0,259.0 L84.0,265.0 L35.0,265.0 Z" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="42.0" y="259.5" font-size="12" fill="#000000" text-anchor="start" font-weight="bold" xml:space="preserve">break</text><rect x="96.0" y="247.0" width="133.0" height="16.0" fill="#fff"/><text x="98.0" y="260.0" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">[invalid or outdated link]</text>
+<path d="M59.0,135.0 L267.0,135.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M267.0,135.0 L257.0,139.5 L257.0,130.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M277.0,164.0 L497.0,164.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M497.0,164.0 L487.0,168.5 L487.0,159.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M507.0,193.0 L703.0,193.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M703.0,193.0 L693.0,197.5 L693.0,188.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M713.0,222.0 L739.0,222.0 L739.0,234.0 L713.0,234.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M713.0,234.0 L723.0,229.5 L723.0,238.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M703.0,291.0 L507.0,291.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M517.0,286.0 L507.0,291.0 L517.0,296.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M497.0,320.0 L277.0,320.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M287.0,315.0 L277.0,320.0 L287.0,325.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M267.0,349.0 L59.0,349.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M69.0,344.0 L59.0,349.0 L69.0,354.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M713.0,388.0 L1116.0,388.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M1116.0,388.0 L1106.0,392.5 L1106.0,383.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M1116.0,417.0 L713.0,417.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M723.0,412.0 L713.0,417.0 L723.0,422.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M703.0,446.0 L507.0,446.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M517.0,441.0 L507.0,446.0 L517.0,451.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M497.0,475.0 L277.0,475.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M287.0,470.0 L277.0,475.0 L287.0,480.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M267.0,504.0 L59.0,504.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M69.0,499.0 L59.0,504.0 L69.0,509.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M59.0,533.0 L267.0,533.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M267.0,533.0 L257.0,537.5 L257.0,528.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M277.0,562.0 L497.0,562.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M497.0,562.0 L487.0,566.5 L487.0,557.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M507.0,591.0 L703.0,591.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M703.0,591.0 L693.0,595.5 L693.0,586.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M713.0,620.0 L921.0,620.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M921.0,620.0 L911.0,624.5 L911.0,615.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M931.0,649.0 L1116.0,649.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M1116.0,649.0 L1106.0,653.5 L1106.0,644.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M931.0,678.0 L1121.0,678.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M1121.0,678.0 L1111.0,682.5 L1111.0,673.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M1121.0,707.0 L931.0,707.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M941.0,702.0 L931.0,707.0 L941.0,712.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M931.0,736.0 L1236.0,736.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M1236.0,736.0 L1226.0,740.5 L1226.0,731.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M1236.0,765.0 L931.0,765.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M941.0,760.0 L931.0,765.0 L941.0,770.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M921.0,794.0 L713.0,794.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M723.0,789.0 L713.0,794.0 L723.0,799.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M703.0,823.0 L507.0,823.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M517.0,818.0 L507.0,823.0 L517.0,828.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M497.0,852.0 L277.0,852.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M287.0,847.0 L277.0,852.0 L287.0,857.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M267.0,881.0 L59.0,881.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M69.0,876.0 L59.0,881.0 L69.0,886.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<rect x="63.0" y="116.0" width="150.0" height="17.0" fill="#ffffff"/><text x="65.0" y="128.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">1. open the link in an email</text>
+<rect x="281.0" y="145.0" width="187.0" height="17.0" fill="#ffffff"/><text x="283.0" y="157.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">2. GET /api/public/consent/{token}</text>
+<rect x="511.0" y="174.0" width="159.0" height="17.0" fill="#ffffff"/><text x="513.0" y="186.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">3. GetSummaryAsync(token)</text>
+<rect x="717.0" y="203.0" width="122.0" height="17.0" fill="#ffffff"/><text x="719.0" y="215.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">4. verify link signature</text>
+<rect x="511.0" y="272.0" width="178.0" height="17.0" fill="#ffffff"/><text x="513.0" y="284.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">5. CONSENT_TOKEN_INVALID</text>
+<rect x="281.0" y="301.0" width="202.0" height="17.0" fill="#ffffff"/><text x="283.0" y="313.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">6. 404 CONSENT_TOKEN_INVALID</text>
+<rect x="63.0" y="330.0" width="185.0" height="17.0" fill="#ffffff"/><text x="65.0" y="342.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">7. new link comes with next email</text>
+<rect x="717.0" y="369.0" width="170.0" height="17.0" fill="#ffffff"/><text x="719.0" y="381.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">8. load candidate, applications</text>
+<rect x="717.0" y="398.0" width="68.0" height="17.0" fill="#ffffff"/><text x="719.0" y="410.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">9. data held</text>
+<rect x="511.0" y="427.0" width="122.0" height="17.0" fill="#ffffff"/><text x="513.0" y="439.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">10. ConsentSummary</text>
+<rect x="281.0" y="456.0" width="146.0" height="17.0" fill="#ffffff"/><text x="283.0" y="468.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">11. 200 ConsentSummary</text>
+<rect x="63.0" y="485.0" width="144.0" height="17.0" fill="#ffffff"/><text x="65.0" y="497.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">12. data held and choices</text>
+<rect x="63.0" y="514.0" width="185.0" height="17.0" fill="#ffffff"/><text x="65.0" y="526.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">13. &quot;Xoá toàn bộ dữ liệu&quot;, confirm</text>
+<rect x="281.0" y="543.0" width="191.0" height="17.0" fill="#ffffff"/><text x="283.0" y="555.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">14. POST …/{token} DELETE_ALL</text>
+<rect x="511.0" y="572.0" width="172.0" height="17.0" fill="#ffffff"/><text x="513.0" y="584.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">15. ApplyAsync(DELETE_ALL)</text>
+<rect x="717.0" y="601.0" width="190.0" height="17.0" fill="#ffffff"/><text x="719.0" y="613.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">16. AnonymizeAsync(candidateId)</text>
+<rect x="935.0" y="630.0" width="166.0" height="17.0" fill="#ffffff"/><text x="937.0" y="642.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">17. reject open, cancel emails</text>
+<rect x="935.0" y="659.0" width="167.0" height="17.0" fill="#ffffff"/><text x="937.0" y="671.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">18. clear data, ERASED, audit</text>
+<rect x="935.0" y="688.0" width="80.0" height="17.0" fill="#ffffff"/><text x="937.0" y="700.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">19. committed</text>
+<rect x="935.0" y="717.0" width="103.0" height="17.0" fill="#ffffff"/><text x="937.0" y="729.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">20. delete CV files</text>
+<rect x="935.0" y="746.0" width="65.0" height="17.0" fill="#ffffff"/><text x="937.0" y="758.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">21. deleted</text>
+<rect x="717.0" y="775.0" width="52.0" height="17.0" fill="#ffffff"/><text x="719.0" y="787.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">22. done</text>
+<rect x="511.0" y="804.0" width="81.0" height="17.0" fill="#ffffff"/><text x="513.0" y="816.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">23. no content</text>
+<rect x="281.0" y="833.0" width="45.0" height="17.0" fill="#ffffff"/><text x="283.0" y="845.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">24. 204</text>
+<rect x="63.0" y="862.0" width="148.0" height="17.0" fill="#ffffff"/><text x="65.0" y="874.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">25. confirmation on screen</text>
+</g></svg>

@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1218" height="1061" viewBox="0 0 1218 1061" font-family="Liberation Sans, Arial, Helvetica, sans-serif">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<g transform="translate(5.0,16.0)">
+<rect x="11.0" y="0.0" width="1186.0" height="1029.0" fill="none" stroke="#000" stroke-width="1.1"/><path d="M11.0,0.0 L118.0,0.0 L118.0,14.0 L112.0,20.0 L11.0,20.0 Z" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="18.0" y="14.5" font-size="12" fill="#000000" text-anchor="start" font-weight="bold" xml:space="preserve">sd</text><text x="32.0" y="14.5" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve"> Apply online</text>
+<path d="M59.0,99.0 L59.0,1017.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M298.0,99.0 L298.0,1017.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M520.0,99.0 L520.0,1017.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M783.0,99.0 L783.0,1017.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M1003.0,99.0 L1003.0,1017.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M1123.0,99.0 L1123.0,1017.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<circle cx="59.0" cy="40" r="6" fill="#fff" stroke="#000" stroke-width="1.3"/><line x1="59.0" y1="46" x2="59.0" y2="61" stroke="#000" stroke-width="1.3" fill="none"/><line x1="48.0" y1="51" x2="70.0" y2="51" stroke="#000" stroke-width="1.3" fill="none"/><line x1="59.0" y1="61" x2="49.0" y2="74" stroke="#000" stroke-width="1.3" fill="none"/><line x1="59.0" y1="61" x2="69.0" y2="74" stroke="#000" stroke-width="1.3" fill="none"/><text x="59.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">Candidate</text>
+<line x1="279.0" y1="40" x2="279.0" y2="68" stroke="#000" stroke-width="1.3" fill="none"/><line x1="279.0" y1="54" x2="289.0" y2="54" stroke="#000" stroke-width="1.3" fill="none"/><circle cx="303.0" cy="54" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><text x="298.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:Career site</text>
+<circle cx="520.0" cy="56" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><path d="M525.0,37 L519.0,42 L525.0,47" fill="none" stroke="#000" stroke-width="1.3"/><text x="520.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:PublicJobPostsController</text>
+<circle cx="783.0" cy="56" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><path d="M788.0,37 L782.0,42 L788.0,47" fill="none" stroke="#000" stroke-width="1.3"/><text x="783.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:PublicApplyService</text>
+<circle cx="1003.0" cy="53" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><line x1="988.0" y1="69" x2="1018.0" y2="69" stroke="#000" stroke-width="1.3"/><text x="1003.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:Database</text>
+<circle cx="1123.0" cy="40" r="6" fill="#fff" stroke="#000" stroke-width="1.3"/><line x1="1123.0" y1="46" x2="1123.0" y2="61" stroke="#000" stroke-width="1.3" fill="none"/><line x1="1112.0" y1="51" x2="1134.0" y2="51" stroke="#000" stroke-width="1.3" fill="none"/><line x1="1123.0" y1="61" x2="1113.0" y2="74" stroke="#000" stroke-width="1.3" fill="none"/><line x1="1123.0" y1="61" x2="1133.0" y2="74" stroke="#000" stroke-width="1.3" fill="none"/><text x="1123.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">Cloudflare Turnstile</text>
+<rect x="515.0" y="164.0" width="10.0" height="29.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="293.0" y="135.0" width="10.0" height="87.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="293.0" y="251.0" width="10.0" height="87.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="998.0" y="553.0" width="10.0" height="29.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="778.0" y="466.0" width="10.0" height="173.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="515.0" y="396.0" width="10.0" height="272.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="293.0" y="367.0" width="10.0" height="330.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="778.0" y="706.0" width="10.0" height="115.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="515.0" y="706.0" width="10.0" height="144.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="293.0" y="706.0" width="10.0" height="173.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="778.0" y="891.0" width="10.0" height="41.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="515.0" y="891.0" width="10.0" height="70.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="293.0" y="891.0" width="10.0" height="99.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="769.0" y="720.0" width="248.0" height="43.0" fill="#ffffff" stroke="#000" stroke-width="1.1"/><path d="M769.0,720.0 L807.0,720.0 L807.0,734.0 L801.0,740.0 L769.0,740.0 Z" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="776.0" y="734.5" font-size="12" fill="#000000" text-anchor="start" font-weight="bold" xml:space="preserve">ref</text>
+<text x="893.0" y="753.4" font-size="12" fill="#000000" text-anchor="middle" xml:space="preserve">Intake</text>
+<rect x="35.0" y="593.0" width="764.0" height="113.0" fill="none" stroke="#000" stroke-width="1.1"/><path d="M35.0,593.0 L90.0,593.0 L90.0,607.0 L84.0,613.0 L35.0,613.0 Z" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="42.0" y="607.5" font-size="12" fill="#000000" text-anchor="start" font-weight="bold" xml:space="preserve">break</text><rect x="96.0" y="595.0" width="229.0" height="16.0" fill="#fff"/><text x="98.0" y="608.0" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">[CAPTCHA failed, limit hit or post expired]</text>
+<rect x="35.0" y="775.0" width="764.0" height="224.0" fill="none" stroke="#000" stroke-width="1.1"/><path d="M35.0,775.0 L71.0,775.0 L71.0,789.0 L65.0,795.0 L35.0,795.0 Z" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="42.0" y="789.5" font-size="12" fill="#000000" text-anchor="start" font-weight="bold" xml:space="preserve">alt</text><rect x="77.0" y="777.0" width="153.0" height="16.0" fill="#fff"/><text x="79.0" y="790.0" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">[created or already applied]</text>
+<path d="M35.0,891.0 L799.0,891.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/>
+<rect x="41.0" y="893.0" width="73.0" height="17.0" fill="#ffffff"/><text x="43.0" y="905.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">[file rejected]</text>
+<path d="M59.0,135.0 L293.0,135.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M293.0,135.0 L283.0,139.5 L283.0,130.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M303.0,164.0 L515.0,164.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M515.0,164.0 L505.0,168.5 L505.0,159.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M515.0,193.0 L303.0,193.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M313.0,188.0 L303.0,193.0 L313.0,198.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M293.0,222.0 L59.0,222.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M69.0,217.0 L59.0,222.0 L69.0,227.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M59.0,251.0 L293.0,251.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M293.0,251.0 L283.0,255.5 L283.0,246.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M303.0,280.0 L1123.0,280.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M1123.0,280.0 L1113.0,284.5 L1113.0,275.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M1123.0,309.0 L303.0,309.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M313.0,304.0 L303.0,309.0 L313.0,314.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M293.0,338.0 L59.0,338.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M69.0,333.0 L59.0,338.0 L69.0,343.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M59.0,367.0 L293.0,367.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M293.0,367.0 L283.0,371.5 L283.0,362.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M303.0,396.0 L515.0,396.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M515.0,396.0 L505.0,400.5 L505.0,391.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M525.0,425.0 L551.0,425.0 L551.0,437.0 L525.0,437.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M525.0,437.0 L535.0,432.5 L535.0,441.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M525.0,466.0 L778.0,466.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M778.0,466.0 L768.0,470.5 L768.0,461.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M788.0,495.0 L1123.0,495.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M1123.0,495.0 L1113.0,499.5 L1113.0,490.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M1123.0,524.0 L788.0,524.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M798.0,519.0 L788.0,524.0 L798.0,529.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M788.0,553.0 L998.0,553.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M998.0,553.0 L988.0,557.5 L988.0,548.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M998.0,582.0 L788.0,582.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M798.0,577.0 L788.0,582.0 L798.0,587.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M778.0,639.0 L525.0,639.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M535.0,634.0 L525.0,639.0 L535.0,644.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M515.0,668.0 L303.0,668.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M313.0,663.0 L303.0,668.0 L313.0,673.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M293.0,697.0 L59.0,697.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M69.0,692.0 L59.0,697.0 L69.0,702.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M778.0,821.0 L525.0,821.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M535.0,816.0 L525.0,821.0 L535.0,826.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M515.0,850.0 L303.0,850.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M313.0,845.0 L303.0,850.0 L313.0,855.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M293.0,879.0 L59.0,879.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M69.0,874.0 L59.0,879.0 L69.0,884.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M778.0,932.0 L525.0,932.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M535.0,927.0 L525.0,932.0 L535.0,937.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M515.0,961.0 L303.0,961.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M313.0,956.0 L303.0,961.0 L313.0,966.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M293.0,990.0 L59.0,990.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M69.0,985.0 L59.0,990.0 L69.0,995.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<rect x="63.0" y="116.0" width="184.0" height="17.0" fill="#ffffff"/><text x="65.0" y="128.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">1. open shared link ?src=linkedin</text>
+<rect x="307.0" y="145.0" width="187.0" height="17.0" fill="#ffffff"/><text x="309.0" y="157.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">2. GET /api/public/job-posts/{slug}</text>
+<rect x="307.0" y="174.0" width="119.0" height="17.0" fill="#ffffff"/><text x="309.0" y="186.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">3. 200 PublicJobPost</text>
+<rect x="63.0" y="203.0" width="138.0" height="17.0" fill="#ffffff"/><text x="65.0" y="215.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">4. job detail, &quot;Ứng tuyển&quot;</text>
+<rect x="63.0" y="232.0" width="185.0" height="17.0" fill="#ffffff"/><text x="65.0" y="244.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">5. fill form, attach CV, tick consent</text>
+<rect x="307.0" y="261.0" width="92.0" height="17.0" fill="#ffffff"/><text x="309.0" y="273.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">6. run challenge</text>
+<rect x="307.0" y="290.0" width="94.0" height="17.0" fill="#ffffff"/><text x="309.0" y="302.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">7. turnstileToken</text>
+<rect x="63.0" y="319.0" width="130.0" height="17.0" fill="#ffffff"/><text x="65.0" y="331.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">8. &quot;Nộp hồ sơ&quot; enabled</text>
+<rect x="63.0" y="348.0" width="109.0" height="17.0" fill="#ffffff"/><text x="65.0" y="360.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">9. click &quot;Nộp hồ sơ&quot;</text>
+<rect x="307.0" y="377.0" width="174.0" height="17.0" fill="#ffffff"/><text x="309.0" y="389.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">10. POST …/{slug}/applications</text>
+<rect x="529.0" y="406.0" width="140.0" height="17.0" fill="#ffffff"/><text x="531.0" y="418.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">11. limit 5 per IP per hour</text>
+<rect x="529.0" y="447.0" width="214.0" height="17.0" fill="#ffffff"/><text x="531.0" y="459.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">12. ApplyAsync(slug, command, client)</text>
+<rect x="792.0" y="476.0" width="164.0" height="17.0" fill="#ffffff"/><text x="794.0" y="488.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">13. POST siteverify {token, ip}</text>
+<rect x="792.0" y="505.0" width="119.0" height="17.0" fill="#ffffff"/><text x="794.0" y="517.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">14. success or failure</text>
+<rect x="792.0" y="534.0" width="192.0" height="17.0" fill="#ffffff"/><text x="794.0" y="546.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">15. count today by email, load post</text>
+<rect x="792.0" y="563.0" width="103.0" height="17.0" fill="#ffffff"/><text x="794.0" y="575.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">16. count, job post</text>
+<rect x="529.0" y="620.0" width="235.0" height="17.0" fill="#ffffff"/><text x="531.0" y="632.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">17. CAPTCHA_FAILED, RATE_LIMITED…</text>
+<rect x="307.0" y="649.0" width="194.0" height="17.0" fill="#ffffff"/><text x="309.0" y="661.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">18. 400, 429 or 409 with error code</text>
+<rect x="63.0" y="678.0" width="133.0" height="17.0" fill="#ffffff"/><text x="65.0" y="690.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">19. message, input kept</text>
+<rect x="529.0" y="802.0" width="124.0" height="17.0" fill="#ffffff"/><text x="531.0" y="814.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">20. PublicApplyResult</text>
+<rect x="307.0" y="831.0" width="148.0" height="17.0" fill="#ffffff"/><text x="309.0" y="843.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">21. 202 PublicApplyResult</text>
+<rect x="63.0" y="860.0" width="211.0" height="17.0" fill="#ffffff"/><text x="65.0" y="872.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">22. thank-you page, receipt email sent</text>
+<rect x="529.0" y="913.0" width="80.0" height="17.0" fill="#ffffff"/><text x="531.0" y="925.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">23. error code</text>
+<rect x="307.0" y="942.0" width="167.0" height="17.0" fill="#ffffff"/><text x="309.0" y="954.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">24. 400 or 413 with error code</text>
+<rect x="63.0" y="971.0" width="175.0" height="17.0" fill="#ffffff"/><text x="65.0" y="983.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">25. message under the CV field</text>
+</g></svg>

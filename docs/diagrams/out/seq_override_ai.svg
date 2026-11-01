@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1116" height="813" viewBox="0 0 1116 813" font-family="Liberation Sans, Arial, Helvetica, sans-serif">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<g transform="translate(7.0,16.0)">
+<rect x="9.0" y="0.0" width="1084.0" height="781.0" fill="none" stroke="#000" stroke-width="1.1"/><path d="M9.0,0.0 L142.0,0.0 L142.0,14.0 L136.0,20.0 L9.0,20.0 Z" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="16.0" y="14.5" font-size="12" fill="#000000" text-anchor="start" font-weight="bold" xml:space="preserve">sd</text><text x="30.0" y="14.5" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve"> Override AI result</text>
+<path d="M57.0,99.0 L57.0,769.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M278.0,99.0 L278.0,769.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M527.0,99.0 L527.0,769.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M775.0,99.0 L775.0,769.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M1045.0,99.0 L1045.0,769.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<circle cx="57.0" cy="40" r="6" fill="#fff" stroke="#000" stroke-width="1.3"/><line x1="57.0" y1="46" x2="57.0" y2="61" stroke="#000" stroke-width="1.3" fill="none"/><line x1="46.0" y1="51" x2="68.0" y2="51" stroke="#000" stroke-width="1.3" fill="none"/><line x1="57.0" y1="61" x2="47.0" y2="74" stroke="#000" stroke-width="1.3" fill="none"/><line x1="57.0" y1="61" x2="67.0" y2="74" stroke="#000" stroke-width="1.3" fill="none"/><text x="57.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">Recruiter</text>
+<line x1="259.0" y1="40" x2="259.0" y2="68" stroke="#000" stroke-width="1.3" fill="none"/><line x1="259.0" y1="54" x2="269.0" y2="54" stroke="#000" stroke-width="1.3" fill="none"/><circle cx="283.0" cy="54" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><text x="278.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:Criteria evaluation tab</text>
+<circle cx="527.0" cy="56" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><path d="M532.0,37 L526.0,42 L532.0,47" fill="none" stroke="#000" stroke-width="1.3"/><text x="527.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:ScreeningController</text>
+<circle cx="775.0" cy="56" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><path d="M780.0,37 L774.0,42 L780.0,47" fill="none" stroke="#000" stroke-width="1.3"/><text x="775.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:ScreeningService</text>
+<circle cx="1045.0" cy="53" r="14" fill="#fff" stroke="#000" stroke-width="1.3"/><line x1="1030.0" y1="69" x2="1060.0" y2="69" stroke="#000" stroke-width="1.3"/><text x="1045.0" y="89.4" font-size="12" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">:Database</text>
+<rect x="273.0" y="135.0" width="10.0" height="29.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="273.0" y="193.0" width="10.0" height="57.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="1040.0" y="347.0" width="10.0" height="29.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="770.0" y="318.0" width="10.0" height="115.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="522.0" y="289.0" width="10.0" height="173.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="273.0" y="259.0" width="10.0" height="232.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="1040.0" y="626.0" width="10.0" height="29.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="770.0" y="503.0" width="10.0" height="181.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="522.0" y="503.0" width="10.0" height="210.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="273.0" y="503.0" width="10.0" height="239.0" rx="0" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="33.0" y="204.0" width="270.0" height="55.0" fill="none" stroke="#000" stroke-width="1.1"/><path d="M33.0,204.0 L88.0,204.0 L88.0,218.0 L82.0,224.0 L33.0,224.0 Z" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="40.0" y="218.5" font-size="12" fill="#000000" text-anchor="start" font-weight="bold" xml:space="preserve">break</text><rect x="94.0" y="206.0" width="193.0" height="16.0" fill="#fff"/><text x="96.0" y="219.0" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">[reason shorter than 10 characters]</text>
+<rect x="33.0" y="387.0" width="1028.0" height="364.0" fill="none" stroke="#000" stroke-width="1.1"/><path d="M33.0,387.0 L69.0,387.0 L69.0,401.0 L63.0,407.0 L33.0,407.0 Z" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="40.0" y="401.5" font-size="12" fill="#000000" text-anchor="start" font-weight="bold" xml:space="preserve">alt</text><rect x="75.0" y="389.0" width="153.0" height="16.0" fill="#fff"/><text x="77.0" y="402.0" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">[analysis not COMPLETED]</text>
+<path d="M33.0,503.0 L1061.0,503.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/>
+<rect x="39.0" y="505.0" width="85.0" height="17.0" fill="#ffffff"/><text x="41.0" y="517.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">[COMPLETED]</text>
+<path d="M57.0,135.0 L273.0,135.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M273.0,135.0 L263.0,139.5 L263.0,130.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M273.0,164.0 L57.0,164.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M67.0,159.0 L57.0,164.0 L67.0,169.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M57.0,193.0 L273.0,193.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M273.0,193.0 L263.0,197.5 L263.0,188.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M273.0,250.0 L57.0,250.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M67.0,245.0 L57.0,250.0 L67.0,255.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M283.0,289.0 L522.0,289.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M522.0,289.0 L512.0,293.5 L512.0,284.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M532.0,318.0 L770.0,318.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M770.0,318.0 L760.0,322.5 L760.0,313.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M780.0,347.0 L1040.0,347.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M1040.0,347.0 L1030.0,351.5 L1030.0,342.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M1040.0,376.0 L780.0,376.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M790.0,371.0 L780.0,376.0 L790.0,381.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M770.0,433.0 L532.0,433.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M542.0,428.0 L532.0,433.0 L542.0,438.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M522.0,462.0 L283.0,462.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M293.0,457.0 L283.0,462.0 L293.0,467.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M273.0,491.0 L57.0,491.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M67.0,486.0 L57.0,491.0 L67.0,496.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M780.0,544.0 L806.0,544.0 L806.0,556.0 L780.0,556.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M780.0,556.0 L790.0,551.5 L790.0,560.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M780.0,585.0 L806.0,585.0 L806.0,597.0 L780.0,597.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M780.0,597.0 L790.0,592.5 L790.0,601.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M780.0,626.0 L1040.0,626.0" fill="none" stroke="#000000" stroke-width="1"/><path d="M1040.0,626.0 L1030.0,630.5 L1030.0,621.5 Z" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+<path d="M1040.0,655.0 L780.0,655.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M790.0,650.0 L780.0,655.0 L790.0,660.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M770.0,684.0 L532.0,684.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M542.0,679.0 L532.0,684.0 L542.0,689.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M522.0,713.0 L283.0,713.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M293.0,708.0 L283.0,713.0 L293.0,718.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M273.0,742.0 L57.0,742.0" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/><path d="M67.0,737.0 L57.0,742.0 L67.0,747.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<rect x="61.0" y="116.0" width="185.0" height="17.0" fill="#ffffff"/><text x="63.0" y="128.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">1. click &quot;Điều chỉnh&quot; on a criterion</text>
+<rect x="61.0" y="145.0" width="181.0" height="17.0" fill="#ffffff"/><text x="63.0" y="157.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">2. modal with AI result and quote</text>
+<rect x="61.0" y="174.0" width="170.0" height="17.0" fill="#ffffff"/><text x="63.0" y="186.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">3. choose result, reason, &quot;Lưu&quot;</text>
+<rect x="61.0" y="231.0" width="142.0" height="17.0" fill="#ffffff"/><text x="63.0" y="243.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">4. field error, nothing sent</text>
+<rect x="287.0" y="270.0" width="209.0" height="17.0" fill="#ffffff"/><text x="289.0" y="282.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">5. PUT …/criteria/{criterionId}/override</text>
+<rect x="536.0" y="299.0" width="220.0" height="17.0" fill="#ffffff"/><text x="538.0" y="311.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">6. OverrideAsync(analysisId, criterionId)</text>
+<rect x="784.0" y="328.0" width="198.0" height="17.0" fill="#ffffff"/><text x="786.0" y="340.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">7. load analysis, criteria, application</text>
+<rect x="784.0" y="357.0" width="62.0" height="17.0" fill="#ffffff"/><text x="786.0" y="369.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">8. analysis</text>
+<rect x="536.0" y="414.0" width="190.0" height="17.0" fill="#ffffff"/><text x="538.0" y="426.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">9. ANALYSIS_NOT_COMPLETED</text>
+<rect x="287.0" y="443.0" width="221.0" height="17.0" fill="#ffffff"/><text x="289.0" y="455.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">10. 409 ANALYSIS_NOT_COMPLETED</text>
+<rect x="61.0" y="472.0" width="124.0" height="17.0" fill="#ffffff"/><text x="63.0" y="484.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">11. &quot;Cần phân tích lại&quot;</text>
+<rect x="784.0" y="525.0" width="179.0" height="17.0" fill="#ffffff"/><text x="786.0" y="537.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">12. keep AI result, set final result</text>
+<rect x="784.0" y="566.0" width="129.0" height="17.0" fill="#ffffff"/><text x="786.0" y="578.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">13. recalculate fit score</text>
+<rect x="784.0" y="607.0" width="242.0" height="17.0" fill="#ffffff"/><text x="786.0" y="619.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">14. save result, scores, AI_OVERRIDE audit</text>
+<rect x="784.0" y="636.0" width="57.0" height="17.0" fill="#ffffff"/><text x="786.0" y="648.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">15. saved</text>
+<rect x="536.0" y="665.0" width="70.0" height="17.0" fill="#ffffff"/><text x="538.0" y="677.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">16. Analysis</text>
+<rect x="287.0" y="694.0" width="94.0" height="17.0" fill="#ffffff"/><text x="289.0" y="706.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">17. 200 Analysis</text>
+<rect x="61.0" y="723.0" width="193.0" height="17.0" fill="#ffffff"/><text x="63.0" y="735.4" font-size="12" fill="#000000" text-anchor="start" xml:space="preserve">18. &quot;Đã điều chỉnh&quot;, score 89 → 92</text>
+</g></svg>

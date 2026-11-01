@@ -474,7 +474,61 @@ Project responsibilities, module layout, dependency rules enforced by architectu
 
 ## 6. Detailed Class and Sequence Design
 
-_Planned._
+Class diagrams are written in Mermaid, as in the course reference project. Sequence and state diagrams are drawn with the team's **ve-diagram-srs** skill; each one is available as PNG, SVG, and an editable draw.io file, generated from [`docs/diagrams/ve_ats.py`](docs/diagrams/ve_ats.py).
+
+| Artifact | Content |
+|---|---|
+| [Class design](docs/10-class-design.md) | 10 class diagrams (cross-cutting, auth, positions, applications and intake, AI screening, interviews, communication, inbox/import/pool, career site and consent, reports) and traceability of all 85 OpenAPI operations to controller actions and Application methods |
+| [Sequence and state diagrams](docs/11-sequence-and-state-diagrams.md) | 16 sequence diagrams for the main flows and error paths; 6 state diagrams (application stage, CV analysis, candidate email, position, job post, inbox item) |
+
+### 6.1 AI screening classes
+
+```mermaid
+classDiagram
+    direction LR
+    class ScreeningService {
+        +QueueAsync(JobApplication, CvFile) CvAnalysis
+        +AnalyzeNextAsync() bool
+        +OverrideAsync(Guid, Guid, OverrideRequest) Analysis
+    }
+    class Redactor {
+        <<static>>
+        +Redact(string, CandidateIdentity)$ string
+    }
+    class QuoteVerifier {
+        <<static>>
+        +Verify(CriterionJudgement[], string)$ CriterionResult[]
+    }
+    class FitScoreCalculator {
+        <<static>>
+        +Calculate(PositionCriterion[], CriterionResult[])$ ScoreResult
+    }
+    class IResumeAnalyzer {
+        <<interface>>
+        +AnalyzeAsync(ResumeAnalysisInput) ResumeAnalysisOutput
+    }
+    class IAnalysisQueue {
+        <<interface>>
+        +ClaimNextAsync(TimeSpan) CvAnalysis?
+    }
+    class AnalysisRunner
+    class LlmResumeAnalyzer
+    AnalysisRunner --> ScreeningService
+    ScreeningService --> IAnalysisQueue
+    ScreeningService --> Redactor
+    ScreeningService --> IResumeAnalyzer
+    ScreeningService --> QuoteVerifier
+    ScreeningService --> FitScoreCalculator
+    LlmResumeAnalyzer ..|> IResumeAnalyzer
+```
+
+### 6.2 Analyze CV with AI
+
+![Analyze CV with AI](docs/diagrams/out/seq_analyze_cv.png)
+
+### 6.3 Application stage
+
+![Application stage](docs/diagrams/out/st_application.png)
 
 ## Documentation
 
@@ -487,6 +541,7 @@ _Planned._
 - [Database design](docs/07-database-design.md) · [Reference DDL](docs/database/schema.sql)
 - [OpenAPI contract](docs/08-openapi-contract.md) · [OpenAPI YAML](docs/api/openapi.yaml)
 - [Frontend and backend folder structures](docs/09-folder-structure.md)
+- [Class design](docs/10-class-design.md) · [Sequence and state diagrams](docs/11-sequence-and-state-diagrams.md) · [Diagram sources](docs/diagrams/)
 - [Mind map](docs/mindmap.png) · [XMind source](docs/mindmap/recruitment-ats.xmind)
 
 ## Project Progress
@@ -500,5 +555,5 @@ _Planned._
 - [x] C4 architecture
 - [x] Database design and OpenAPI contract
 - [x] Folder structures
-- [ ] Class and sequence diagrams
+- [x] Class and sequence diagrams
 - [ ] Implementation

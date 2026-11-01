@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1380" height="206" viewBox="0 0 1380 206" font-family="Liberation Sans, Arial, Helvetica, sans-serif">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<g transform="translate(-16.0,-34.0)">
+<path d="M202.0,75.0 L215.0,62.0 L228.0,75.0 L215.0,88.0 L202.0,75.0" fill="none" stroke="#000000" stroke-width="1.3"/>
+<rect x="470.0" y="50.0" width="170.0" height="50.0" rx="12" fill="#ffffff" stroke="#000000" stroke-width="1.3"/><text x="555.0" y="79.3" font-size="13" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">DRAFT</text>
+<rect x="810.0" y="170.0" width="170.0" height="50.0" rx="12" fill="#ffffff" stroke="#000000" stroke-width="1.3"/><text x="895.0" y="199.3" font-size="13" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">OPEN</text>
+<rect x="1210.0" y="170.0" width="170.0" height="50.0" rx="12" fill="#ffffff" stroke="#000000" stroke-width="1.3"/><text x="1295.0" y="199.3" font-size="13" fill="#000000" text-anchor="middle" font-weight="bold" xml:space="preserve">CLOSED</text>
+<path d="M228.0,75.0 L470.0,75.0" fill="none" stroke="#000000" stroke-width="1.2"/><path d="M460.0,80.0 L470.0,75.0 L460.0,70.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<rect x="309.5" y="55.0" width="79.0" height="17.0" fill="#ffffff"/><text x="349.0" y="67.4" font-size="12" fill="#000000" text-anchor="middle" xml:space="preserve">[save as draft]</text>
+<path d="M215.0,88.0 L215.0,195.0 L810.0,195.0" fill="none" stroke="#000000" stroke-width="1.2"/><path d="M800.0,200.0 L810.0,195.0 L800.0,190.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<rect x="471.0" y="175.0" width="83.0" height="17.0" fill="#ffffff"/><text x="512.5" y="187.4" font-size="12" fill="#000000" text-anchor="middle" xml:space="preserve">[save as open]</text>
+<path d="M640.0,75.0 L895.0,75.0 L895.0,170.0" fill="none" stroke="#000000" stroke-width="1.2"/><path d="M890.0,160.0 L895.0,170.0 L900.0,160.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<rect x="728.5" y="55.0" width="78.0" height="17.0" fill="#ffffff"/><text x="767.5" y="67.4" font-size="12" fill="#000000" text-anchor="middle" xml:space="preserve">open position</text>
+<path d="M980.0,185.0 L1210.0,185.0" fill="none" stroke="#000000" stroke-width="1.2"/><path d="M1200.0,190.0 L1210.0,185.0 L1200.0,180.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<rect x="1055.5" y="165.0" width="79.0" height="17.0" fill="#ffffff"/><text x="1095.0" y="177.4" font-size="12" fill="#000000" text-anchor="middle" xml:space="preserve">close position</text>
+<path d="M1210.0,205.0 L980.0,205.0" fill="none" stroke="#000000" stroke-width="1.2"/><path d="M990.0,200.0 L980.0,205.0 L990.0,210.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<rect x="1050.5" y="208.0" width="89.0" height="17.0" fill="#ffffff"/><text x="1095.0" y="220.4" font-size="12" fill="#000000" text-anchor="middle" xml:space="preserve">reopen position</text>
+<circle cx="42.0" cy="75.0" r="10" fill="#000"/>
+<path d="M52.0,75.0 L202.0,75.0" fill="none" stroke="#000000" stroke-width="1.2"/><path d="M192.0,80.0 L202.0,75.0 L192.0,70.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<rect x="85.0" y="55.0" width="84.0" height="17.0" fill="#ffffff"/><text x="127.0" y="67.4" font-size="12" fill="#000000" text-anchor="middle" xml:space="preserve">create position</text>
+</g></svg>
