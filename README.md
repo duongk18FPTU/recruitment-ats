@@ -273,7 +273,93 @@ High-fidelity prototype in Figma: **[Recruitment ATS — UI](https://www.figma.c
 
 ## 3. C4 Architecture
 
-_Planned._
+The architecture is described with the C4 model: system context, containers, components of the API and the Worker, and a deployment view. Slow, scheduled, and external work (AI analysis, candidate emails, mailbox intake, retention) runs in a separate Worker; both queues are PostgreSQL tables written in the same transaction as the action that creates them, so a pending email exists only if the action committed and can be cancelled safely.
+
+### 3.1 System context
+
+```mermaid
+flowchart LR
+    hr["<b>Hiring team</b><br/>[Person]<br/>Admin, HR Manager,<br/>Recruiter, Interviewer"]
+    cand["<b>Candidate</b><br/>[Person, no account]"]
+    ats["<b>Recruitment ATS</b><br/>[Software system]"]
+    ai["<b>AI Service</b><br/>[LLM API]"]
+    smtp["<b>Email Service</b><br/>[SMTP]"]
+    imap["<b>Recruitment Mailbox</b><br/>[IMAP]"]
+    turnstile["<b>Cloudflare Turnstile</b><br/>[CAPTCHA]"]
+    social["<b>LinkedIn, Facebook</b><br/>[Link previews]"]
+
+    hr -->|"Manages hiring [HTTPS]"| ats
+    cand -->|"Browses, applies, consent [HTTPS]"| ats
+    ats -->|"Redacted CV text [HTTPS/JSON]"| ai
+    ats -->|"Candidate emails [SMTP]"| smtp
+    ats -->|"Reads CVs, read-only [IMAPS]"| imap
+    ats -->|"Verifies token [HTTPS]"| turnstile
+    social -->|"Fetches preview [HTTPS]"| ats
+
+    classDef person fill:#08427b,color:#fff,stroke:#052e56
+    classDef system fill:#1168bd,color:#fff,stroke:#0b4f9e
+    classDef external fill:#999,color:#fff,stroke:#6b6b6b
+    class hr,cand person
+    class ats system
+    class ai,smtp,imap,turnstile,social external
+```
+
+### 3.2 Containers
+
+```mermaid
+flowchart TB
+    hr["<b>Hiring team</b><br/>[Person]"]
+    cand["<b>Candidate</b><br/>[Person]"]
+
+    subgraph ats["Recruitment ATS"]
+        direction TB
+        career["<b>Career site</b><br/>[React + Vite SPA]<br/>careers.example.vn"]
+        internal["<b>Internal app</b><br/>[React + Vite SPA]<br/>ats.example.vn"]
+        api["<b>API</b><br/>[ASP.NET Core]<br/>Internal + public REST API,<br/>RBAC, audit, enqueues work"]
+        worker["<b>Worker</b><br/>[.NET Worker Service]<br/>AI analysis, emails,<br/>mailbox polling, retention"]
+        db[("<b>Database</b><br/>[PostgreSQL]<br/>Data, queues, audit log")]
+        files[("<b>CV file store</b><br/>[Volume]")]
+    end
+
+    ext["<b>AI Service · SMTP · IMAP</b><br/>[External systems]"]
+    turnstile["<b>Cloudflare Turnstile</b><br/>[External system]"]
+
+    hr --> internal
+    cand --> career
+    internal -->|"/api/* [HTTPS/JSON]"| api
+    career -->|"/api/public/* [HTTPS/JSON]"| api
+    api --> db
+    api --> files
+    api -->|"siteverify"| turnstile
+    worker --> db
+    worker --> files
+    worker -->|"HTTPS · SMTP · IMAPS"| ext
+
+    classDef person fill:#08427b,color:#fff,stroke:#052e56
+    classDef container fill:#438dd5,color:#fff,stroke:#2e6295
+    classDef external fill:#999,color:#fff,stroke:#6b6b6b
+    class hr,cand person
+    class career,internal,api,worker,db,files container
+    class ext,turnstile external
+    style ats fill:#f8fbff,stroke:#1168bd,stroke-dasharray:5 5
+```
+
+### 3.3 Key decisions
+
+| # | Decision |
+|---|---|
+| AD-01 | Separate **Worker** container sharing the application core with the API |
+| AD-02 | Queues are **PostgreSQL tables** claimed with `FOR UPDATE SKIP LOCKED`; no message broker |
+| AD-03 | CV files on a volume behind `IFileStorage` |
+| AD-04 | Career site stays a Vite SPA; link-preview crawlers get Open Graph HTML from the API |
+| AD-05 | Public API is a rate-limited route group in the same API, protected by **Cloudflare Turnstile** |
+| AD-06 | JWT access token in memory + rotating refresh token in an `httpOnly` cookie |
+| AD-07 | PII redaction runs in the Worker before the AI adapter (`IResumeAnalyzer`) |
+| AD-08 | Internal app polls AI status; no WebSocket |
+| AD-09 | One VM with Docker Compose behind Caddy, two domains |
+| AD-10 | Mermaid flowcharts with C4 styling |
+
+Architecture drivers, full context and container diagrams, component diagrams for the API and the Worker, key interactions (AI analysis, email queue, public apply, link previews), deployment, and open items: [C4 architecture](docs/06-c4-architecture.md).
 
 ## 4. Database Diagrams and OpenAPI 3.0 Contract
 
@@ -294,6 +380,7 @@ _Planned._
 - [INVEST requirements and acceptance criteria](docs/03-invest-requirements.md)
 - [Information architecture](docs/04-information-architecture.md)
 - [UI/UX design](docs/05-ui-ux.md)
+- [C4 architecture](docs/06-c4-architecture.md)
 - [Mind map](docs/mindmap.png) · [XMind source](docs/mindmap/recruitment-ats.xmind)
 
 ## Project Progress
@@ -304,7 +391,7 @@ _Planned._
 - [x] User stories (INVEST) and acceptance criteria
 - [x] Information architecture and screen hierarchy
 - [x] UI/UX prototype (Figma)
-- [ ] C4 architecture
+- [x] C4 architecture
 - [ ] Database design and OpenAPI contract
 - [ ] Folder structures
 - [ ] Class and sequence diagrams
