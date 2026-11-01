@@ -245,12 +245,12 @@ flowchart LR
 - **Preconditions:** an active account exists
 - **Main flow:** enter email and password → backend verifies credentials and account status → returns a Bearer access token and a safe profile → Dashboard
 - **Alternative:** invalid credentials or disabled account → generic error, remain on login screen
-- **Result:** authenticated client session (30-minute access token, no refresh token)
+- **Result:** authenticated client session (15-minute access token, rotating refresh token in an `httpOnly` cookie — AD-06)
 
 ### UC02 Logout
 
 - **Actor:** all internal roles
-- **Main flow:** click logout → call `logout` (audit) → client discards token and cached data → Login
+- **Main flow:** click logout → call `logout` (audit) → server revokes the refresh token → client discards the access token and cached data → Login
 - **Result:** internal pages are no longer accessible from this client
 
 ### UC03 View dashboard

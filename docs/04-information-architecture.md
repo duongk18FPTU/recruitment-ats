@@ -370,24 +370,24 @@ The score is shown as a plain number; AI output gets no special colour. Criterio
 
 | Screen | API operations |
 |---|---|
-| Login | `login`, `logout` |
+| Login | `login`, `refreshToken`, `logout` |
 | Dashboard | `getDashboard` |
-| Positions | `listJobs`, `getJob`, `createJob`, `updateJob`, `updateJobStatus` |
+| Positions | `listPositions`, `getPosition`, `createPosition`, `updatePosition`, `updatePositionStatus`, `listDepartments`, `listUserOptions` |
 | Job post | `getJobPost`, `updateJobPost`, `publishJobPost`, `unpublishJobPost`, `getShareLinks` |
-| Pipeline / candidates | `listApplications`, `getApplication`, `createApplication`, `updateCandidate`, `replaceCv`, `moveApplicationStage`, `getStageHistory`, `exportApplications` |
-| AI analysis | `getAnalysis`, `requestAnalysis`, `overrideAnalysis` |
-| Candidate emails | `listApplicationEmails`, `updatePendingEmail`, `cancelPendingEmail`, `resendEmail` |
-| CV inbox | `listInboxItems`, `getInboxItem`, `assignInboxItem`, `dismissInboxItem` |
-| Talent pool | `searchTalentPool`, `addCandidateToJob`, `exportTalentPool` |
-| Interviews | `listInterviews`, `createInterview`, `updateInterview`, `cancelInterview`, `getScorecards`, `submitScorecard` |
-| Import | `previewImport`, `createImport`, `listImports`, `getImport` |
+| Pipeline / candidates | `getPipeline`, `listApplications`, `getApplication`, `matchCandidate`, `createApplication`, `updateApplication`, `replaceCv`, `getCvFileContent`, `moveApplicationStage`, `getStageHistory`, `exportApplications` |
+| AI analysis | `getAnalysis`, `listAnalyses`, `requestAnalysis`, `overrideCriterionResult` |
+| Candidate emails | `listApplicationEmails`, `listEmails`, `updatePendingEmail`, `cancelPendingEmail`, `resendEmail` |
+| CV inbox | `listInboxItems`, `getInboxItem`, `getInboxAttachmentContent`, `assignInboxItem`, `dismissInboxItem` |
+| Talent pool | `searchTalentPool`, `getCandidate`, `addCandidateToPosition`, `exportTalentPool` |
+| Interviews | `listInterviews`, `getInterview`, `createInterview`, `updateInterview`, `cancelInterview`, `getScorecards`, `getMyScorecard`, `saveScorecardDraft`, `submitScorecard` |
+| Import | `downloadImportTemplate`, `previewImport`, `confirmImport`, `listImports`, `getImport` |
 | Reports | `getReport`, `exportReport` |
 | Audit | `listAuditLogs` |
 | Users | `listUsers`, `getUser`, `createUser`, `updateUser`, `updateUserStatus` |
 | Settings | `listEmailTemplates`, `updateEmailTemplate`, `previewEmailTemplate`, `sendTestEmail`, `getMailSettings`, `updateMailSettings`, `testMailSettings` |
 | Profile | `getProfile`, `updateProfile`, `changePassword` |
-| Career site (public API) | `listPublicJobPosts`, `getPublicJobPost`, `submitPublicApplication`, `getConsent`, `updateConsent` |
+| Career site (public API) | `listPublicJobPosts`, `getPublicJobPostFilters`, `getPublicJobPost`, `submitPublicApplication`, `getPrivacyPolicy`, `getConsent`, `updateConsent` |
 
-Operation names are provisional; they become final in the OpenAPI contract (README section 4).
+Operation names are final; paths, schemas, and error codes are in the [OpenAPI contract](08-openapi-contract.md).
 
 **Related:** [Use cases](02-use-cases.md) · [INVEST requirements](03-invest-requirements.md) · [UI/UX](05-ui-ux.md)

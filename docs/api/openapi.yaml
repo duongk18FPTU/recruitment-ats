@@ -1,0 +1,3441 @@
+openapi: 3.0.3
+info:
+  title: Recruitment ATS API
+  version: 1.0.0
+  license:
+    name: Proprietary
+  description: |
+    REST contract for the Recruitment ATS internal app and the public career site.
+    Design status: TARGET. Conventions, error codes, and the role matrix are described in
+    [OpenAPI contract](../08-openapi-contract.md).
+
+    * Internal endpoints (`/api/*`) require a Bearer access token. The extension `x-roles`
+      lists the roles allowed; record-level rules (position ownership, panel assignment,
+      blind scorecards) are stated in each description and enforced by the API.
+    * Public endpoints (`/api/public/*`) are anonymous, rate-limited, and served only on the
+      career-site domain.
+    * Errors use RFC 7807 Problem Details with a stable `errorCode` and `traceId`.
+servers:
+  - url: https://ats.example.vn
+    description: Internal app domain (`/api/*`)
+  - url: https://careers.example.vn
+    description: Career site domain (`/api/public/*` only)
+security:
+  - bearerAuth: []
+tags:
+  - name: Auth
+    description: Login, token refresh, logout
+  - name: Profile
+    description: The current user
+  - name: Dashboard
+    description: Overview per role
+  - name: Lookups
+    description: Option lists for forms and filters
+  - name: Positions
+    description: Internal positions and criteria
+  - name: Job posts
+    description: Public version of a position and share links
+  - name: Applications
+    description: Applications, CVs, and pipeline stages
+  - name: Candidates
+    description: Candidate records and duplicate matching
+  - name: AI screening
+    description: AI analysis and human overrides
+  - name: Interviews
+    description: Scheduling and blind scorecards
+  - name: Emails
+    description: Automatic candidate emails and the cancel window
+  - name: CV inbox
+    description: CVs collected from the recruitment mailbox
+  - name: Talent pool
+    description: Consented past candidates
+  - name: Imports
+    description: Bulk import from Excel and ZIP
+  - name: Reports
+    description: Recruitment reports and export
+  - name: Audit
+    description: Audit log
+  - name: Users
+    description: User administration
+  - name: Settings
+    description: Email templates, mailbox and sender
+  - name: Public career site
+    description: Anonymous endpoints for the career site
+
+paths:
+  # ---------------------------------------------------------------- Auth
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      operationId: login
+      summary: Log in (US01)
+      description: |
+        Returns an access token (15 minutes) and sets the refresh token as an `httpOnly`,
+        `Secure`, `SameSite=Strict` cookie scoped to `/api/auth`. Wrong credentials, a
+        deactivated account, and a locked account return the same 401.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: Logged in
+          headers:
+            Set-Cookie:
+              description: Refresh token cookie `ats_refresh`
+              schema: { type: string }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResponse' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /api/auth/refresh:
+    post:
+      tags: [Auth]
+      operationId: refreshToken
+      summary: Rotate the refresh token and issue a new access token
+      description: |
+        Reads the `ats_refresh` cookie. The used token is revoked and replaced. Reusing a revoked
+        token revokes the whole token family (theft detection) and returns 401.
+      security:
+        - refreshCookie: []
+      responses:
+        '200':
+          description: New access token
+          headers:
+            Set-Cookie:
+              description: Rotated refresh token cookie
+              schema: { type: string }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /api/auth/logout:
+    post:
+      tags: [Auth]
+      operationId: logout
+      summary: Log out (US02)
+      description: Revokes the refresh token family, clears the cookie, and writes a `LOGOUT` audit entry.
+      responses:
+        '204': { description: Logged out }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ---------------------------------------------------------------- Profile
+  /api/me:
+    get:
+      tags: [Profile]
+      operationId: getProfile
+      summary: Get my profile (US21)
+      responses:
+        '200':
+          description: Profile
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserProfile' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    put:
+      tags: [Profile]
+      operationId: updateProfile
+      summary: Update my profile (US21)
+      description: Role, email, and status cannot be changed here.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProfileUpdateRequest' }
+      responses:
+        '200':
+          description: Updated profile
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserProfile' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /api/me/password:
+    put:
+      tags: [Profile]
+      operationId: changePassword
+      summary: Change my password (US21)
+      description: Revokes all other refresh tokens of the user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ChangePasswordRequest' }
+      responses:
+        '204': { description: Password changed }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ---------------------------------------------------------------- Dashboard
+  /api/dashboard:
+    get:
+      tags: [Dashboard]
+      operationId: getDashboard
+      summary: Dashboard for a date range (US03)
+      description: |
+        Figures include only data the caller may see. Interviewers receive `variant = INTERVIEWER`
+        with only `myUpcomingInterviews` and `pendingScorecards`.
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER, INTERVIEWER]
+      parameters:
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+      responses:
+        '200':
+          description: Dashboard
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Dashboard' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ---------------------------------------------------------------- Lookups
+  /api/lookups/departments:
+    get:
+      tags: [Lookups]
+      operationId: listDepartments
+      summary: Active departments for forms and filters
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER, INTERVIEWER]
+      responses:
+        '200':
+          description: Departments
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Department' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /api/lookups/users:
+    get:
+      tags: [Lookups]
+      operationId: listUserOptions
+      summary: Active users for pickers (panel members, position owner filter)
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      parameters:
+        - name: roles
+          in: query
+          description: Comma-separated roles to include
+          schema:
+            type: array
+            items: { $ref: '#/components/schemas/Role' }
+          style: form
+          explode: false
+        - $ref: '#/components/parameters/Q'
+      responses:
+        '200':
+          description: Users
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/UserOption' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  # ---------------------------------------------------------------- Positions
+  /api/positions:
+    get:
+      tags: [Positions]
+      operationId: listPositions
+      summary: Search positions (US04)
+      description: Interviewers see only positions where they sit on at least one interview panel.
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER, INTERVIEWER]
+      parameters:
+        - $ref: '#/components/parameters/Q'
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/PositionStatus' }
+        - name: departmentId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: ownerId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: jobPostStatus
+          in: query
+          schema: { $ref: '#/components/schemas/JobPostStatus' }
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [createdAt, -createdAt, targetHireDate, -targetHireDate, title]
+            default: -createdAt
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Page of positions
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PositionPage' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Positions]
+      operationId: createPosition
+      summary: Create a position with criteria (US05)
+      description: The caller becomes the owner; a `DRAFT` job post is prefilled from the position.
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PositionCreateRequest' }
+      responses:
+        '201':
+          description: Created
+          headers:
+            Location:
+              schema: { type: string }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PositionDetail' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/positions/{positionId}:
+    parameters:
+      - $ref: '#/components/parameters/PositionId'
+    get:
+      tags: [Positions]
+      operationId: getPosition
+      summary: Position detail with current criteria (US04)
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER, INTERVIEWER]
+      responses:
+        '200':
+          description: Position
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PositionDetail' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Positions]
+      operationId: updatePosition
+      summary: Edit a position (US06)
+      description: |
+        Recruiters may edit only positions they own (BR-14); only ADMIN and HR_MANAGER may change
+        `ownerId`. Changing criteria creates a new criteria version and marks existing analyses
+        `OUTDATED`.
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PositionUpdateRequest' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PositionDetail' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/positions/{positionId}/status:
+    parameters:
+      - $ref: '#/components/parameters/PositionId'
+    put:
+      tags: [Positions]
+      operationId: updatePositionStatus
+      summary: Open, close, or reopen a position (US07)
+      description: |
+        `DRAFT → OPEN` is allowed for ADMIN, HR_MANAGER, and the owner. `OPEN → CLOSED` and
+        `CLOSED → OPEN` are allowed for ADMIN and HR_MANAGER only. Closing unpublishes the job post
+        (BR-05).
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PositionStatusRequest' }
+      responses:
+        '200':
+          description: Status changed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PositionDetail' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/positions/{positionId}/pipeline:
+    parameters:
+      - $ref: '#/components/parameters/PositionId'
+    get:
+      tags: [Applications]
+      operationId: getPipeline
+      summary: Kanban board of one position (US08)
+      description: |
+        Returns every stage with its total count and up to `limitPerStage` cards, newest first for
+        final stages and best score first otherwise. AI fields are omitted for INTERVIEWER.
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER, INTERVIEWER]
+      parameters:
+        - name: limitPerStage
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
+      responses:
+        '200':
+          description: Pipeline
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Pipeline' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ---------------------------------------------------------------- Job posts
+  /api/positions/{positionId}/job-post:
+    parameters:
+      - $ref: '#/components/parameters/PositionId'
+    get:
+      tags: [Job posts]
+      operationId: getJobPost
+      summary: Job post of a position (US22)
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      responses:
+        '200':
+          description: Job post
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/JobPost' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Job posts]
+      operationId: updateJobPost
+      summary: Edit public content (US22, BR-20)
+      description: Owner, ADMIN, or HR_MANAGER. A published post updates on the career site immediately.
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/JobPostUpdateRequest' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/JobPost' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/positions/{positionId}/job-post/publish:
+    parameters:
+      - $ref: '#/components/parameters/PositionId'
+    post:
+      tags: [Job posts]
+      operationId: publishJobPost
+      summary: Publish the job post (US22)
+      description: Only while the position is `OPEN` (BR-05); otherwise 409 `POSITION_NOT_OPEN`. Audited as `PUBLISH`.
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      responses:
+        '200':
+          description: Published
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/JobPost' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/positions/{positionId}/job-post/unpublish:
+    parameters:
+      - $ref: '#/components/parameters/PositionId'
+    post:
+      tags: [Job posts]
+      operationId: unpublishJobPost
+      summary: Remove the job post from the career site (US22)
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      responses:
+        '200':
+          description: Unpublished
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/JobPost' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/positions/{positionId}/job-post/share-links:
+    parameters:
+      - $ref: '#/components/parameters/PositionId'
+    get:
+      tags: [Job posts]
+      operationId: getShareLinks
+      summary: Source-tagged links to the job post (US22, BR-18)
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      responses:
+        '200':
+          description: One link per source
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ShareLink' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  # ---------------------------------------------------------------- Applications
+  /api/applications:
+    get:
+      tags: [Applications]
+      operationId: listApplications
+      summary: Applications table across positions (US08)
+      description: |
+        Interviewers receive only applications where they sit on an interview panel, and every
+        AI field (`fitScore`, `missingMustHave`, `analysisStatus`) is absent from the response
+        (BR-08); AI filters and sorting by score return 403 for them.
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER, INTERVIEWER]
+      parameters:
+        - $ref: '#/components/parameters/ApplicationFilterPosition'
+        - $ref: '#/components/parameters/ApplicationFilterStage'
+        - $ref: '#/components/parameters/ApplicationFilterSource'
+        - $ref: '#/components/parameters/ApplicationFilterScoreMin'
+        - $ref: '#/components/parameters/ApplicationFilterScoreMax'
+        - $ref: '#/components/parameters/ApplicationFilterMissingMustHave'
+        - $ref: '#/components/parameters/Q'
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [-appliedAt, appliedAt, -fitScore, fitScore, -stageChangedAt]
+            default: -appliedAt
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Page of applications
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApplicationPage' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [Applications]
+      operationId: createApplication
+      summary: Add an application with a CV (US09)
+      description: |
+        Validates the file (BR-15), reuses an existing candidate matched by email or phone (BR-06),
+        creates the application in `NEW`, queues an AI analysis, and queues the receipt email.
+        `candidateMatched` in the response tells whether an existing candidate was reused.
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema: { $ref: '#/components/schemas/ApplicationCreateForm' }
+            encoding:
+              cv:
+                contentType: application/pdf, application/vnd.openxmlformats-officedocument.wordprocessingml.document
+      responses:
+        '201':
+          description: Created
+          headers:
+            Location:
+              schema: { type: string }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApplicationCreated' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '413': { $ref: '#/components/responses/PayloadTooLarge' }
+  /api/applications/export:
+    get:
+      tags: [Applications]
+      operationId: exportApplications
+      summary: Export the filtered candidate table to Excel (US30, BR-25)
+      description: Same filters as `listApplications`; at most 5,000 rows, otherwise 400 `EXPORT_TOO_LARGE`. Audited as `EXPORT`.
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      parameters:
+        - $ref: '#/components/parameters/ApplicationFilterPosition'
+        - $ref: '#/components/parameters/ApplicationFilterStage'
+        - $ref: '#/components/parameters/ApplicationFilterSource'
+        - $ref: '#/components/parameters/ApplicationFilterScoreMin'
+        - $ref: '#/components/parameters/ApplicationFilterScoreMax'
+        - $ref: '#/components/parameters/ApplicationFilterMissingMustHave'
+        - $ref: '#/components/parameters/Q'
+      responses:
+        '200': { $ref: '#/components/responses/XlsxFile' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/applications/{applicationId}:
+    parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+    get:
+      tags: [Applications]
+      operationId: getApplication
+      summary: Application detail (US08)
+      description: AI fields are absent for INTERVIEWER; they may open only applications they interview.
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER, INTERVIEWER]
+      responses:
+        '200':
+          description: Application
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApplicationDetail' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Applications]
+      operationId: updateApplication
+      summary: Edit candidate information and source (US10)
+      description: Changing email or phone re-runs the duplicate check (BR-06). Audited.
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ApplicationUpdateRequest' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApplicationDetail' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/applications/{applicationId}/cv:
+    parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+    post:
+      tags: [Applications]
+      operationId: replaceCv
+      summary: Replace the CV (US10)
+      description: Keeps the previous file and analysis as history and queues a new analysis.
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [cv]
+              properties:
+                cv: { type: string, format: binary }
+      responses:
+        '200':
+          description: Replaced
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApplicationDetail' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '413': { $ref: '#/components/responses/PayloadTooLarge' }
+  /api/applications/{applicationId}/stage:
+    parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+    post:
+      tags: [Applications]
+      operationId: moveApplicationStage
+      summary: Move to the next stage or reject (US11)
+      description: |
+        One step forward at a time; `REJECTED` from any non-final stage with a reason (BR-01, BR-02).
+        RECRUITER may move up to `INTERVIEW` and reject; `OFFER` and `HIRED` need ADMIN or
+        HR_MANAGER (BR-03). An invalid move returns 409 `INVALID_STAGE_TRANSITION` with
+        `allowedStages`. Moving to `REJECTED` or `OFFER` queues the matching email (BR-23);
+        `pendingEmail` in the response lets the UI offer "Xem email".
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/StageMoveRequest' }
+      responses:
+        '200':
+          description: Moved
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StageMoveResult' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/applications/{applicationId}/stage-history:
+    parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+    get:
+      tags: [Applications]
+      operationId: getStageHistory
+      summary: Stage history (BR-04)
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      responses:
+        '200':
+          description: Oldest first
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/StageHistoryEntry' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/cv-files/{cvFileId}/content:
+    parameters:
+      - name: cvFileId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      tags: [Applications]
+      operationId: getCvFileContent
+      summary: Stream a CV file for preview or download
+      description: Allowed to anyone who may read an application that uses the file. Sent with `Cache-Control private, no-store`.
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER, INTERVIEWER]
+      parameters:
+        - name: disposition
+          in: query
+          schema: { type: string, enum: [inline, attachment], default: inline }
+      responses:
+        '200':
+          description: File
+          content:
+            application/pdf:
+              schema: { type: string, format: binary }
+            application/vnd.openxmlformats-officedocument.wordprocessingml.document:
+              schema: { type: string, format: binary }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ---------------------------------------------------------------- Candidates
+  /api/candidates/match:
+    get:
+      tags: [Candidates]
+      operationId: matchCandidate
+      summary: Find an existing candidate by email or phone before adding (BR-06)
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      parameters:
+        - name: email
+          in: query
+          schema: { type: string, format: email }
+        - name: phone
+          in: query
+          schema: { type: string }
+        - name: positionId
+          in: query
+          description: When given, `alreadyApplied` tells whether the candidate applied to this position.
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Match result
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CandidateMatch' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/candidates/{candidateId}:
+    parameters:
+      - $ref: '#/components/parameters/CandidateId'
+    get:
+      tags: [Candidates]
+      operationId: getCandidate
+      summary: Candidate with CVs, applications, and consent state (US26)
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      responses:
+        '200':
+          description: Candidate
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CandidateDetail' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ---------------------------------------------------------------- AI screening
+  /api/applications/{applicationId}/analyses:
+    parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+    get:
+      tags: [AI screening]
+      operationId: listAnalyses
+      summary: Analysis history, newest first (US12)
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      responses:
+        '200':
+          description: Analyses
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Analysis' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    post:
+      tags: [AI screening]
+      operationId: requestAnalysis
+      summary: Analyze again (US12)
+      description: Queues a new analysis of the current CV against the current criteria. 409 `ANALYSIS_IN_PROGRESS` while one is `PENDING` or `PROCESSING`.
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      responses:
+        '202':
+          description: Queued
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Analysis' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/applications/{applicationId}/analysis:
+    parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+    get:
+      tags: [AI screening]
+      operationId: getAnalysis
+      summary: Current analysis (polled every 5 s while pending)
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      responses:
+        '200':
+          description: Current analysis
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Analysis' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/analyses/{analysisId}/criteria/{criterionId}/override:
+    parameters:
+      - name: analysisId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+      - name: criterionId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    put:
+      tags: [AI screening]
+      operationId: overrideCriterionResult
+      summary: Override one criterion result (US13, BR-13)
+      description: Only on a `COMPLETED` analysis. The AI result is kept; the score is recalculated; audited as `AI_OVERRIDE`.
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/OverrideRequest' }
+      responses:
+        '200':
+          description: Updated analysis
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Analysis' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  # ---------------------------------------------------------------- Interviews
+  /api/interviews:
+    get:
+      tags: [Interviews]
+      operationId: listInterviews
+      summary: Interviews in a period (US03, US15)
+      description: INTERVIEWER always receives only interviews where they sit on the panel.
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER, INTERVIEWER]
+      parameters:
+        - name: mine
+          in: query
+          description: Only interviews where the caller is on the panel
+          schema: { type: boolean, default: false }
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+        - name: applicationId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/InterviewStatus' }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Page of interviews
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/InterviewPage' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /api/applications/{applicationId}/interviews:
+    parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+    post:
+      tags: [Interviews]
+      operationId: createInterview
+      summary: Schedule an interview (US14)
+      description: |
+        The application must be in `INTERVIEW` (409 `APPLICATION_NOT_IN_INTERVIEW`); a panel member
+        with an overlapping interview returns 409 `INTERVIEW_OVERLAP` naming the conflict. Queues the
+        invitation email for 10 minutes (BR-23).
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/InterviewRequest' }
+      responses:
+        '201':
+          description: Scheduled
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Interview' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/interviews/{interviewId}:
+    parameters:
+      - $ref: '#/components/parameters/InterviewId'
+    get:
+      tags: [Interviews]
+      operationId: getInterview
+      summary: Interview detail
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER, INTERVIEWER]
+      responses:
+        '200':
+          description: Interview
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Interview' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Interviews]
+      operationId: updateInterview
+      summary: Reschedule or change the panel (US14)
+      description: Replaces a still-pending invitation; if it was already sent, queues an `INTERVIEW_CHANGED` email.
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/InterviewRequest' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Interview' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/interviews/{interviewId}/cancel:
+    parameters:
+      - $ref: '#/components/parameters/InterviewId'
+    post:
+      tags: [Interviews]
+      operationId: cancelInterview
+      summary: Cancel an interview (US14)
+      description: Cancels a still-pending invitation; if it was already sent, queues an `INTERVIEW_CANCELLED` email.
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReasonRequest' }
+      responses:
+        '200':
+          description: Cancelled
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Interview' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/interviews/{interviewId}/scorecard:
+    parameters:
+      - $ref: '#/components/parameters/InterviewId'
+    get:
+      tags: [Interviews]
+      operationId: getMyScorecard
+      summary: My scorecard for this interview (draft or submitted)
+      description: Panel members only; returns an empty draft with the criteria if none was saved.
+      x-roles: [HR_MANAGER, INTERVIEWER]
+      responses:
+        '200':
+          description: Scorecard
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Scorecard' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Interviews]
+      operationId: saveScorecardDraft
+      summary: Save my scorecard as a draft
+      x-roles: [HR_MANAGER, INTERVIEWER]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ScorecardRequest' }
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Scorecard' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/interviews/{interviewId}/scorecard/submit:
+    parameters:
+      - $ref: '#/components/parameters/InterviewId'
+    post:
+      tags: [Interviews]
+      operationId: submitScorecard
+      summary: Submit my scorecard (US15)
+      description: |
+        Every criterion rated 1–5 and a recommendation are required. After submission the scorecard is
+        read-only (409 `SCORECARD_ALREADY_SUBMITTED`) and other submitted scorecards become visible.
+      x-roles: [HR_MANAGER, INTERVIEWER]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ScorecardRequest' }
+      responses:
+        '200':
+          description: Submitted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Scorecard' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/applications/{applicationId}/scorecards:
+    parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+    get:
+      tags: [Interviews]
+      operationId: getScorecards
+      summary: Scorecards of an application (BR-07)
+      description: |
+        ADMIN, HR_MANAGER, and RECRUITER see all submitted scorecards. A panel member who has not
+        submitted for this application receives only their own (`othersHidden = true`); after
+        submitting they also see other submitted ones. Drafts of others are never returned.
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER, INTERVIEWER]
+      responses:
+        '200':
+          description: Scorecards
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ScorecardsView' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ---------------------------------------------------------------- Emails
+  /api/emails:
+    get:
+      tags: [Emails]
+      operationId: listEmails
+      summary: Candidate emails across applications (e.g. failed ones for "Cần xử lý")
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      parameters:
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/EmailStatus' }
+        - name: event
+          in: query
+          schema: { $ref: '#/components/schemas/EmailEvent' }
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Page of emails
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EmailPage' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/applications/{applicationId}/emails:
+    parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+    get:
+      tags: [Emails]
+      operationId: listApplicationEmails
+      summary: Email history of an application (US27)
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      responses:
+        '200':
+          description: Newest first
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/EmailMessage' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/emails/{emailId}:
+    parameters:
+      - $ref: '#/components/parameters/EmailId'
+    put:
+      tags: [Emails]
+      operationId: updatePendingEmail
+      summary: Edit a pending email (US27)
+      description: Only while `PENDING`; otherwise 409 `EMAIL_NOT_PENDING`. Does not extend the send time.
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EmailUpdateRequest' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EmailMessage' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/emails/{emailId}/cancel:
+    parameters:
+      - $ref: '#/components/parameters/EmailId'
+    post:
+      tags: [Emails]
+      operationId: cancelPendingEmail
+      summary: Cancel a pending email (US27)
+      description: Only while `PENDING`; otherwise 409 `EMAIL_NOT_PENDING`. Audited as `CANCEL`.
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      responses:
+        '200':
+          description: Cancelled
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EmailMessage' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/emails/{emailId}/resend:
+    parameters:
+      - $ref: '#/components/parameters/EmailId'
+    post:
+      tags: [Emails]
+      operationId: resendEmail
+      summary: Send a failed email again
+      description: Only for `FAILED`; the email returns to `PENDING` due immediately with a fresh retry count. Audited as `RESEND`.
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      responses:
+        '200':
+          description: Queued
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EmailMessage' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  # ---------------------------------------------------------------- CV inbox
+  /api/inbox-items:
+    get:
+      tags: [CV inbox]
+      operationId: listInboxItems
+      summary: CV inbox (US25)
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      parameters:
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/InboxStatus' }
+        - $ref: '#/components/parameters/Q'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Page of inbox items
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/InboxPage' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/inbox-items/{inboxItemId}:
+    parameters:
+      - $ref: '#/components/parameters/InboxItemId'
+    get:
+      tags: [CV inbox]
+      operationId: getInboxItem
+      summary: Inbox item with attachments and prefilled candidate data
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      responses:
+        '200':
+          description: Inbox item
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/InboxItemDetail' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/inbox-items/{inboxItemId}/attachments/{attachmentId}/content:
+    parameters:
+      - $ref: '#/components/parameters/InboxItemId'
+      - name: attachmentId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      tags: [CV inbox]
+      operationId: getInboxAttachmentContent
+      summary: Stream an attachment for preview
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      responses:
+        '200':
+          description: File
+          content:
+            application/pdf:
+              schema: { type: string, format: binary }
+            application/vnd.openxmlformats-officedocument.wordprocessingml.document:
+              schema: { type: string, format: binary }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/inbox-items/{inboxItemId}/assign:
+    parameters:
+      - $ref: '#/components/parameters/InboxItemId'
+    post:
+      tags: [CV inbox]
+      operationId: assignInboxItem
+      summary: Turn an inbox item into an application (US25)
+      description: |
+        Runs the same intake as `createApplication` with the chosen attachment. A candidate who already
+        applied to the position marks the item `DUPLICATE` and returns 409 `DUPLICATE_APPLICATION` with
+        `existingApplicationId`.
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/InboxAssignRequest' }
+      responses:
+        '201':
+          description: Application created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApplicationCreated' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/inbox-items/{inboxItemId}/dismiss:
+    parameters:
+      - $ref: '#/components/parameters/InboxItemId'
+    post:
+      tags: [CV inbox]
+      operationId: dismissInboxItem
+      summary: Dismiss an item (deleted after 7 days, BR-22)
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      responses:
+        '200':
+          description: Dismissed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/InboxItem' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  # ---------------------------------------------------------------- Talent pool
+  /api/talent-pool:
+    get:
+      tags: [Talent pool]
+      operationId: searchTalentPool
+      summary: Search consented candidates (US26, BR-24)
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      parameters:
+        - $ref: '#/components/parameters/Q'
+        - $ref: '#/components/parameters/PoolSkills'
+        - $ref: '#/components/parameters/PoolSource'
+        - $ref: '#/components/parameters/PoolLastPosition'
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Page of pool candidates
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PoolPage' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/talent-pool/export:
+    get:
+      tags: [Talent pool]
+      operationId: exportTalentPool
+      summary: Export the filtered talent pool to Excel (US30, BR-25)
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      parameters:
+        - $ref: '#/components/parameters/Q'
+        - $ref: '#/components/parameters/PoolSkills'
+        - $ref: '#/components/parameters/PoolSource'
+        - $ref: '#/components/parameters/PoolLastPosition'
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+      responses:
+        '200': { $ref: '#/components/responses/XlsxFile' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/talent-pool/{candidateId}/applications:
+    parameters:
+      - $ref: '#/components/parameters/CandidateId'
+    post:
+      tags: [Talent pool]
+      operationId: addCandidateToPosition
+      summary: Add a pool candidate to an open position (US26)
+      description: Creates an application in `NEW` with the candidate's latest CV, queues analysis and receipt email. 409 if already applied.
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AddToPositionRequest' }
+      responses:
+        '201':
+          description: Application created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApplicationCreated' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  # ---------------------------------------------------------------- Imports
+  /api/imports/template:
+    get:
+      tags: [Imports]
+      operationId: downloadImportTemplate
+      summary: Excel template for bulk import (US16)
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      responses:
+        '200': { $ref: '#/components/responses/XlsxFile' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/imports/preview:
+    post:
+      tags: [Imports]
+      operationId: previewImport
+      summary: Upload Excel + ZIP and validate every row (US16)
+      description: Nothing is created. More than 200 rows → 400; Excel over 5 MB or ZIP over 200 MB → 413.
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema: { $ref: '#/components/schemas/ImportPreviewForm' }
+      responses:
+        '200':
+          description: Preview stored as a batch
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ImportBatch' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '413': { $ref: '#/components/responses/PayloadTooLarge' }
+  /api/imports:
+    get:
+      tags: [Imports]
+      operationId: listImports
+      summary: Import history
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Page of import batches
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ImportPage' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/imports/{batchId}:
+    parameters:
+      - $ref: '#/components/parameters/BatchId'
+    get:
+      tags: [Imports]
+      operationId: getImport
+      summary: Import batch with row results
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      responses:
+        '200':
+          description: Batch
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ImportBatch' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/imports/{batchId}/confirm:
+    parameters:
+      - $ref: '#/components/parameters/BatchId'
+    post:
+      tags: [Imports]
+      operationId: confirmImport
+      summary: Create all applications atomically (US16, BR-16)
+      description: Re-validates; any invalid row → 409 `IMPORT_INVALID_ROWS` and nothing is created. Expired preview → 409 `IMPORT_EXPIRED`.
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ImportConfirmRequest' }
+      responses:
+        '200':
+          description: Completed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ImportBatch' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  # ---------------------------------------------------------------- Reports
+  /api/reports:
+    get:
+      tags: [Reports]
+      operationId: getReport
+      summary: Recruitment report (US17)
+      x-roles: [ADMIN, HR_MANAGER]
+      parameters:
+        - $ref: '#/components/parameters/FromRequired'
+        - $ref: '#/components/parameters/ToRequired'
+        - name: positionId
+          in: query
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Report
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Report' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/reports/export:
+    get:
+      tags: [Reports]
+      operationId: exportReport
+      summary: Export the report to PDF or XLSX (US18)
+      x-roles: [ADMIN, HR_MANAGER]
+      parameters:
+        - $ref: '#/components/parameters/FromRequired'
+        - $ref: '#/components/parameters/ToRequired'
+        - name: positionId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: format
+          in: query
+          required: true
+          schema: { type: string, enum: [pdf, xlsx] }
+      responses:
+        '200':
+          description: File
+          headers:
+            Content-Disposition:
+              schema: { type: string }
+          content:
+            application/pdf:
+              schema: { type: string, format: binary }
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema: { type: string, format: binary }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  # ---------------------------------------------------------------- Audit
+  /api/audit-logs:
+    get:
+      tags: [Audit]
+      operationId: listAuditLogs
+      summary: Audit log, newest first (US19)
+      x-roles: [ADMIN, HR_MANAGER]
+      parameters:
+        - name: module
+          in: query
+          schema: { $ref: '#/components/schemas/AuditModule' }
+        - name: action
+          in: query
+          schema: { $ref: '#/components/schemas/AuditAction' }
+        - name: actorId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: entityId
+          in: query
+          schema: { type: string, format: uuid }
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Page of audit entries
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuditPage' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  # ---------------------------------------------------------------- Users
+  /api/users:
+    get:
+      tags: [Users]
+      operationId: listUsers
+      summary: Users (US20)
+      x-roles: [ADMIN]
+      parameters:
+        - $ref: '#/components/parameters/Q'
+        - name: role
+          in: query
+          schema: { $ref: '#/components/schemas/Role' }
+        - name: isActive
+          in: query
+          schema: { type: boolean }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Page of users
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserPage' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [Users]
+      operationId: createUser
+      summary: Create a user with a temporary password (US20)
+      x-roles: [ADMIN]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UserCreateRequest' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/users/{userId}:
+    parameters:
+      - $ref: '#/components/parameters/UserId'
+    get:
+      tags: [Users]
+      operationId: getUser
+      summary: User detail
+      x-roles: [ADMIN]
+      responses:
+        '200':
+          description: User
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Users]
+      operationId: updateUser
+      summary: Edit a user (US20)
+      x-roles: [ADMIN]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UserUpdateRequest' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/users/{userId}/status:
+    parameters:
+      - $ref: '#/components/parameters/UserId'
+    put:
+      tags: [Users]
+      operationId: updateUserStatus
+      summary: Activate or deactivate a user (US20)
+      description: Deactivation revokes the user's refresh tokens. Deactivating oneself → 409 `SELF_DEACTIVATION`.
+      x-roles: [ADMIN]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [isActive]
+              properties:
+                isActive: { type: boolean }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  # ---------------------------------------------------------------- Settings
+  /api/settings/email-templates:
+    get:
+      tags: [Settings]
+      operationId: listEmailTemplates
+      summary: Email templates (US28)
+      x-roles: [ADMIN, HR_MANAGER]
+      responses:
+        '200':
+          description: One template per event
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/EmailTemplate' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/settings/email-templates/{event}:
+    parameters:
+      - $ref: '#/components/parameters/EmailEventPath'
+    put:
+      tags: [Settings]
+      operationId: updateEmailTemplate
+      summary: Edit a template (US28)
+      description: Unknown placeholders or a body without `{{link_dong_y}}` → 400.
+      x-roles: [ADMIN, HR_MANAGER]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EmailTemplateUpdateRequest' }
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EmailTemplate' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/settings/email-templates/{event}/preview:
+    parameters:
+      - $ref: '#/components/parameters/EmailEventPath'
+    post:
+      tags: [Settings]
+      operationId: previewEmailTemplate
+      summary: Render unsaved template content with sample data
+      x-roles: [ADMIN, HR_MANAGER]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EmailTemplateUpdateRequest' }
+      responses:
+        '200':
+          description: Rendered
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RenderedEmail' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/settings/email-templates/{event}/test:
+    parameters:
+      - $ref: '#/components/parameters/EmailEventPath'
+    post:
+      tags: [Settings]
+      operationId: sendTestEmail
+      summary: Send the rendered template to the caller's own address
+      x-roles: [ADMIN, HR_MANAGER]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EmailTemplateUpdateRequest' }
+      responses:
+        '200':
+          description: Result of the send attempt
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ConnectionTestResult' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/settings/mail:
+    get:
+      tags: [Settings]
+      operationId: getMailSettings
+      summary: Mailbox and sender settings without passwords (US29)
+      x-roles: [ADMIN]
+      responses:
+        '200':
+          description: Settings
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MailSettings' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    put:
+      tags: [Settings]
+      operationId: updateMailSettings
+      summary: Save mailbox and sender settings (US29)
+      description: Omitted or null passwords keep the stored value. Audited without secrets.
+      x-roles: [ADMIN]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MailSettingsUpdateRequest' }
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MailSettings' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/settings/mail/test:
+    post:
+      tags: [Settings]
+      operationId: testMailSettings
+      summary: Test IMAP and SMTP connections (US29)
+      description: Tests the submitted values; omitted passwords use the stored ones.
+      x-roles: [ADMIN]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MailSettingsUpdateRequest' }
+      responses:
+        '200':
+          description: Result per connection
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [imap, smtp]
+                properties:
+                  imap: { $ref: '#/components/schemas/ConnectionTestResult' }
+                  smtp: { $ref: '#/components/schemas/ConnectionTestResult' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  # ---------------------------------------------------------------- Public
+  /api/public/job-posts:
+    get:
+      tags: [Public career site]
+      operationId: listPublicJobPosts
+      summary: Published job posts of open positions (US23)
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Q'
+        - name: departmentId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: location
+          in: query
+          schema: { type: string }
+        - name: employmentType
+          in: query
+          schema: { $ref: '#/components/schemas/EmploymentType' }
+        - name: level
+          in: query
+          schema: { $ref: '#/components/schemas/Level' }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Page of job posts
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PublicJobPostPage' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /api/public/job-posts/filters:
+    get:
+      tags: [Public career site]
+      operationId: getPublicJobPostFilters
+      summary: Filter options with counts (departments, locations, types, levels)
+      security: []
+      responses:
+        '200':
+          description: Filter options
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PublicFilters' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /api/public/job-posts/{slug}:
+    parameters:
+      - $ref: '#/components/parameters/Slug'
+    get:
+      tags: [Public career site]
+      operationId: getPublicJobPost
+      summary: Job post detail (US23)
+      description: Unpublished, closed-position, or unknown slugs → 404 without details. Expired posts return `isExpired = true`.
+      security: []
+      responses:
+        '200':
+          description: Job post
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PublicJobPost' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/public/job-posts/{slug}/applications:
+    parameters:
+      - $ref: '#/components/parameters/Slug'
+    post:
+      tags: [Public career site]
+      operationId: submitPublicApplication
+      summary: Apply online (US24)
+      description: |
+        Checks the Turnstile token, then limits of 5 per IP per hour and 3 per email per day (BR-21),
+        then the file (BR-15). A repeat application to the same position returns the same 202 and
+        creates nothing. Unknown `src` values fall back to `CAREER_SITE`.
+      security: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema: { $ref: '#/components/schemas/PublicApplyForm' }
+            encoding:
+              cv:
+                contentType: application/pdf, application/vnd.openxmlformats-officedocument.wordprocessingml.document
+      responses:
+        '202':
+          description: Accepted (same response for new and repeat applications)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PublicApplyResult' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '413': { $ref: '#/components/responses/PayloadTooLarge' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /api/public/privacy-policy:
+    get:
+      tags: [Public career site]
+      operationId: getPrivacyPolicy
+      summary: Current privacy policy and its version (BR-19)
+      security: []
+      responses:
+        '200':
+          description: Policy
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PrivacyPolicy' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /api/public/consent/{token}:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        description: Signed consent token from an email link
+        schema: { type: string }
+    get:
+      tags: [Public career site]
+      operationId: getConsent
+      summary: What data is held and the pool status (US31)
+      security: []
+      responses:
+        '200':
+          description: Consent summary
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ConsentSummary' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+    post:
+      tags: [Public career site]
+      operationId: updateConsent
+      summary: Join or leave the talent pool, or delete all data (US31, BR-24)
+      description: An invalid or expired token → 404 `CONSENT_TOKEN_INVALID`. `DELETE_ALL` invalidates the token.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ConsentActionRequest' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ConsentSummary' }
+        '204': { description: All data deleted }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /api/public/share/jobs/{slug}:
+    parameters:
+      - $ref: '#/components/parameters/Slug'
+    get:
+      tags: [Public career site]
+      operationId: getJobPostSharePage
+      summary: Open Graph HTML for link-preview crawlers (AD-04)
+      description: Routed by the proxy for crawler user agents only; browsers get the SPA.
+      security: []
+      responses:
+        '200':
+          description: Minimal HTML with `og:title`, `og:description`, `og:image`, `og:url`
+          content:
+            text/html:
+              schema: { type: string }
+        '404':
+          description: Unknown or unpublished post
+          content:
+            text/html:
+              schema: { type: string }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Access token from `login` or `refreshToken`, valid 15 minutes. Claims `sub`, `role`, `name`.
+    refreshCookie:
+      type: apiKey
+      in: cookie
+      name: ats_refresh
+
+  parameters:
+    Page:
+      name: page
+      in: query
+      schema: { type: integer, minimum: 1, default: 1 }
+    PageSize:
+      name: pageSize
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+    Q:
+      name: q
+      in: query
+      description: Free-text search
+      schema: { type: string, maxLength: 100 }
+    From:
+      name: from
+      in: query
+      description: Inclusive start date
+      schema: { type: string, format: date }
+    To:
+      name: to
+      in: query
+      description: Inclusive end date
+      schema: { type: string, format: date }
+    FromRequired:
+      name: from
+      in: query
+      required: true
+      schema: { type: string, format: date }
+    ToRequired:
+      name: to
+      in: query
+      required: true
+      schema: { type: string, format: date }
+    PositionId:
+      name: positionId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    ApplicationId:
+      name: applicationId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    CandidateId:
+      name: candidateId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    InterviewId:
+      name: interviewId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    EmailId:
+      name: emailId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    InboxItemId:
+      name: inboxItemId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    BatchId:
+      name: batchId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    UserId:
+      name: userId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    Slug:
+      name: slug
+      in: path
+      required: true
+      schema: { type: string, pattern: '^[a-z0-9-]{1,120}$' }
+    EmailEventPath:
+      name: event
+      in: path
+      required: true
+      schema: { $ref: '#/components/schemas/EmailEvent' }
+    ApplicationFilterPosition:
+      name: positionId
+      in: query
+      schema: { type: string, format: uuid }
+    ApplicationFilterStage:
+      name: stage
+      in: query
+      schema:
+        type: array
+        items: { $ref: '#/components/schemas/Stage' }
+      style: form
+      explode: false
+    ApplicationFilterSource:
+      name: source
+      in: query
+      schema:
+        type: array
+        items: { $ref: '#/components/schemas/Source' }
+      style: form
+      explode: false
+    ApplicationFilterScoreMin:
+      name: scoreMin
+      in: query
+      schema: { type: integer, minimum: 0, maximum: 100 }
+    ApplicationFilterScoreMax:
+      name: scoreMax
+      in: query
+      schema: { type: integer, minimum: 0, maximum: 100 }
+    ApplicationFilterMissingMustHave:
+      name: missingMustHave
+      in: query
+      schema: { type: boolean }
+    PoolSkills:
+      name: skills
+      in: query
+      description: Comma-separated; all must match
+      schema:
+        type: array
+        items: { type: string }
+      style: form
+      explode: false
+    PoolSource:
+      name: source
+      in: query
+      schema: { $ref: '#/components/schemas/Source' }
+    PoolLastPosition:
+      name: lastPositionId
+      in: query
+      schema: { type: string, format: uuid }
+
+  responses:
+    BadRequest:
+      description: Validation failed (`VALIDATION_FAILED`) or a business precondition on the input
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ValidationProblemDetails' }
+    Unauthorized:
+      description: Missing, expired, or invalid credentials
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    Forbidden:
+      description: Role or record-level rule denies access
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    NotFound:
+      description: Resource does not exist or is not visible to the caller
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    Conflict:
+      description: Business rule or concurrency conflict; see `errorCode`
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    PayloadTooLarge:
+      description: File larger than allowed (`FILE_TOO_LARGE`)
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    TooManyRequests:
+      description: Rate limit reached (`RATE_LIMITED`)
+      headers:
+        Retry-After:
+          schema: { type: integer }
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    XlsxFile:
+      description: Excel file
+      headers:
+        Content-Disposition:
+          schema: { type: string }
+      content:
+        application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+          schema: { type: string, format: binary }
+
+  schemas:
+    # ------------------------------------------------------------ Errors and paging
+    ErrorCode:
+      type: string
+      enum:
+        - VALIDATION_FAILED
+        - INVALID_CREDENTIALS
+        - UNAUTHENTICATED
+        - FORBIDDEN
+        - NOT_FOUND
+        - CONCURRENCY_CONFLICT
+        - DUPLICATE_EMAIL
+        - DUPLICATE_APPLICATION
+        - POSITION_NOT_OPEN
+        - INVALID_POSITION_STATUS_CHANGE
+        - INVALID_STAGE_TRANSITION
+        - ANALYSIS_IN_PROGRESS
+        - ANALYSIS_NOT_COMPLETED
+        - APPLICATION_NOT_IN_INTERVIEW
+        - INTERVIEW_OVERLAP
+        - INTERVIEW_CANCELLED
+        - SCORECARD_ALREADY_SUBMITTED
+        - EMAIL_NOT_PENDING
+        - EMAIL_NOT_FAILED
+        - INBOX_ITEM_PROCESSED
+        - IMPORT_INVALID_ROWS
+        - IMPORT_EXPIRED
+        - EXPORT_TOO_LARGE
+        - UNSUPPORTED_FILE_TYPE
+        - NO_EXTRACTABLE_TEXT
+        - FILE_TOO_LARGE
+        - SELF_DEACTIVATION
+        - JOB_POST_EXPIRED
+        - CAPTCHA_FAILED
+        - RATE_LIMITED
+        - CONSENT_TOKEN_INVALID
+        - INTERNAL_ERROR
+    ProblemDetails:
+      type: object
+      description: RFC 7807 problem; `detail` is a Vietnamese message safe to show to the user.
+      required: [type, title, status, errorCode, traceId]
+      properties:
+        type: { type: string, example: 'https://ats.example.vn/errors/invalid-stage-transition' }
+        title: { type: string, example: Invalid stage transition }
+        status: { type: integer, example: 409 }
+        detail: { type: string, example: Không thể chuyển từ NEW sang INTERVIEW }
+        instance: { type: string, example: /api/applications/0190a1b2-.../stage }
+        errorCode: { $ref: '#/components/schemas/ErrorCode' }
+        traceId: { type: string, example: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01 }
+        allowedStages:
+          type: array
+          description: Only for `INVALID_STAGE_TRANSITION`
+          items: { $ref: '#/components/schemas/Stage' }
+        existingApplicationId:
+          type: string
+          format: uuid
+          description: Only for `DUPLICATE_APPLICATION`
+        conflicts:
+          type: array
+          description: Only for `INTERVIEW_OVERLAP`
+          items:
+            type: object
+            properties:
+              userId: { type: string, format: uuid }
+              userName: { type: string }
+              interviewId: { type: string, format: uuid }
+              startsAt: { type: string, format: date-time }
+    ValidationProblemDetails:
+      allOf:
+        - $ref: '#/components/schemas/ProblemDetails'
+        - type: object
+          properties:
+            errors:
+              type: object
+              description: Field name (camelCase) → messages
+              additionalProperties:
+                type: array
+                items: { type: string }
+              example:
+                criteria[0].weight: [Trọng số phải từ 1 đến 5]
+    PageMeta:
+      type: object
+      required: [page, pageSize, totalItems, totalPages]
+      properties:
+        page: { type: integer }
+        pageSize: { type: integer }
+        totalItems: { type: integer }
+        totalPages: { type: integer }
+
+    # ------------------------------------------------------------ Enums
+    Role:
+      type: string
+      enum: [ADMIN, HR_MANAGER, RECRUITER, INTERVIEWER]
+    PositionStatus:
+      type: string
+      enum: [DRAFT, OPEN, CLOSED]
+    EmploymentType:
+      type: string
+      enum: [FULL_TIME, PART_TIME, CONTRACT, INTERNSHIP]
+    Level:
+      type: string
+      enum: [INTERN, FRESHER, JUNIOR, MIDDLE, SENIOR, LEAD, MANAGER]
+    CriterionType:
+      type: string
+      enum: [MUST_HAVE, NICE_TO_HAVE]
+    JobPostStatus:
+      type: string
+      enum: [DRAFT, PUBLISHED, UNPUBLISHED]
+    Stage:
+      type: string
+      enum: [NEW, SCREENING, INTERVIEW, OFFER, HIRED, REJECTED]
+    Source:
+      type: string
+      enum: [CAREER_SITE, LINKEDIN, FACEBOOK, TOPCV, VIETNAMWORKS, EMAIL, REFERRAL, OTHER]
+    IntakeChannel:
+      type: string
+      enum: [CAREER_SITE, MAILBOX, MANUAL, IMPORT, TALENT_POOL]
+    RejectionReason:
+      type: string
+      enum: [SKILLS_MISMATCH, EXPERIENCE_MISMATCH, SALARY_MISMATCH, FAILED_INTERVIEW, CULTURE_FIT,
+             POSITION_FILLED, NO_RESPONSE, CANDIDATE_WITHDREW, OTHER]
+    AnalysisStatus:
+      type: string
+      enum: [PENDING, PROCESSING, COMPLETED, FAILED, OUTDATED]
+    CriterionResult:
+      type: string
+      enum: [MET, PARTIAL, NOT_MET, UNVERIFIED]
+    InterviewStatus:
+      type: string
+      enum: [SCHEDULED, CANCELLED]
+    Recommendation:
+      type: string
+      enum: [STRONG_YES, YES, NO, STRONG_NO]
+    ScorecardStatus:
+      type: string
+      enum: [DRAFT, SUBMITTED]
+    EmailEvent:
+      type: string
+      enum: [RECEIPT, INTERVIEW_INVITATION, INTERVIEW_CHANGED, INTERVIEW_CANCELLED, REJECTION, OFFER,
+             POOL_RENEWAL, CONSENT_CONFIRMATION]
+    EmailStatus:
+      type: string
+      enum: [PENDING, SENDING, SENT, FAILED, CANCELLED]
+    InboxStatus:
+      type: string
+      enum: [NEEDS_REVIEW, CONVERTED, DUPLICATE, DISMISSED]
+    ImportStatus:
+      type: string
+      enum: [PREVIEWED, COMPLETED, EXPIRED]
+    AuditModule:
+      type: string
+      enum: [AUTH, POSITION, JOB_POST, APPLICATION, CANDIDATE, AI, INTERVIEW, EMAIL, INBOX, IMPORT,
+             TALENT_POOL, REPORT, USER, SETTINGS, CONSENT]
+    AuditAction:
+      type: string
+      enum: [LOGIN, LOGIN_FAILED, LOGOUT, CREATE, UPDATE, STATUS_CHANGE, STAGE_CHANGE, AI_OVERRIDE,
+             PUBLISH, UNPUBLISH, EXPORT, IMPORT, ASSIGN, DISMISS, CANCEL, RESEND, SUBMIT,
+             CONSENT_CHANGE, CV_DELETE, ANONYMIZE]
+
+    # ------------------------------------------------------------ Auth, profile, users
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email, maxLength: 254 }
+        password: { type: string, format: password, minLength: 1, maxLength: 128 }
+    AuthResponse:
+      type: object
+      required: [accessToken, expiresAt, user]
+      properties:
+        accessToken: { type: string }
+        expiresAt: { type: string, format: date-time }
+        user: { $ref: '#/components/schemas/UserProfile' }
+    UserProfile:
+      type: object
+      required: [id, email, fullName, role, timezone]
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        fullName: { type: string }
+        phone: { type: string, nullable: true }
+        avatarUrl: { type: string, format: uri, nullable: true }
+        timezone: { type: string, example: Asia/Ho_Chi_Minh }
+        role: { $ref: '#/components/schemas/Role' }
+        mustChangePassword: { type: boolean }
+    ProfileUpdateRequest:
+      type: object
+      required: [fullName, timezone]
+      properties:
+        fullName: { type: string, minLength: 2, maxLength: 120 }
+        phone: { type: string, maxLength: 20, nullable: true }
+        avatarUrl: { type: string, format: uri, maxLength: 500, nullable: true }
+        timezone: { type: string, maxLength: 64 }
+    ChangePasswordRequest:
+      type: object
+      required: [currentPassword, newPassword]
+      properties:
+        currentPassword: { type: string, format: password }
+        newPassword:
+          type: string
+          format: password
+          minLength: 10
+          maxLength: 128
+          description: At least 10 characters with letters and digits
+    User:
+      type: object
+      required: [id, email, fullName, role, isActive, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        fullName: { type: string }
+        phone: { type: string, nullable: true }
+        role: { $ref: '#/components/schemas/Role' }
+        isActive: { type: boolean }
+        lastLoginAt: { type: string, format: date-time, nullable: true }
+        createdAt: { type: string, format: date-time }
+    UserCreateRequest:
+      type: object
+      required: [email, fullName, role, temporaryPassword]
+      properties:
+        email: { type: string, format: email, maxLength: 254 }
+        fullName: { type: string, minLength: 2, maxLength: 120 }
+        phone: { type: string, maxLength: 20, nullable: true }
+        role: { $ref: '#/components/schemas/Role' }
+        temporaryPassword: { type: string, format: password, minLength: 10, maxLength: 128 }
+    UserUpdateRequest:
+      type: object
+      required: [email, fullName, role]
+      properties:
+        email: { type: string, format: email, maxLength: 254 }
+        fullName: { type: string, minLength: 2, maxLength: 120 }
+        phone: { type: string, maxLength: 20, nullable: true }
+        role: { $ref: '#/components/schemas/Role' }
+    UserPage:
+      allOf:
+        - $ref: '#/components/schemas/PageMeta'
+        - type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items: { $ref: '#/components/schemas/User' }
+    UserOption:
+      type: object
+      required: [id, fullName, role]
+      properties:
+        id: { type: string, format: uuid }
+        fullName: { type: string }
+        role: { $ref: '#/components/schemas/Role' }
+    Department:
+      type: object
+      required: [id, name]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+
+    # ------------------------------------------------------------ Dashboard and reports
+    Dashboard:
+      type: object
+      required: [variant]
+      properties:
+        variant: { type: string, enum: [FULL, INTERVIEWER] }
+        kpis:
+          type: object
+          properties:
+            openPositions: { type: integer }
+            newApplications: { type: integer }
+            interviewsThisWeek: { type: integer }
+            hires: { type: integer }
+        stageCounts:
+          type: array
+          items: { $ref: '#/components/schemas/StageCount' }
+        upcomingInterviews:
+          type: array
+          items: { $ref: '#/components/schemas/InterviewSummary' }
+        positionsNearTargetDate:
+          type: array
+          items: { $ref: '#/components/schemas/PositionSummary' }
+        actionItems:
+          type: object
+          description: "Cần xử lý"
+          properties:
+            inboxNeedsReview: { type: integer }
+            failedEmails: { type: integer }
+            failedAnalyses: { type: integer }
+            overdueScorecards: { type: integer }
+        myUpcomingInterviews:
+          type: array
+          items: { $ref: '#/components/schemas/InterviewSummary' }
+        pendingScorecards:
+          type: array
+          items: { $ref: '#/components/schemas/InterviewSummary' }
+    StageCount:
+      type: object
+      required: [stage, count]
+      properties:
+        stage: { $ref: '#/components/schemas/Stage' }
+        count: { type: integer }
+    Report:
+      type: object
+      required: [from, to, funnel, bySource, rejectionReasons, ai, emails, positions]
+      properties:
+        from: { type: string, format: date }
+        to: { type: string, format: date }
+        funnel:
+          type: array
+          items:
+            type: object
+            properties:
+              stage: { $ref: '#/components/schemas/Stage' }
+              count: { type: integer, description: Applications that reached this stage }
+              conversionRate: { type: number, format: double, description: 'Share of the previous stage, 0–1' }
+        averageTimeToHireDays: { type: number, format: double, nullable: true }
+        bySource:
+          type: array
+          items:
+            type: object
+            properties:
+              source: { $ref: '#/components/schemas/Source' }
+              applications: { type: integer }
+              hires: { type: integer }
+        rejectionReasons:
+          type: array
+          items:
+            type: object
+            properties:
+              reason: { $ref: '#/components/schemas/RejectionReason' }
+              count: { type: integer }
+        ai:
+          type: object
+          properties:
+            completedAnalyses: { type: integer }
+            failedAnalyses: { type: integer }
+            overrideRate:
+              type: number
+              format: double
+              description: Overridden criterion results ÷ all criterion results of completed analyses
+            agreementRate:
+              type: number
+              format: double
+              description: |
+                Screened applications where the human decision (advanced to INTERVIEW vs rejected in
+                NEW/SCREENING) matches the AI signal (fit score ≥ 60 and no missing must-have) ÷ all
+                screened applications with a completed analysis
+        emails:
+          type: object
+          properties:
+            sent: { type: integer }
+            failed: { type: integer }
+            cancelled: { type: integer }
+        positions:
+          type: array
+          items:
+            type: object
+            properties:
+              positionId: { type: string, format: uuid }
+              code: { type: string }
+              title: { type: string }
+              applications: { type: integer }
+              hires: { type: integer }
+              averageTimeToHireDays: { type: number, format: double, nullable: true }
+
+    # ------------------------------------------------------------ Positions and job posts
+    CriterionInput:
+      type: object
+      required: [name, type, weight]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Existing criterion of the current version (kept if unchanged)
+        name: { type: string, minLength: 2, maxLength: 150 }
+        description: { type: string, maxLength: 500, nullable: true }
+        type: { $ref: '#/components/schemas/CriterionType' }
+        weight: { type: integer, minimum: 1, maximum: 5 }
+    Criterion:
+      type: object
+      required: [id, name, type, weight, version]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        description: { type: string, nullable: true }
+        type: { $ref: '#/components/schemas/CriterionType' }
+        weight: { type: integer, minimum: 1, maximum: 5 }
+        version: { type: integer }
+    PositionFields:
+      type: object
+      required: [title, departmentId, location, employmentType, level, headcount, targetHireDate, description, criteria]
+      properties:
+        title: { type: string, minLength: 2, maxLength: 150 }
+        departmentId: { type: string, format: uuid }
+        location: { type: string, maxLength: 100 }
+        employmentType: { $ref: '#/components/schemas/EmploymentType' }
+        level: { $ref: '#/components/schemas/Level' }
+        headcount: { type: integer, minimum: 1 }
+        targetHireDate: { type: string, format: date, description: Must be in the future }
+        description: { type: string, minLength: 1, maxLength: 20000 }
+        criteria:
+          type: array
+          minItems: 1
+          maxItems: 30
+          items: { $ref: '#/components/schemas/CriterionInput' }
+    PositionCreateRequest:
+      allOf:
+        - $ref: '#/components/schemas/PositionFields'
+        - type: object
+          properties:
+            status:
+              type: string
+              enum: [DRAFT, OPEN]
+              default: DRAFT
+    PositionUpdateRequest:
+      allOf:
+        - $ref: '#/components/schemas/PositionFields'
+        - type: object
+          required: [rowVersion]
+          properties:
+            ownerId:
+              type: string
+              format: uuid
+              description: ADMIN and HR_MANAGER only
+            rowVersion: { type: string, description: Concurrency token from the last read }
+    PositionStatusRequest:
+      type: object
+      required: [status]
+      properties:
+        status: { $ref: '#/components/schemas/PositionStatus' }
+    PositionSummary:
+      type: object
+      required: [id, code, title, department, location, status, owner, headcount, targetHireDate, applicationCount, hiredCount]
+      properties:
+        id: { type: string, format: uuid }
+        code: { type: string, example: JOB-014 }
+        title: { type: string }
+        department: { $ref: '#/components/schemas/Department' }
+        location: { type: string }
+        status: { $ref: '#/components/schemas/PositionStatus' }
+        jobPostStatus: { $ref: '#/components/schemas/JobPostStatus' }
+        owner: { $ref: '#/components/schemas/UserOption' }
+        headcount: { type: integer }
+        targetHireDate: { type: string, format: date }
+        applicationCount: { type: integer }
+        hiredCount: { type: integer }
+    PositionDetail:
+      allOf:
+        - $ref: '#/components/schemas/PositionSummary'
+        - type: object
+          required: [employmentType, level, description, criteriaVersion, criteria, createdAt, rowVersion]
+          properties:
+            employmentType: { $ref: '#/components/schemas/EmploymentType' }
+            level: { $ref: '#/components/schemas/Level' }
+            description: { type: string }
+            criteriaVersion: { type: integer }
+            criteria:
+              type: array
+              items: { $ref: '#/components/schemas/Criterion' }
+            stageCounts:
+              type: array
+              items: { $ref: '#/components/schemas/StageCount' }
+            createdAt: { type: string, format: date-time }
+            closedAt: { type: string, format: date-time, nullable: true }
+            rowVersion: { type: string }
+    PositionPage:
+      allOf:
+        - $ref: '#/components/schemas/PageMeta'
+        - type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items: { $ref: '#/components/schemas/PositionSummary' }
+    JobPostContent:
+      type: object
+      required: [slug, title, location, employmentType, level, description, requirements]
+      properties:
+        slug: { type: string, pattern: '^[a-z0-9-]{1,120}$', example: backend-dotnet }
+        title: { type: string, maxLength: 150 }
+        location: { type: string, maxLength: 100 }
+        employmentType: { $ref: '#/components/schemas/EmploymentType' }
+        level: { $ref: '#/components/schemas/Level' }
+        salaryMin: { type: integer, format: int64, minimum: 0, nullable: true }
+        salaryMax: { type: integer, format: int64, minimum: 0, nullable: true }
+        salaryCurrency: { type: string, default: VND, example: VND }
+        salaryVisible: { type: boolean, default: false }
+        summary: { type: string, maxLength: 300, nullable: true }
+        description: { type: string, maxLength: 20000 }
+        requirements: { type: string, maxLength: 20000 }
+        benefits: { type: string, maxLength: 20000, nullable: true }
+        closingDate: { type: string, format: date, nullable: true }
+    JobPostUpdateRequest:
+      $ref: '#/components/schemas/JobPostContent'
+    JobPost:
+      allOf:
+        - $ref: '#/components/schemas/JobPostContent'
+        - type: object
+          required: [id, positionId, status, publicUrl]
+          properties:
+            id: { type: string, format: uuid }
+            positionId: { type: string, format: uuid }
+            status: { $ref: '#/components/schemas/JobPostStatus' }
+            publicUrl: { type: string, format: uri, example: 'https://careers.example.vn/jobs/backend-dotnet' }
+            publishedAt: { type: string, format: date-time, nullable: true }
+            isExpired: { type: boolean }
+    ShareLink:
+      type: object
+      required: [source, url]
+      properties:
+        source: { $ref: '#/components/schemas/Source' }
+        url: { type: string, format: uri, example: 'https://careers.example.vn/jobs/backend-dotnet?src=linkedin' }
+
+    # ------------------------------------------------------------ Candidates and applications
+    CandidateInput:
+      type: object
+      required: [fullName]
+      description: At least one of email or phone is required.
+      properties:
+        fullName: { type: string, minLength: 2, maxLength: 120 }
+        email: { type: string, format: email, maxLength: 254, nullable: true }
+        phone: { type: string, maxLength: 20, nullable: true }
+        notes: { type: string, maxLength: 5000, nullable: true }
+    CandidateSummary:
+      type: object
+      required: [id, fullName]
+      properties:
+        id: { type: string, format: uuid }
+        fullName: { type: string }
+        email: { type: string, format: email, nullable: true }
+        phone: { type: string, nullable: true }
+        emailInvalid: { type: boolean }
+        inTalentPool: { type: boolean }
+    CandidateMatch:
+      type: object
+      required: [matched]
+      properties:
+        matched: { type: boolean }
+        matchedBy: { type: string, enum: [EMAIL, PHONE], nullable: true }
+        candidate: { $ref: '#/components/schemas/CandidateSummary' }
+        alreadyApplied: { type: boolean }
+        existingApplicationId: { type: string, format: uuid, nullable: true }
+    CandidateDetail:
+      allOf:
+        - $ref: '#/components/schemas/CandidateSummary'
+        - type: object
+          required: [skills, applications, cvFiles]
+          properties:
+            notes: { type: string, nullable: true }
+            skills:
+              type: array
+              items: { type: string }
+            poolConsentExpiresAt: { type: string, format: date-time, nullable: true }
+            applications:
+              type: array
+              items: { $ref: '#/components/schemas/ApplicationListItem' }
+            cvFiles:
+              type: array
+              items: { $ref: '#/components/schemas/CvFile' }
+    CvFile:
+      type: object
+      required: [id, originalName, contentType, sizeBytes, uploadedAt]
+      properties:
+        id: { type: string, format: uuid }
+        originalName: { type: string }
+        contentType: { type: string }
+        sizeBytes: { type: integer }
+        uploadedAt: { type: string, format: date-time }
+        isCurrent: { type: boolean }
+    ApplicationCreateForm:
+      type: object
+      required: [positionId, fullName, source, cv]
+      properties:
+        positionId: { type: string, format: uuid }
+        fullName: { type: string, minLength: 2, maxLength: 120 }
+        email: { type: string, format: email }
+        phone: { type: string, maxLength: 20 }
+        source: { $ref: '#/components/schemas/Source' }
+        sourceNote: { type: string, maxLength: 200, description: Required when source is OTHER }
+        notes: { type: string, maxLength: 5000 }
+        cv: { type: string, format: binary, description: 'PDF or DOCX, at most 10 MB, with extractable text' }
+    ApplicationCreated:
+      type: object
+      required: [application, candidateMatched]
+      properties:
+        application: { $ref: '#/components/schemas/ApplicationDetail' }
+        candidateMatched: { type: boolean }
+        receiptEmailQueued: { type: boolean, description: False when the candidate has no valid email }
+    ApplicationListItem:
+      type: object
+      required: [id, candidate, position, stage, source, appliedAt, stageChangedAt]
+      properties:
+        id: { type: string, format: uuid }
+        candidate: { $ref: '#/components/schemas/CandidateSummary' }
+        position:
+          type: object
+          required: [id, code, title]
+          properties:
+            id: { type: string, format: uuid }
+            code: { type: string }
+            title: { type: string }
+        stage: { $ref: '#/components/schemas/Stage' }
+        source: { $ref: '#/components/schemas/Source' }
+        appliedAt: { type: string, format: date-time }
+        stageChangedAt: { type: string, format: date-time }
+        fitScore:
+          type: integer
+          minimum: 0
+          maximum: 100
+          nullable: true
+          description: Absent for INTERVIEWER (BR-08)
+        missingMustHave: { type: boolean, description: Absent for INTERVIEWER }
+        analysisStatus:
+          allOf:
+            - $ref: '#/components/schemas/AnalysisStatus'
+          description: Absent for INTERVIEWER
+        nextInterviewAt: { type: string, format: date-time, nullable: true }
+    ApplicationPage:
+      allOf:
+        - $ref: '#/components/schemas/PageMeta'
+        - type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items: { $ref: '#/components/schemas/ApplicationListItem' }
+    ApplicationDetail:
+      allOf:
+        - $ref: '#/components/schemas/ApplicationListItem'
+        - type: object
+          required: [intakeChannel, cvFiles, allowedStages, rowVersion]
+          properties:
+            sourceNote: { type: string, nullable: true }
+            intakeChannel: { $ref: '#/components/schemas/IntakeChannel' }
+            coverMessage: { type: string, nullable: true }
+            notes: { type: string, nullable: true }
+            rejectionReason:
+              type: string
+              allOf:
+                - $ref: '#/components/schemas/RejectionReason'
+              nullable: true
+            rejectionNote: { type: string, nullable: true }
+            currentCvFileId: { type: string, format: uuid, nullable: true }
+            cvFiles:
+              type: array
+              items: { $ref: '#/components/schemas/CvFile' }
+            allowedStages:
+              type: array
+              description: Stages the caller may move this application to now
+              items: { $ref: '#/components/schemas/Stage' }
+            pendingEmailCount: { type: integer, description: Absent for INTERVIEWER }
+            rowVersion: { type: string }
+    ApplicationUpdateRequest:
+      type: object
+      required: [candidate, source, rowVersion]
+      properties:
+        candidate: { $ref: '#/components/schemas/CandidateInput' }
+        source: { $ref: '#/components/schemas/Source' }
+        sourceNote: { type: string, maxLength: 200, nullable: true }
+        rowVersion: { type: string }
+    StageMoveRequest:
+      type: object
+      required: [toStage, rowVersion]
+      properties:
+        toStage: { $ref: '#/components/schemas/Stage' }
+        rejectionReason:
+          allOf:
+            - $ref: '#/components/schemas/RejectionReason'
+          description: Required when toStage is REJECTED
+        note: { type: string, maxLength: 500 }
+        rowVersion: { type: string }
+    StageMoveResult:
+      type: object
+      required: [application]
+      properties:
+        application: { $ref: '#/components/schemas/ApplicationDetail' }
+        pendingEmail: { $ref: '#/components/schemas/EmailMessage' }
+    StageHistoryEntry:
+      type: object
+      required: [id, toStage, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        fromStage:
+          type: string
+          allOf:
+            - $ref: '#/components/schemas/Stage'
+          nullable: true
+        toStage: { $ref: '#/components/schemas/Stage' }
+        rejectionReason:
+          type: string
+          allOf:
+            - $ref: '#/components/schemas/RejectionReason'
+          nullable: true
+        note: { type: string, nullable: true }
+        actor: { $ref: '#/components/schemas/UserOption' }
+        createdAt: { type: string, format: date-time }
+    Pipeline:
+      type: object
+      required: [positionId, columns]
+      properties:
+        positionId: { type: string, format: uuid }
+        columns:
+          type: array
+          items:
+            type: object
+            required: [stage, count, items]
+            properties:
+              stage: { $ref: '#/components/schemas/Stage' }
+              count: { type: integer }
+              items:
+                type: array
+                items: { $ref: '#/components/schemas/ApplicationListItem' }
+
+    # ------------------------------------------------------------ AI screening
+    Analysis:
+      type: object
+      required: [id, status, criteriaVersion, requestedAt, isOverridden]
+      properties:
+        id: { type: string, format: uuid }
+        status: { $ref: '#/components/schemas/AnalysisStatus' }
+        cvFileId: { type: string, format: uuid }
+        criteriaVersion: { type: integer }
+        requestedAt: { type: string, format: date-time }
+        completedAt: { type: string, format: date-time, nullable: true }
+        failureReason: { type: string, nullable: true }
+        model: { type: string, nullable: true, description: Shown in the provenance line "Gợi ý bởi AI" }
+        aiScore: { type: integer, minimum: 0, maximum: 100, nullable: true }
+        finalScore: { type: integer, minimum: 0, maximum: 100, nullable: true }
+        missingMustHave: { type: boolean, nullable: true }
+        isOverridden: { type: boolean }
+        extracted:
+          type: object
+          nullable: true
+          properties:
+            skills:
+              type: array
+              items: { type: string }
+            yearsOfExperience: { type: number, format: double, nullable: true }
+            education:
+              type: array
+              items: { type: string }
+            languages:
+              type: array
+              items: { type: string }
+        criteria:
+          type: array
+          items: { $ref: '#/components/schemas/CriterionEvaluation' }
+    CriterionEvaluation:
+      type: object
+      required: [criterion, aiResult, finalResult]
+      properties:
+        criterion: { $ref: '#/components/schemas/Criterion' }
+        aiResult: { $ref: '#/components/schemas/CriterionResult' }
+        aiQuote: { type: string, nullable: true, description: Verified to exist in the CV text (BR-11) }
+        aiExplanation: { type: string, nullable: true }
+        finalResult: { $ref: '#/components/schemas/CriterionResult' }
+        override:
+          type: object
+          nullable: true
+          properties:
+            reason: { type: string }
+            by: { $ref: '#/components/schemas/UserOption' }
+            at: { type: string, format: date-time }
+    OverrideRequest:
+      type: object
+      required: [result, reason]
+      properties:
+        result:
+          type: string
+          enum: [MET, PARTIAL, NOT_MET]
+        reason: { type: string, minLength: 10, maxLength: 500 }
+
+    # ------------------------------------------------------------ Interviews
+    InterviewRequest:
+      type: object
+      required: [roundName, startsAt, durationMinutes, panelUserIds]
+      description: Either location or meetingUrl is required.
+      properties:
+        roundName: { type: string, maxLength: 100, example: Phỏng vấn chuyên môn }
+        startsAt: { type: string, format: date-time, description: Must be in the future }
+        durationMinutes: { type: integer, minimum: 15, maximum: 480 }
+        location: { type: string, maxLength: 200, nullable: true }
+        meetingUrl: { type: string, format: uri, maxLength: 500, nullable: true }
+        panelUserIds:
+          type: array
+          minItems: 1
+          maxItems: 10
+          items: { type: string, format: uuid }
+          description: Active INTERVIEWER or HR_MANAGER users
+        rowVersion: { type: string, description: Required on update }
+    InterviewSummary:
+      type: object
+      required: [id, applicationId, candidateName, positionTitle, roundName, startsAt, durationMinutes, status]
+      properties:
+        id: { type: string, format: uuid }
+        applicationId: { type: string, format: uuid }
+        candidateName: { type: string }
+        positionTitle: { type: string }
+        roundName: { type: string }
+        startsAt: { type: string, format: date-time }
+        durationMinutes: { type: integer }
+        status: { $ref: '#/components/schemas/InterviewStatus' }
+        myScorecardStatus:
+          type: string
+          allOf:
+            - $ref: '#/components/schemas/ScorecardStatus'
+          nullable: true
+          description: Only when the caller is on the panel
+    Interview:
+      allOf:
+        - $ref: '#/components/schemas/InterviewSummary'
+        - type: object
+          required: [panel, rowVersion]
+          properties:
+            location: { type: string, nullable: true }
+            meetingUrl: { type: string, nullable: true }
+            panel:
+              type: array
+              items:
+                type: object
+                properties:
+                  user: { $ref: '#/components/schemas/UserOption' }
+                  scorecardStatus:
+                    type: string
+                    allOf:
+                      - $ref: '#/components/schemas/ScorecardStatus'
+                    nullable: true
+            cancelReason: { type: string, nullable: true }
+            rowVersion: { type: string }
+    InterviewPage:
+      allOf:
+        - $ref: '#/components/schemas/PageMeta'
+        - type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items: { $ref: '#/components/schemas/InterviewSummary' }
+    ReasonRequest:
+      type: object
+      required: [reason]
+      properties:
+        reason: { type: string, minLength: 3, maxLength: 300 }
+    ScorecardRequest:
+      type: object
+      properties:
+        ratings:
+          type: array
+          items:
+            type: object
+            required: [criterionId, rating]
+            properties:
+              criterionId: { type: string, format: uuid }
+              rating: { type: integer, minimum: 1, maximum: 5 }
+              comment: { type: string, maxLength: 1000 }
+        recommendation: { $ref: '#/components/schemas/Recommendation' }
+        overallComment: { type: string, maxLength: 5000 }
+    Scorecard:
+      type: object
+      required: [interviewId, interviewer, status, ratings]
+      properties:
+        id: { type: string, format: uuid, nullable: true }
+        interviewId: { type: string, format: uuid }
+        roundName: { type: string }
+        interviewer: { $ref: '#/components/schemas/UserOption' }
+        status: { $ref: '#/components/schemas/ScorecardStatus' }
+        ratings:
+          type: array
+          items:
+            type: object
+            properties:
+              criterion: { $ref: '#/components/schemas/Criterion' }
+              rating: { type: integer, minimum: 1, maximum: 5, nullable: true }
+              comment: { type: string, nullable: true }
+        recommendation:
+          type: string
+          allOf:
+            - $ref: '#/components/schemas/Recommendation'
+          nullable: true
+        overallComment: { type: string, nullable: true }
+        submittedAt: { type: string, format: date-time, nullable: true }
+    ScorecardsView:
+      type: object
+      required: [othersHidden, scorecards]
+      properties:
+        othersHidden:
+          type: boolean
+          description: True when the caller must submit their own scorecard first (BR-07)
+        mine:
+          type: array
+          items: { $ref: '#/components/schemas/Scorecard' }
+        scorecards:
+          type: array
+          description: Submitted scorecards visible to the caller
+          items: { $ref: '#/components/schemas/Scorecard' }
+
+    # ------------------------------------------------------------ Emails
+    EmailMessage:
+      type: object
+      required: [id, event, toAddress, subject, bodyHtml, status, scheduledAt, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        applicationId: { type: string, format: uuid, nullable: true }
+        candidateName: { type: string }
+        event: { $ref: '#/components/schemas/EmailEvent' }
+        toAddress: { type: string, format: email }
+        subject: { type: string }
+        bodyHtml: { type: string }
+        status: { $ref: '#/components/schemas/EmailStatus' }
+        scheduledAt: { type: string, format: date-time, description: End of the cancel window; drives the countdown }
+        sentAt: { type: string, format: date-time, nullable: true }
+        attemptCount: { type: integer }
+        lastError: { type: string, nullable: true }
+        editedBy: { $ref: '#/components/schemas/UserOption' }
+        cancelledBy: { $ref: '#/components/schemas/UserOption' }
+        cancelledAt: { type: string, format: date-time, nullable: true }
+        cancelReason: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+        rowVersion: { type: string }
+    EmailUpdateRequest:
+      type: object
+      required: [subject, bodyHtml, rowVersion]
+      properties:
+        subject: { type: string, minLength: 1, maxLength: 200 }
+        bodyHtml: { type: string, minLength: 1, maxLength: 50000, description: Sanitized server-side; must keep the consent link }
+        rowVersion: { type: string }
+    EmailPage:
+      allOf:
+        - $ref: '#/components/schemas/PageMeta'
+        - type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items: { $ref: '#/components/schemas/EmailMessage' }
+
+    # ------------------------------------------------------------ CV inbox
+    InboxItem:
+      type: object
+      required: [id, fromAddress, subject, receivedAt, status, attachmentCount]
+      properties:
+        id: { type: string, format: uuid }
+        fromAddress: { type: string, format: email }
+        fromName: { type: string, nullable: true }
+        subject: { type: string }
+        receivedAt: { type: string, format: date-time }
+        status: { $ref: '#/components/schemas/InboxStatus' }
+        attachmentCount: { type: integer }
+        detectedPosition:
+          type: object
+          nullable: true
+          properties:
+            id: { type: string, format: uuid }
+            code: { type: string }
+            title: { type: string }
+        applicationId: { type: string, format: uuid, nullable: true }
+        processedBy: { $ref: '#/components/schemas/UserOption' }
+        processedAt: { type: string, format: date-time, nullable: true }
+    InboxItemDetail:
+      allOf:
+        - $ref: '#/components/schemas/InboxItem'
+        - type: object
+          required: [attachments, suggestedCandidate]
+          properties:
+            bodyPreview: { type: string, nullable: true }
+            attachments:
+              type: array
+              items:
+                type: object
+                properties:
+                  id: { type: string, format: uuid }
+                  fileName: { type: string }
+                  contentType: { type: string }
+                  sizeBytes: { type: integer }
+            suggestedCandidate:
+              $ref: '#/components/schemas/CandidateInput'
+    InboxAssignRequest:
+      type: object
+      required: [positionId, attachmentId, candidate, source]
+      properties:
+        positionId: { type: string, format: uuid }
+        attachmentId: { type: string, format: uuid }
+        candidate: { $ref: '#/components/schemas/CandidateInput' }
+        source: { $ref: '#/components/schemas/Source' }
+        sourceNote: { type: string, maxLength: 200 }
+    InboxPage:
+      allOf:
+        - $ref: '#/components/schemas/PageMeta'
+        - type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items: { $ref: '#/components/schemas/InboxItem' }
+
+    # ------------------------------------------------------------ Talent pool
+    PoolCandidate:
+      type: object
+      required: [candidate, skills, poolConsentExpiresAt]
+      properties:
+        candidate: { $ref: '#/components/schemas/CandidateSummary' }
+        skills:
+          type: array
+          items: { type: string }
+        latestApplication:
+          type: object
+          nullable: true
+          properties:
+            positionTitle: { type: string }
+            stage: { $ref: '#/components/schemas/Stage' }
+            source: { $ref: '#/components/schemas/Source' }
+            appliedAt: { type: string, format: date-time }
+        poolConsentExpiresAt: { type: string, format: date-time }
+        expiresSoon: { type: boolean, description: Within 30 days }
+    PoolPage:
+      allOf:
+        - $ref: '#/components/schemas/PageMeta'
+        - type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items: { $ref: '#/components/schemas/PoolCandidate' }
+    AddToPositionRequest:
+      type: object
+      required: [positionId]
+      properties:
+        positionId: { type: string, format: uuid }
+        source:
+          allOf:
+            - $ref: '#/components/schemas/Source'
+          description: Defaults to the source of the candidate's latest application
+
+    # ------------------------------------------------------------ Imports
+    ImportPreviewForm:
+      type: object
+      required: [positionId, excel, zip]
+      properties:
+        positionId: { type: string, format: uuid }
+        excel: { type: string, format: binary, description: '.xlsx from the template, at most 200 rows' }
+        zip: { type: string, format: binary, description: CV files named as in the cv_file column }
+    ImportRow:
+      type: object
+      required: [row, status, errors]
+      properties:
+        row: { type: integer }
+        fullName: { type: string }
+        email: { type: string }
+        phone: { type: string }
+        source: { type: string }
+        cvFile: { type: string }
+        status: { type: string, enum: [VALID, INVALID] }
+        errors:
+          type: array
+          items: { type: string }
+        duplicateOfCandidateId: { type: string, format: uuid, nullable: true }
+    ImportBatch:
+      type: object
+      required: [id, positionId, status, totalRows, validRows, createdCount, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        positionId: { type: string, format: uuid }
+        positionTitle: { type: string }
+        status: { $ref: '#/components/schemas/ImportStatus' }
+        excelFileName: { type: string }
+        zipFileName: { type: string }
+        totalRows: { type: integer }
+        validRows: { type: integer }
+        createdCount: { type: integer }
+        sendReceiptEmails: { type: boolean }
+        rows:
+          type: array
+          description: Included in preview and detail, omitted in lists
+          items: { $ref: '#/components/schemas/ImportRow' }
+        createdBy: { $ref: '#/components/schemas/UserOption' }
+        createdAt: { type: string, format: date-time }
+        completedAt: { type: string, format: date-time, nullable: true }
+        expiresAt: { type: string, format: date-time }
+    ImportConfirmRequest:
+      type: object
+      properties:
+        sendReceiptEmails: { type: boolean, default: true }
+    ImportPage:
+      allOf:
+        - $ref: '#/components/schemas/PageMeta'
+        - type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items: { $ref: '#/components/schemas/ImportBatch' }
+
+    # ------------------------------------------------------------ Audit and settings
+    AuditLog:
+      type: object
+      required: [id, occurredAt, actorType, module, action, summary]
+      properties:
+        id: { type: integer, format: int64 }
+        occurredAt: { type: string, format: date-time }
+        actorType: { type: string, enum: [USER, SYSTEM, CANDIDATE] }
+        actor: { $ref: '#/components/schemas/UserOption' }
+        module: { $ref: '#/components/schemas/AuditModule' }
+        action: { $ref: '#/components/schemas/AuditAction' }
+        entityType: { type: string, nullable: true }
+        entityId: { type: string, format: uuid, nullable: true }
+        summary: { type: string }
+        details: { type: object, additionalProperties: true, nullable: true }
+        ipAddress: { type: string, nullable: true }
+        traceId: { type: string, nullable: true }
+    AuditPage:
+      allOf:
+        - $ref: '#/components/schemas/PageMeta'
+        - type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items: { $ref: '#/components/schemas/AuditLog' }
+    EmailTemplate:
+      type: object
+      required: [event, delayMinutes, subject, bodyHtml, placeholders]
+      properties:
+        event: { $ref: '#/components/schemas/EmailEvent' }
+        delayMinutes: { type: integer, enum: [0, 10] }
+        subject: { type: string }
+        bodyHtml: { type: string }
+        placeholders:
+          type: array
+          description: Placeholders allowed for this event
+          items: { type: string, example: '{{ten_ung_vien}}' }
+        updatedBy: { $ref: '#/components/schemas/UserOption' }
+        updatedAt: { type: string, format: date-time }
+    EmailTemplateUpdateRequest:
+      type: object
+      required: [subject, bodyHtml]
+      properties:
+        subject: { type: string, minLength: 1, maxLength: 200 }
+        bodyHtml: { type: string, minLength: 1, maxLength: 50000, description: 'Must contain {{link_dong_y}}' }
+    RenderedEmail:
+      type: object
+      required: [subject, bodyHtml]
+      properties:
+        subject: { type: string }
+        bodyHtml: { type: string }
+    MailSettings:
+      type: object
+      properties:
+        imapHost: { type: string, nullable: true }
+        imapPort: { type: integer, nullable: true }
+        imapUseSsl: { type: boolean }
+        imapUsername: { type: string, nullable: true }
+        imapPasswordSet: { type: boolean, description: The password itself is never returned }
+        imapFolder: { type: string }
+        mailboxEnabled: { type: boolean }
+        lastPollAt: { type: string, format: date-time, nullable: true }
+        lastPollStatus: { type: string, nullable: true }
+        smtpHost: { type: string, nullable: true }
+        smtpPort: { type: integer, nullable: true }
+        smtpSecurity: { type: string, enum: [STARTTLS, SSL, NONE] }
+        smtpUsername: { type: string, nullable: true }
+        smtpPasswordSet: { type: boolean }
+        senderName: { type: string, nullable: true }
+        senderAddress: { type: string, format: email, nullable: true }
+        replyToAddress: { type: string, format: email, nullable: true }
+    MailSettingsUpdateRequest:
+      type: object
+      required: [imapUseSsl, imapFolder, mailboxEnabled, smtpSecurity]
+      properties:
+        imapHost: { type: string, maxLength: 200, nullable: true }
+        imapPort: { type: integer, minimum: 1, maximum: 65535, nullable: true }
+        imapUseSsl: { type: boolean }
+        imapUsername: { type: string, maxLength: 254, nullable: true }
+        imapPassword: { type: string, format: password, nullable: true, description: Omit or null to keep }
+        imapFolder: { type: string, maxLength: 100 }
+        mailboxEnabled: { type: boolean }
+        smtpHost: { type: string, maxLength: 200, nullable: true }
+        smtpPort: { type: integer, minimum: 1, maximum: 65535, nullable: true }
+        smtpSecurity: { type: string, enum: [STARTTLS, SSL, NONE] }
+        smtpUsername: { type: string, maxLength: 254, nullable: true }
+        smtpPassword: { type: string, format: password, nullable: true, description: Omit or null to keep }
+        senderName: { type: string, maxLength: 100, nullable: true }
+        senderAddress: { type: string, format: email, nullable: true }
+        replyToAddress: { type: string, format: email, nullable: true }
+    ConnectionTestResult:
+      type: object
+      required: [success]
+      properties:
+        success: { type: boolean }
+        message: { type: string, description: 'Specific error, e.g. authentication failed or host unreachable' }
+        durationMs: { type: integer }
+
+    # ------------------------------------------------------------ Public career site
+    PublicJobPostSummary:
+      type: object
+      required: [slug, title, department, location, employmentType, level, isExpired]
+      description: Only public fields (BR-20); never criteria, owner, or internal notes.
+      properties:
+        slug: { type: string }
+        title: { type: string }
+        department: { type: string }
+        location: { type: string }
+        employmentType: { $ref: '#/components/schemas/EmploymentType' }
+        level: { $ref: '#/components/schemas/Level' }
+        salaryMin: { type: integer, format: int64, nullable: true }
+        salaryMax: { type: integer, format: int64, nullable: true }
+        salaryCurrency: { type: string, nullable: true }
+        summary: { type: string, nullable: true }
+        closingDate: { type: string, format: date, nullable: true }
+        isExpired: { type: boolean }
+        publishedAt: { type: string, format: date-time }
+    PublicJobPost:
+      allOf:
+        - $ref: '#/components/schemas/PublicJobPostSummary'
+        - type: object
+          required: [description, requirements, otherJobs]
+          properties:
+            description: { type: string }
+            requirements: { type: string }
+            benefits: { type: string, nullable: true }
+            otherJobs:
+              type: array
+              maxItems: 5
+              items: { $ref: '#/components/schemas/PublicJobPostSummary' }
+    PublicJobPostPage:
+      allOf:
+        - $ref: '#/components/schemas/PageMeta'
+        - type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items: { $ref: '#/components/schemas/PublicJobPostSummary' }
+    PublicFilters:
+      type: object
+      properties:
+        departments:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string, format: uuid }
+              name: { type: string }
+              count: { type: integer }
+        locations:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string }
+              count: { type: integer }
+        employmentTypes:
+          type: array
+          items: { $ref: '#/components/schemas/EmploymentType' }
+        levels:
+          type: array
+          items: { $ref: '#/components/schemas/Level' }
+    PublicApplyForm:
+      type: object
+      required: [fullName, email, phone, cv, privacyConsent, policyVersion, turnstileToken]
+      properties:
+        fullName: { type: string, minLength: 2, maxLength: 120 }
+        email: { type: string, format: email, maxLength: 254 }
+        phone: { type: string, maxLength: 20 }
+        message: { type: string, maxLength: 2000 }
+        cv: { type: string, format: binary, description: 'PDF or DOCX, at most 10 MB' }
+        privacyConsent: { type: boolean, enum: [true], description: Must be true (BR-19) }
+        policyVersion: { type: string, description: Version shown on the form }
+        poolConsent: { type: boolean, default: false, description: 'Separate, unticked by default' }
+        src:
+          type: string
+          description: Source from the share link (`linkedin`, `facebook`, …); unknown → CAREER_SITE
+        turnstileToken: { type: string, description: Cloudflare Turnstile response token }
+    PublicApplyResult:
+      type: object
+      required: [positionTitle]
+      properties:
+        positionTitle: { type: string }
+    PrivacyPolicy:
+      type: object
+      required: [version, effectiveDate, contentHtml]
+      properties:
+        version: { type: string, example: '2026-01' }
+        effectiveDate: { type: string, format: date }
+        contentHtml: { type: string }
+    ConsentSummary:
+      type: object
+      required: [candidateName, inTalentPool, applications]
+      properties:
+        candidateName: { type: string }
+        inTalentPool: { type: boolean }
+        poolConsentExpiresAt: { type: string, format: date-time, nullable: true }
+        applications:
+          type: array
+          items:
+            type: object
+            properties:
+              positionTitle: { type: string }
+              appliedAt: { type: string, format: date-time }
+    ConsentActionRequest:
+      type: object
+      required: [action]
+      properties:
+        action: { type: string, enum: [JOIN_POOL, LEAVE_POOL, DELETE_ALL] }

@@ -61,8 +61,8 @@ Priority uses MoSCoW (`M` must, `S` should, `C` could). Story points use the Fib
 
 | Story | I | N | V | E | S | T | Notes |
 |---|---|---|---|---|---|---|---|
-| US01 | PASS | PASS | PASS | PASS | PASS | PASS | Bearer token, 30-minute lifetime, no refresh token. |
-| US02 | PASS | PASS | PASS | PASS | PASS | PASS | Client-side discard; no server-side revocation. |
+| US01 | PASS | PASS | PASS | PASS | PASS | PASS | Bearer token, 15-minute lifetime, rotating refresh token in an `httpOnly` cookie (AD-06). |
+| US02 | PASS | PASS | PASS | PASS | PASS | PASS | Server revokes the refresh token; client discards the access token. |
 | US03 | PASS | PASS | PASS | PASS | PASS | PASS | KPI list and Interviewer variant are defined. |
 | US04 | PASS | PASS | PASS | PASS | PASS | PASS | Read / filter / paging is independently testable. |
 | US05 | PASS | PASS | PASS | PASS | PASS | PASS | Criteria model (type, weight 1–5) is explicit. |
