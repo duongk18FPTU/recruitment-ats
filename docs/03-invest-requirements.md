@@ -52,7 +52,6 @@ Priority uses MoSCoW (`M` must, `S` should, `C` could). Story points use the Fib
 | US29 | As an Admin, I want to configure the recruitment mailbox and email sender and test the connection so that intake and sending work securely. | Operability | US01 | M | 3 |
 | US30 | As an Admin, HR Manager, or Recruiter, I want to export the filtered candidate list or talent pool to Excel so that I can share or process it offline. | Portable data | US08, US26 | M | 3 |
 | US31 | As a candidate, I want to join or leave the talent pool or delete my data from a link in any email so that I control my personal data. | Lawful processing | US24, US27 | M | 3 |
-
 | US32 | As an Admin, HR Manager, or position owner, I want AI to suggest weighted criteria from the job description so that I can set up a position faster and more consistently. | Faster, consistent setup | US05 | S | 3 |
 | US33 | As an Admin, HR Manager, or Recruiter, I want the system to find consented pool candidates whose CVs match a position by meaning so that I can reuse past talent without guessing keywords. | Talent reuse | US26, US12 | S | 8 |
 | US34 | As an Admin, HR Manager, or Recruiter, I want AI to suggest interview questions aimed at the criteria the CV did not clearly prove so that interviewers check what matters. | Focused interviews | US14, US12 | S | 5 |

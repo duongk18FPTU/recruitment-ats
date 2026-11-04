@@ -139,7 +139,7 @@ flowchart TB
     style system fill:#f8fbff,stroke:#1168bd,stroke-dasharray:5 5
 ```
 
-Detailed use case diagram (one node per use case), include/extend relationships, 25 business rules, and use case specifications: [Actors, business rules, and use cases](docs/02-use-cases.md).
+Detailed use case diagram (one node per use case), include/extend relationships, 28 business rules, and use case specifications: [Actors, business rules, and use cases](docs/02-use-cases.md).
 
 ### 1.5 Roles and permissions
 

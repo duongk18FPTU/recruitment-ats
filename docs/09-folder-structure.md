@@ -506,5 +506,6 @@ AiEmbedding__Dimensions=1024
 3. Auth and Users end to end (API + internal app shell) — proves JWT, refresh, ProblemDetails, and the API client.
 4. Positions → Applications/Intake → Screening (with `FakeResumeAnalyzer`) → Worker `AnalysisRunner`.
 5. Interviews, Communication + `EmailDispatcher`, Career site, Inbox + `MailboxPoller`, Imports, Talent pool, Reports, Audit, Retention.
+6. AI assistance (Should-have, US32–34): `CriteriaSuggestionService` → `PoolMatchingService` + Worker `EmbeddingRunner` (pgvector, `FakeEmbeddingClient` in tests) → interview-question drafts.
 
 **Related:** [C4 architecture](06-c4-architecture.md) · [Database design](07-database-design.md) · [OpenAPI contract](08-openapi-contract.md) · [Information architecture](04-information-architecture.md)
