@@ -322,13 +322,13 @@ src/frontend/
 | Vitest, Testing Library, MSW | Unit and component tests with API mocks per `operationId` |
 | Playwright | End-to-end tests against the Compose stack |
 
-**Installed so far (M0):** React, Vite, TypeScript, `openapi-typescript` + `openapi-fetch`, Vitest + Testing Library + jsdom, ESLint (`typescript-eslint`, `react-hooks`). The other libraries are added with the first feature that needs them (React Router, TanStack Query, forms with M1; Chart.js with the dashboard; MSW with the first API-backed screen; Playwright with the first end-to-end flow). Versions are exact (no `^`) and locked in `package-lock.json`; Node ≥ 24.15 (jsdom).
+**Installed so far:** React, Vite, TypeScript, `openapi-typescript` + `openapi-fetch`, Vitest + Testing Library + jsdom, ESLint (`typescript-eslint`, `react-hooks`) in M0; React Router 8 and TanStack Query 5 in the internal app (T1.3). The other libraries are added with the first feature that needs them (forms with US01 / US05; Chart.js with the dashboard; MSW with the first API-backed screen; Playwright with the first end-to-end flow). Versions are exact (no `^`) and locked in `package-lock.json`; Node ≥ 24.15 (jsdom).
 
 | Script (in `src/frontend/`) | Does |
 |---|---|
 | `npm run generate` | Regenerates `packages/api-client/src/schema.d.ts` from `docs/api/openapi.yaml` |
 | `npm run typecheck` | Type-checks the packages, including `public.typecheck.ts` (the career site's client cannot name an internal route) |
-| `npm run lint` · `npm test` · `npm run build` | ESLint; Vitest over `apps/*` (jsdom); `tsc` + `vite build` of both apps |
+| `npm run lint` · `npm test` · `npm run build` | ESLint; Vitest over `apps/*` (jsdom) and `packages/api-client` (node); `tsc` + `vite build` of both apps |
 | `npm run dev:internal` · `dev:career` | Vite on `localhost:5173` / `5174`; `/api` is proxied to the API on `localhost:5080`, keeping calls same-origin as in production |
 
 ### 4.2 Internal app
@@ -340,11 +340,12 @@ apps/internal/
 └── src/
     ├── main.tsx
     ├── app/
-    │   ├── App.tsx
-    │   ├── router.tsx                  # routes, RequireAuth, RequireRole → #/403
-    │   ├── providers.tsx               # QueryClient, AuthProvider, Toasts
-    │   └── navigation.ts               # sidebar items per role (IA navigation table)
-    ├── components/layout/              # AppShell, Sidebar, Topbar, UserMenu
+    │   ├── App.tsx                     # HashRouter → AppProviders → AppRoutes
+    │   ├── router.tsx                  # routes, RequireAuth, RequireRole → #/403; unbuilt pages show ComingSoonPage
+    │   ├── providers.tsx               # QueryClient (403 → #/403, no retry on 4xx), AuthProvider; Toasts with the first mutation
+    │   ├── navigation.ts               # pages, roles, and sidebar groups (IA navigation table)
+    │   └── app.css                     # base styles on top of @ats/ui tokens
+    ├── components/layout/              # AppShell, Sidebar (with the user block), Topbar (breadcrumb), Logo, layout.css
     ├── features/
     │   ├── auth/                       # SCR-01, session, refresh, role guards
     │   ├── dashboard/                  # SCR-02 (+ interviewer variant)
@@ -362,8 +363,8 @@ apps/internal/
     │   ├── users/                      # SCR-70
     │   ├── settings/                   # SCR-75 email templates, SCR-76 mailbox & sender
     │   └── profile/                    # SCR-80
-    ├── pages/ForbiddenPage.tsx         # SCR-90
-    └── test/                           # setup, renderWithProviders, MSW handlers by operationId
+    ├── pages/                          # ForbiddenPage (SCR-90), ComingSoonPage (until a page's story is built)
+    └── test/                           # setup, renderApp + signIn; MSW handlers by operationId with the first API-backed screen
 ```
 
 Feature template (from the reference project, adapted to TanStack Query):
@@ -408,8 +409,8 @@ packages/api-client/
     ├── client.ts                       # openapi-fetch instance for the internal app
     ├── public.ts                       # client restricted to /api/public/*
     ├── public.typecheck.ts             # compile-time check that internal routes are not in the public client
-    ├── auth.ts                         # (M1) access token in memory; on 401 call refreshToken once, then retry
-    ├── problem.ts                      # (M1) ProblemDetails → ApiError { status, errorCode, fieldErrors, traceId }
+    ├── auth.ts                         # authSession (token in memory), refreshSession (shared by parallel callers), middleware: on 401 refresh once, then retry
+    ├── problem.ts                      # ProblemDetails → ApiError { status, errorCode, fieldErrors, traceId, problem }; unwrap()
     └── index.ts
 ```
 

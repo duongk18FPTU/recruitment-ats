@@ -1,0 +1,63 @@
+import type { UserProfile } from "@ats/api-client";
+import { Link, useLocation } from "react-router";
+import { roleLabels, sidebarFor, type AppPage } from "../../app/navigation";
+import { Logo } from "./Logo";
+
+export function Sidebar({ user }: { user: UserProfile }) {
+  const { pathname } = useLocation();
+  const isActive = (page: AppPage) => {
+    const root = page.section ?? page.path;
+    return pathname === root || pathname.startsWith(`${root}/`);
+  };
+
+  return (
+    <aside className="sidebar">
+      <Link to="/dashboard" className="sidebar__brand">
+        <Logo />
+        <span>
+          Recruitment <strong>ATS</strong>
+        </span>
+      </Link>
+
+      <nav aria-label="Điều hướng chính" className="sidebar__nav">
+        {sidebarFor(user.role).map((section) => (
+          <div key={section.group} className="sidebar__section">
+            <h2 className="sidebar__group">{section.group}</h2>
+            <ul>
+              {section.items.map((page) => (
+                <li key={page.path}>
+                  <Link
+                    to={page.path}
+                    className="sidebar__link"
+                    aria-current={isActive(page) ? "page" : undefined}
+                  >
+                    {page.navLabel}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </nav>
+
+      <Link to="/profile" className="sidebar__user" aria-label={`Hồ sơ cá nhân: ${user.fullName}`}>
+        <span className="sidebar__avatar" aria-hidden="true">
+          {initials(user.fullName)}
+        </span>
+        <span>
+          <span className="sidebar__user-name">{user.fullName}</span>
+          <span className="sidebar__user-role">{roleLabels[user.role]}</span>
+        </span>
+      </Link>
+    </aside>
+  );
+}
+
+// "Phạm Thu Hà" → "TH": the given name is last in Vietnamese names.
+function initials(fullName: string): string {
+  const words = fullName.trim().split(/\s+/);
+  return words
+    .slice(-2)
+    .map((word) => word.charAt(0).toLocaleUpperCase("vi"))
+    .join("");
+}

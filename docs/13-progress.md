@@ -16,7 +16,7 @@
 | M4 Should-have | v1.1 | 0 / 8 | 0 / 34 | `TODO` |
 | **Total** | | **0 / 34** | **0 / 149** | |
 
-**Now:** M1 → T1.3 Internal app shell.
+**Now:** M1 → US01 Login.
 
 ## M0 Foundation — `DONE`
 
@@ -35,7 +35,7 @@
 |---|---|---|---|---|---|---|
 | 1 | T1.1 Cross-cutting (errors, actor, audit, unit of work, contract test) | — | ✓ | — | — | `DONE` |
 | 2 | T1.2 Seed (first Admin, departments) | — | ✓ | — | — | `DONE` |
-| 3 | T1.3 Internal app shell (router, query, auth client, AppShell, 403) | — | — | | — | `TODO` |
+| 3 | T1.3 Internal app shell (router, query, auth client, AppShell, 403) | — | — | ✓ | — | `DONE` |
 | 4 | US01 Login | 3 | | | 0 / 3 | `TODO` |
 | 4 | US02 Logout | 1 | | | 0 / 2 | `TODO` |
 | 4 | US20 Manage users | 3 | | | 0 / 4 | `TODO` |
@@ -119,6 +119,8 @@ Deviations from the design documents, kept here so they are easy to review (each
 | 2026-11-04 | The contract has 33 error codes (documents said 32); C# `ErrorCode` is checked against the YAML enum | 09 §3.2, 10 §1 |
 | 2026-11-04 | `Actor.Type` reuses `AuditActorType`; `IpAddress` is `IPAddress?` (stored as `inet`) | 10 §1 |
 | 2026-11-04 | `CreatedAt` / `UpdatedAt` set by `TimestampInterceptor` from `IClock` | 09 §3.3, 10 §1 |
-| 2026-11-04 | Seed runs with the migrations as `api migrate`; the first Admin comes from secrets, so the "change password at first login" rule is dropped (no column or API supported it) | 06, 07, 09 §3.3, §7, README |
+| 2026-11-04 | Seed runs with the migrations as `api migrate`; the first Admin comes from secrets. "Change password at first login" is not enforced: the contract has an optional `UserProfile.mustChangePassword`, but there is no column and no acceptance criterion — **open question for US01 / US20** | 06, 07, 09 §3.3, §7, README |
 | 2026-11-04 | `Pbkdf2PasswordHasher` added in T1.2 (needed by the seed), not US01 | 09 §3.3 |
+| 2026-11-04 | Internal app: every IA page has its route and sidebar item from T1.3; a page whose story is not built shows "Chức năng này đang được xây dựng". Nav icons come with the `ui` icon set | 09 §4.2 |
+| 2026-11-04 | React Router 8 (docs did not name a version); `packages/api-client` has its own Vitest project | 09 §4.1 |
 | 2026-11-04 | Contract test checks routes against the YAML (name, method, path, no duplicates); operations of unbuilt stories have no route yet | 09 §3.6 |

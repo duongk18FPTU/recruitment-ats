@@ -1,9 +1,14 @@
-// Placeholder until the app shell and routes arrive with M1 (docs/09-folder-structure.md §4.2).
+import { HashRouter } from "react-router";
+import { AppProviders } from "./providers";
+import { AppRoutes } from "./router";
+import "./app.css";
+
 export function App() {
   return (
-    <main style={{ fontFamily: "var(--font-ui)", color: "var(--color-ink)", padding: "var(--space-24)" }}>
-      <h1>Recruitment ATS</h1>
-      <p>Không gian làm việc của đội tuyển dụng.</p>
-    </main>
+    <HashRouter>
+      <AppProviders>
+        <AppRoutes />
+      </AppProviders>
+    </HashRouter>
   );
 }

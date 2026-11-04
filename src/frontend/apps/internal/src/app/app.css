@@ -1,0 +1,47 @@
+/* Base styles for the internal app; colours and spacing come from @ats/ui/tokens.css. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+a {
+  color: var(--color-brand);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+h1 {
+  margin: 0 0 var(--space-8);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 28px;
+}
+
+.page-message p {
+  margin: 0 0 var(--space-16);
+  color: var(--color-ink-2);
+}
+
+.page-status {
+  padding: var(--space-24);
+  color: var(--color-ink-2);
+}
+
+.login {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+}
