@@ -555,22 +555,40 @@ classDiagram
 - [OpenAPI contract](docs/08-openapi-contract.md) · [OpenAPI YAML](docs/api/openapi.yaml)
 - [Frontend and backend folder structures](docs/09-folder-structure.md)
 - [Class design](docs/10-class-design.md) · [Sequence and state diagrams](docs/11-sequence-and-state-diagrams.md) · [Diagram sources](docs/diagrams/)
-- [Delivery plan](docs/12-delivery-plan.md) — milestones M0–M4, Definition of Done, local environment
+- [Delivery plan](docs/12-delivery-plan.md) — milestones M0–M4, build order, risks, Definition of Done · [Progress](docs/13-progress.md)
 - [Mind map](docs/mindmap.png) · [XMind source](docs/mindmap/recruitment-ats.xmind)
+
+## Getting Started
+
+Requirements: Docker, .NET 10 SDK, Node.js ≥ 24.15.
+
+```bash
+cp .env.example .env                 # then set POSTGRES_PASSWORD (and the same password in ConnectionStrings__Ats)
+docker compose up -d postgres        # Postgres 16 + pgvector on localhost:5433
+./deploy/postgres/check-schema.sh    # applies docs/database/schema.sql to a throwaway database
+
+cd src/backend
+dotnet tool restore
+export ConnectionStrings__Ats="$(grep '^ConnectionStrings__Ats=' ../../.env | cut -d= -f2-)"
+dotnet ef database update --project src/RecruitmentAts.Infrastructure --startup-project src/RecruitmentAts.Infrastructure
+dotnet build                         # warnings are errors
+dotnet test                          # all test projects; Infrastructure tests start Postgres with Testcontainers
+dotnet run --project src/RecruitmentAts.Api   # http://localhost:5080/health
+
+cd ../frontend
+npm install
+npm run dev:internal                 # http://localhost:5173 (career site: npm run dev:career → 5174)
+```
+
+The development database `ats` is created with the `vector` and `btree_gist` extensions; EF Core migrations own its tables. The other Compose services (api, worker, web apps, Caddy, Mailpit, GreenMail) are added when the code that needs them exists ([delivery plan](docs/12-delivery-plan.md)).
 
 ## Project Progress
 
-- [x] Top-down problem analysis and research
-- [x] Mind map
-- [x] Use case diagram and business rules
-- [x] User stories (INVEST) and acceptance criteria
-- [x] Information architecture and screen hierarchy
-- [x] UI/UX prototype (Figma)
-- [x] C4 architecture
-- [x] Database design and OpenAPI contract
-- [x] Folder structures
-- [x] Class and sequence diagrams
-- [x] Delivery plan (milestones M0–M4)
-- [ ] Implementation
-  - [x] M0 Foundation — CI, local Postgres + pgvector, .NET 10 skeleton, M1 persistence, frontend workspace
-  - [ ] M1 Core screening · [ ] M2 Interviews and candidates · [ ] M3 Intake, pool, and insight · [ ] M4 Should-have
+Detailed checklist per story and task: [Progress](docs/13-progress.md). Plan and build order: [Delivery plan](docs/12-delivery-plan.md).
+
+- [x] Documentation: research, use cases, INVEST stories, IA and UI/UX, C4, database, OpenAPI, folder structures, class and sequence design
+- [x] M0 Foundation — CI, local Postgres + pgvector, backend and frontend skeletons
+- [ ] M1 Core screening — **MVP**
+- [ ] M2 Interviews and candidates
+- [ ] M3 Intake, pool, and insight — **v1.0**
+- [ ] M4 Should-have — v1.1
