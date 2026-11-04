@@ -2,7 +2,7 @@
 
 > Design status: TARGET
 >
-> Reference DDL: [`database/schema.sql`](database/schema.sql) (PostgreSQL 16, verified to run). EF Core migrations must produce an equivalent schema.
+> Reference DDL: [`database/schema.sql`](database/schema.sql) (PostgreSQL 16, verified to run in CI). EF Core migrations must produce an equivalent schema; `SchemaMatchesReferenceTests` checks this for every table that exists so far. Tables are added per milestone ([delivery plan](12-delivery-plan.md)); M1 has `users`, `refresh_tokens`, `departments`, `positions`, `position_criteria`, `candidates`, `cv_files`, `applications`, `stage_history`, `cv_analyses`, `analysis_criterion_results`, `ai_call_logs`, and `audit_logs`.
 
 The database is the single source of truth for the API and the Worker ([C4 containers](06-c4-architecture.md#level-2--containers)). It also holds the two work queues — `cv_analyses` and `email_messages` — so that a job or an email is written in the same transaction as the action that causes it (AD-02).
 

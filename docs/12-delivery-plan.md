@@ -16,6 +16,8 @@ The backlog ([INVEST requirements](03-invest-requirements.md)) has 34 stories an
 
 M1–M3 together are exactly the 26 Must-have stories. M4 can be cut or reordered without breaking anything delivered before it.
 
+**Cross-milestone note.** AC-US09 #1 also requires a receipt email, which needs US27 (M2). In M1, adding an application queues no email; the receipt is added and the AC fully passes in M2.
+
 ### Why this order
 
 - **M1 first** proves the product's main idea and its largest technical risk (prompting, redaction, quote verification, the Worker queue) while the codebase is still small. AI runs with `FakeResumeAnalyzer` in tests and DeepSeek on synthetic CVs in development (AD-12).
@@ -31,7 +33,7 @@ M1–M3 together are exactly the 26 Must-have stories. M4 can be cut or reordere
 | 2 | CI workflow: OpenAPI validation, reference schema on Postgres + pgvector, backend and frontend jobs that start once the code exists | No (runs on GitHub) | Done |
 | 3 | Local Postgres 16 + pgvector with Docker Compose, `.env.example`, schema check script | ~150 MB image | Done |
 | 4 | Install .NET 10 SDK; solution skeleton, `Directory.Build.props`, `global.json`, architecture tests | ~250 MB SDK + NuGet | Done |
-| 5 | Persistence: `AtsDbContext`, first migration compared with `schema.sql` | NuGet | |
+| 5 | Persistence: `AtsDbContext`, migration `M1CoreScreening` (13 M1 tables), compared with `schema.sql` by Testcontainers | NuGet | Done |
 | 6 | Frontend npm workspace: two Vite apps, shared packages, API types generated from `openapi.yaml` | ~150–300 MB npm | |
 | 7 | Auth and Users end to end (start of M1) | — | |
 
@@ -56,8 +58,13 @@ cd src/backend
 dotnet build                         # warnings are errors
 dotnet test                          # all test projects (Microsoft.Testing.Platform)
 dotnet run --project src/RecruitmentAts.Api   # http://localhost:5080/health
+
+# apply migrations to the dev database (ConnectionStrings__Ats from .env)
+export ConnectionStrings__Ats="$(grep '^ConnectionStrings__Ats=' ../../.env | cut -d= -f2-)"
+dotnet tool restore
+dotnet ef database update --project src/RecruitmentAts.Infrastructure --startup-project src/RecruitmentAts.Infrastructure
 ```
 
-The development database `ats` starts empty with the `vector` and `btree_gist` extensions; EF Core migrations own its tables (step 5). The other services in [`compose.yaml`](09-folder-structure.md#2-repository-layout) (api, worker, web apps, Caddy, Mailpit, GreenMail) are added when the code that needs them exists.
+The development database `ats` is created with the `vector` and `btree_gist` extensions; EF Core migrations own its tables. The other services in [`compose.yaml`](09-folder-structure.md#2-repository-layout) (api, worker, web apps, Caddy, Mailpit, GreenMail) are added when the code that needs them exists.
 
 **Related:** [INVEST requirements](03-invest-requirements.md) · [Folder structures — order of creation](09-folder-structure.md#8-order-of-creation) · [C4 deployment](06-c4-architecture.md)
