@@ -1,6 +1,6 @@
 # Frontend and Backend Folder Structures
 
-> Design status: TARGET — no source code exists yet; implementation (README section 7) creates it in this layout.
+> Design status: IN PROGRESS — the backend skeleton (§3.1, §3.7) exists in `src/backend/`; the rest is the target layout, created in the order of §8 and the [delivery plan](12-delivery-plan.md). Update this document in the same commit whenever the code differs from it.
 >
 > Based on the course reference project [finance-manager](https://github.com/PhamHiep948/finance-manager) (Simplified Clean Architecture, feature-based React), extended for this project's second backend host (Worker) and second frontend (career site).
 
@@ -244,10 +244,12 @@ A job only loops, opens a DI scope, and calls one Application method; all decisi
 
 Folders inside each test project mirror the module folders (`Screening/`, `Interviews/`, …).
 
+A test project without tests yet sets `--ignore-exit-code 8` ("zero tests ran") in its `.csproj`; the setting is removed with its first test. Run everything with `dotnet test` from `src/backend/`.
+
 ### 3.7 Dependency rules
 
 ```text
-Application     → (no project)            packages: FluentValidation only
+Application     → (no project)            packages: FluentValidation, Microsoft.Extensions.DependencyInjection.Abstractions (AddApplication)
 Infrastructure  → Application
 Api             → Application, Infrastructure (Program.cs / DI only)
 Worker          → Application, Infrastructure (Program.cs / DI only)
@@ -255,7 +257,8 @@ Worker          → Application, Infrastructure (Program.cs / DI only)
 
 Enforced by `ArchitectureTests`:
 
-- Application has no reference to `Microsoft.AspNetCore.*`, `Microsoft.EntityFrameworkCore*`, `Npgsql`, `MailKit`.
+- Application has no reference to `Microsoft.AspNetCore.*`, `Microsoft.EntityFrameworkCore*`, `Npgsql`, `MailKit`, or the other projects.
+- Infrastructure does not reference the hosts, and the Api and the Worker do not reference each other.
 - Controllers and Worker jobs do not use `AtsDbContext` or any type in `Infrastructure.*` except in `Program.cs`.
 - No module calls another module's repository; cross-module work goes through that module's service (e.g. `Intake` calls `Screening` to queue an analysis).
 - Types in `*.Contracts` namespaces have no behavior.

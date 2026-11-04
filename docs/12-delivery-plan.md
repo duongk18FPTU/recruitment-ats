@@ -43,6 +43,7 @@ M1–M3 together are exactly the 26 Must-have stories. M4 can be cut or reordere
 4. Schema changes come as an EF Core migration and keep `docs/database/schema.sql` equivalent.
 5. Actions that the business rules require to be audited write an audit entry.
 6. CI is green; no secrets or real CVs are committed.
+7. Documentation changes in the same commit as the code: when the implementation differs from a document (structure, packages, schema, contract, decisions), the document is updated, and this plan's checklist and the README progress are ticked.
 
 ## 4. Local environment
 
@@ -50,6 +51,11 @@ M1–M3 together are exactly the 26 Must-have stories. M4 can be cut or reordere
 cp .env.example .env                 # then set POSTGRES_PASSWORD
 docker compose up -d postgres        # Postgres 16 + pgvector on localhost:5433
 ./deploy/postgres/check-schema.sh    # applies schema.sql to a throwaway database
+
+cd src/backend
+dotnet build                         # warnings are errors
+dotnet test                          # all test projects (Microsoft.Testing.Platform)
+dotnet run --project src/RecruitmentAts.Api   # http://localhost:5080/health
 ```
 
 The development database `ats` starts empty with the `vector` and `btree_gist` extensions; EF Core migrations own its tables (step 5). The other services in [`compose.yaml`](09-folder-structure.md#2-repository-layout) (api, worker, web apps, Caddy, Mailpit, GreenMail) are added when the code that needs them exists.
