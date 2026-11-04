@@ -1,9 +1,12 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RecruitmentAts.Application.Abstractions.Persistence;
+using RecruitmentAts.Application.Abstractions.Security;
 using RecruitmentAts.Application.Abstractions.Time;
 using RecruitmentAts.Infrastructure.Persistence;
 using RecruitmentAts.Infrastructure.Persistence.Repositories;
+using RecruitmentAts.Infrastructure.Persistence.Seed;
+using RecruitmentAts.Infrastructure.Security;
 using RecruitmentAts.Infrastructure.Time;
 
 namespace RecruitmentAts.Infrastructure;
@@ -30,6 +33,9 @@ public static class DependencyInjection
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+        services.AddScoped<DatabaseSeeder>();
+
+        services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
 
         return services;
     }

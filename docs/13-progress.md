@@ -16,7 +16,7 @@
 | M4 Should-have | v1.1 | 0 / 8 | 0 / 34 | `TODO` |
 | **Total** | | **0 / 34** | **0 / 149** | |
 
-**Now:** M1 → T1.2 Seed.
+**Now:** M1 → T1.3 Internal app shell.
 
 ## M0 Foundation — `DONE`
 
@@ -34,7 +34,7 @@
 | Order | Item | Pts | Backend | Frontend | AC | Status |
 |---|---|---|---|---|---|---|
 | 1 | T1.1 Cross-cutting (errors, actor, audit, unit of work, contract test) | — | ✓ | — | — | `DONE` |
-| 2 | T1.2 Seed (first Admin, departments) | — | | — | — | `TODO` |
+| 2 | T1.2 Seed (first Admin, departments) | — | ✓ | — | — | `DONE` |
 | 3 | T1.3 Internal app shell (router, query, auth client, AppShell, 403) | — | — | | — | `TODO` |
 | 4 | US01 Login | 3 | | | 0 / 3 | `TODO` |
 | 4 | US02 Logout | 1 | | | 0 / 2 | `TODO` |
@@ -119,4 +119,6 @@ Deviations from the design documents, kept here so they are easy to review (each
 | 2026-11-04 | The contract has 33 error codes (documents said 32); C# `ErrorCode` is checked against the YAML enum | 09 §3.2, 10 §1 |
 | 2026-11-04 | `Actor.Type` reuses `AuditActorType`; `IpAddress` is `IPAddress?` (stored as `inet`) | 10 §1 |
 | 2026-11-04 | `CreatedAt` / `UpdatedAt` set by `TimestampInterceptor` from `IClock` | 09 §3.3, 10 §1 |
+| 2026-11-04 | Seed runs with the migrations as `api migrate`; the first Admin comes from secrets, so the "change password at first login" rule is dropped (no column or API supported it) | 06, 07, 09 §3.3, §7, README |
+| 2026-11-04 | `Pbkdf2PasswordHasher` added in T1.2 (needed by the seed), not US01 | 09 §3.3 |
 | 2026-11-04 | Contract test checks routes against the YAML (name, method, path, no duplicates); operations of unbuilt stories have no route yet | 09 §3.6 |

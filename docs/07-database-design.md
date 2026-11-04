@@ -520,9 +520,11 @@ The Worker's `RetentionJob` runs daily and audits every deletion as `CV_DELETE` 
 
 | Table | Rows |
 |---|---|
-| `users` | One `ADMIN` account; the password must be changed at first login |
-| `departments` | The company's departments |
+| `users` | One `ADMIN` account, created only while no Admin exists, from the secrets `Seed__AdminEmail` and `Seed__AdminPassword` (10–128 characters); audited as `SYSTEM` / `USER` / `CREATE`. The password is changed later in the profile (US21) |
+| `departments` | The company's departments from `Seed:Departments` in the API's `appsettings.json`; names that are missing are added, existing rows are never changed |
 | `email_templates` | One Vietnamese template per event, each containing `{{link_dong_y}}` |
 | `mail_settings` | Row `id = 1` with `mailbox_enabled = false` |
+
+Seeding runs with the migrations in one deployment step, `dotnet RecruitmentAts.Api.dll migrate` (`DatabaseInitialization.MigrateAndSeedAsync`), and is safe to repeat. Rows of later milestones (`email_templates`, `mail_settings`) are seeded with their tables.
 
 **Related:** [C4 architecture](06-c4-architecture.md) · [OpenAPI contract](08-openapi-contract.md) · [Use cases](02-use-cases.md)

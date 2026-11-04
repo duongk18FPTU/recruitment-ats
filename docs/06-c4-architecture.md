@@ -359,7 +359,7 @@ flowchart TB
 | Domains | `careers.<domain>` for candidates, `ats.<domain>` for the hiring team. Each SPA and its API calls share an origin, so no CORS is needed and the refresh cookie can be `SameSite=Strict`. `ats.<domain>` does not expose `/api/public/*`, and `careers.<domain>` exposes nothing else. |
 | Secrets | Connection strings, JWT signing key, AI API key, Turnstile secret come from environment variables / Docker secrets, never from the repository. Mailbox and SMTP passwords set in the UI are encrypted with ASP.NET Data Protection; keys persist in the `dp-keys` volume. |
 | Backup | Nightly `pg_dump` and archive of `cv-files` to off-site storage, kept 14 days, so deleted candidate data disappears from backups within 14 days. |
-| Migrations | EF Core migrations run as a one-off step before `api` and `worker` start. |
+| Migrations | EF Core migrations and seed data run as a one-off step before `api` and `worker` start: the `api` image with the argument `migrate`. |
 | Observability | Structured JSON logs with `traceId` on every request and job; `/health` endpoints on `api` and `worker` used by Compose health checks. |
 | Local development | Same Compose file; Mailpit replaces SMTP, GreenMail replaces IMAP, Turnstile test keys, and a fake `IResumeAnalyzer` unless an AI key is set. |
 

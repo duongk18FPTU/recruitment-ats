@@ -4,6 +4,7 @@ using RecruitmentAts.Api.Auth;
 using RecruitmentAts.Api.Errors;
 using RecruitmentAts.Application;
 using RecruitmentAts.Infrastructure;
+using RecruitmentAts.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,13 +27,20 @@ builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
+// One-off deployment step: `dotnet RecruitmentAts.Api.dll migrate` applies migrations and seed data, then exits.
+if (args.Contains("migrate", StringComparer.Ordinal))
+{
+    await app.Services.MigrateAndSeedAsync(app.Lifetime.ApplicationStopping);
+    return;
+}
+
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 
 app.MapHealthChecks("/health");
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();
 
 // Enums travel as UPPER_SNAKE_CASE, like the database values; numbers are rejected.
 static void ConfigureJson(JsonSerializerOptions options) =>

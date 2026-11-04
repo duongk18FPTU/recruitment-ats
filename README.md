@@ -569,8 +569,8 @@ docker compose up -d postgres        # Postgres 16 + pgvector on localhost:5433
 
 cd src/backend
 dotnet tool restore
-export ConnectionStrings__Ats="$(grep '^ConnectionStrings__Ats=' ../../.env | cut -d= -f2-)"
-dotnet ef database update --project src/RecruitmentAts.Infrastructure --startup-project src/RecruitmentAts.Infrastructure
+for v in ConnectionStrings__Ats Seed__AdminEmail Seed__AdminPassword; do export "$v=$(grep "^$v=" ../../.env | cut -d= -f2-)"; done
+dotnet run --project src/RecruitmentAts.Api -- migrate   # migrations + seed (first Admin, departments); safe to repeat
 dotnet build                         # warnings are errors
 dotnet test                          # all test projects; Infrastructure tests start Postgres with Testcontainers
 dotnet run --project src/RecruitmentAts.Api   # http://localhost:5080/health

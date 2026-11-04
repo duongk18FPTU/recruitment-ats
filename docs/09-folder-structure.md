@@ -164,7 +164,8 @@ RecruitmentAts.Infrastructure/
 │   ├── Queues/                         # AnalysisQueue, EmailQueue — FOR UPDATE SKIP LOCKED
 │   ├── UnitOfWork.cs                   # one transaction per command; stale row → CONCURRENCY_CONFLICT
 │   ├── TimestampInterceptor.cs         # CreatedAt / UpdatedAt from IClock
-│   └── Seed/                           # admin user, departments, email templates
+│   ├── Seed/DatabaseSeeder.cs          # first Admin, departments (email templates with M2)
+│   └── DatabaseInitialization.cs       # MigrateAndSeedAsync — the `migrate` deployment step
 ├── Ai/
 │   ├── OpenAiCompatibleResumeAnalyzer.cs  # any OpenAI-compatible API (DeepSeek, GLM, OpenAI, Gemini, Ollama)
 │   ├── OpenAiCompatibleAssistant.cs    # criteria and interview-question drafts, same chat endpoint
@@ -474,7 +475,7 @@ packages/ui/
 
 | Setting | Where |
 |---|---|
-| Connection string, JWT signing key, AI API key (`Ai__ApiKey`), Turnstile secret | Environment variables / Docker secrets (`.env` locally, never committed) |
+| Connection string, JWT signing key, AI API key (`Ai__ApiKey`), Turnstile secret, first Admin (`Seed__AdminEmail`, `Seed__AdminPassword`) | Environment variables / Docker secrets (`.env` locally, never committed) |
 | Mailbox and SMTP passwords | Database, encrypted with Data Protection (keys in the `dp-keys` volume) |
 | Non-secret defaults (timeouts, delays, limits) | `appsettings.json`, overridable by environment |
 | Frontend | `VITE_TURNSTILE_SITE_KEY` only; API calls are same-origin, so no API URL is needed |
