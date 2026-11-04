@@ -1,0 +1,16 @@
+{
+  "name": "@ats/internal",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -p tsconfig.json && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@ats/api-client": "*",
+    "@ats/ui": "*",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  }
+}

@@ -1,0 +1,44 @@
+/* ATS Tokens — Figma variables documented in docs/05-ui-ux.md. */
+:root {
+  /* Colour */
+  --color-ink: #17191e;
+  --color-ink-2: #535965;
+  --color-ink-3: #666b75;
+  --color-canvas: #f5f4f1;
+  --color-surface: #ffffff;
+  --color-surface-sunken: #faf9f7;
+  --color-line: #e4e2dd;
+  --color-line-strong: #bdb9b1;
+  --color-brand: #1f5c46;
+  --color-brand-hover: #184a38;
+  --color-brand-soft: #e7f0ec;
+  --color-brand-accent: #8ccbb3;
+  --color-success: #2e7d4f;
+  --color-success-soft: #e6f2ea;
+  --color-warning: #9a5b0b;
+  --color-warning-soft: #fbf0dd;
+  --color-danger: #b3261e;
+  --color-danger-soft: #fbe9e7;
+  --color-info: #2d5b8a;
+  --color-info-soft: #e8eff7;
+  --color-highlight: #fff1b8;
+
+  /* Type */
+  --font-ui: "Be Vietnam Pro", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-serif: "Source Serif 4", Georgia, serif;
+
+  /* Spacing (4 px grid) and radii */
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-40: 40px;
+  --space-48: 48px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+}

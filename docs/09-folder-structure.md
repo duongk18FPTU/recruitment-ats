@@ -1,6 +1,6 @@
 # Frontend and Backend Folder Structures
 
-> Design status: IN PROGRESS — the backend skeleton (§3.1, §3.7) exists in `src/backend/`; the rest is the target layout, created in the order of §8 and the [delivery plan](12-delivery-plan.md). Update this document in the same commit whenever the code differs from it.
+> Design status: IN PROGRESS — the backend skeleton (§3.1, §3.7) with M1 persistence (§3.3) exists in `src/backend/`, and the frontend workspace (§4.1) with placeholder apps in `src/frontend/`; the rest is the target layout, created in the order of §8 and the [delivery plan](12-delivery-plan.md). Update this document in the same commit whenever the code differs from it.
 >
 > Based on the course reference project [finance-manager](https://github.com/PhamHiep948/finance-manager) (Simplified Clean Architecture, feature-based React), extended for this project's second backend host (Worker) and second frontend (career site).
 
@@ -311,7 +311,7 @@ src/frontend/
 
 | Library | Use |
 |---|---|
-| React 19, Vite, TypeScript | Both apps |
+| React 19, Vite, TypeScript 5.9 | Both apps. TypeScript stays on 5.9 until `typescript-eslint` (< 6.1) and `openapi-typescript` (`^5.x`) support newer versions |
 | React Router | Internal: hash routes (`#/positions/:id`, as in [IA](04-information-architecture.md#routes)); career: path routes (`/jobs/:slug`) for shareable links |
 | TanStack Query | Server state, cache invalidation after mutations, polling AI status every 5 s |
 | `openapi-typescript` + `openapi-fetch` | Types and typed requests from `docs/api/openapi.yaml` |
@@ -319,6 +319,15 @@ src/frontend/
 | Chart.js | Dashboard and report charts (as in the reference project) |
 | Vitest, Testing Library, MSW | Unit and component tests with API mocks per `operationId` |
 | Playwright | End-to-end tests against the Compose stack |
+
+**Installed so far (M0):** React, Vite, TypeScript, `openapi-typescript` + `openapi-fetch`, Vitest + Testing Library + jsdom, ESLint (`typescript-eslint`, `react-hooks`). The other libraries are added with the first feature that needs them (React Router, TanStack Query, forms with M1; Chart.js with the dashboard; MSW with the first API-backed screen; Playwright with the first end-to-end flow). Versions are exact (no `^`) and locked in `package-lock.json`; Node ≥ 24.15 (jsdom).
+
+| Script (in `src/frontend/`) | Does |
+|---|---|
+| `npm run generate` | Regenerates `packages/api-client/src/schema.d.ts` from `docs/api/openapi.yaml` |
+| `npm run typecheck` | Type-checks the packages, including `public.typecheck.ts` (the career site's client cannot name an internal route) |
+| `npm run lint` · `npm test` · `npm run build` | ESLint; Vitest over `apps/*` (jsdom); `tsc` + `vite build` of both apps |
+| `npm run dev:internal` · `dev:career` | Vite on `localhost:5173` / `5174`; `/api` is proxied to the API on `localhost:5080`, keeping calls same-origin as in production |
 
 ### 4.2 Internal app
 
@@ -396,8 +405,9 @@ packages/api-client/
     ├── schema.d.ts                     # generated — never edited
     ├── client.ts                       # openapi-fetch instance for the internal app
     ├── public.ts                       # client restricted to /api/public/*
-    ├── auth.ts                         # access token in memory; on 401 call refreshToken once, then retry
-    ├── problem.ts                      # ProblemDetails → ApiError { status, errorCode, fieldErrors, traceId }
+    ├── public.typecheck.ts             # compile-time check that internal routes are not in the public client
+    ├── auth.ts                         # (M1) access token in memory; on 401 call refreshToken once, then retry
+    ├── problem.ts                      # (M1) ProblemDetails → ApiError { status, errorCode, fieldErrors, traceId }
     └── index.ts
 ```
 

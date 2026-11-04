@@ -102,6 +102,7 @@ jobs:
           npm ci
           npm run generate --if-present
           git diff --exit-code -- . || { echo "::error::API types are out of date with openapi.yaml — run npm run generate"; exit 1; }
+          npm run typecheck --if-present
           npm run lint --if-present
           npm test --if-present
           npm run build --if-present

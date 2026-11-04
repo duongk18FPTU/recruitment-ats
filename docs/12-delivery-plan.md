@@ -34,8 +34,9 @@ M1–M3 together are exactly the 26 Must-have stories. M4 can be cut or reordere
 | 3 | Local Postgres 16 + pgvector with Docker Compose, `.env.example`, schema check script | ~150 MB image | Done |
 | 4 | Install .NET 10 SDK; solution skeleton, `Directory.Build.props`, `global.json`, architecture tests | ~250 MB SDK + NuGet | Done |
 | 5 | Persistence: `AtsDbContext`, migration `M1CoreScreening` (13 M1 tables), compared with `schema.sql` by Testcontainers | NuGet | Done |
-| 6 | Frontend npm workspace: two Vite apps, shared packages, API types generated from `openapi.yaml` | ~150–300 MB npm | |
-| 7 | Auth and Users end to end (start of M1) | — | |
+| 6 | Frontend npm workspace: two Vite apps, shared packages, API types generated from `openapi.yaml` | ~175 MB npm | Done |
+
+M0 is complete: every row above is done and CI checks the contract, the reference schema, the backend, and the frontend on every push. Auth and Users end to end is the first slice of M1.
 
 ## 3. Definition of Done (every story)
 
@@ -63,6 +64,10 @@ dotnet run --project src/RecruitmentAts.Api   # http://localhost:5080/health
 export ConnectionStrings__Ats="$(grep '^ConnectionStrings__Ats=' ../../.env | cut -d= -f2-)"
 dotnet tool restore
 dotnet ef database update --project src/RecruitmentAts.Infrastructure --startup-project src/RecruitmentAts.Infrastructure
+
+cd ../frontend
+npm install
+npm run dev:internal                 # http://localhost:5173 (career site: npm run dev:career → 5174)
 ```
 
 The development database `ats` is created with the `vector` and `btree_gist` extensions; EF Core migrations own its tables. The other services in [`compose.yaml`](09-folder-structure.md#2-repository-layout) (api, worker, web apps, Caddy, Mailpit, GreenMail) are added when the code that needs them exists.

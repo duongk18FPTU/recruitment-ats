@@ -1,0 +1,15 @@
+{
+  "name": "@ats/api-client",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./public": "./src/public.ts"
+  },
+  "scripts": {
+    "generate": "openapi-typescript ../../../../docs/api/openapi.yaml -o src/schema.d.ts"
+  },
+  "dependencies": {
+    "openapi-fetch": "0.17.0"
+  }
+}
