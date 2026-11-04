@@ -1,0 +1,6 @@
+# Local development only: exposes Postgres to the host for the API, EF Core
+# migrations, and database tools. Mailpit and GreenMail are added with US27/US25.
+services:
+  postgres:
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5433}:5432"

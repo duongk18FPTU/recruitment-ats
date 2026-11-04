@@ -1,0 +1,107 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    name: OpenAPI contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: pip install "openapi-spec-validator==0.7.*"
+      - run: openapi-spec-validator docs/api/openapi.yaml
+
+  database:
+    name: Reference schema and Compose
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_DB: ats_schema_check
+          POSTGRES_USER: ats
+          POSTGRES_PASSWORD: ci
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U ats"
+          --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      PGHOST: localhost
+      PGUSER: ats
+      PGPASSWORD: ci
+      PGDATABASE: ats_schema_check
+    steps:
+      - uses: actions/checkout@v5
+      - name: Apply docs/database/schema.sql
+        run: psql -v ON_ERROR_STOP=1 -q -f docs/database/schema.sql
+      - name: Count tables
+        run: psql -tAc "SELECT count(*) || ' tables' FROM pg_tables WHERE schemaname = 'public'"
+      - name: Validate compose files
+        run: POSTGRES_PASSWORD=ci docker compose config --quiet
+
+  backend:
+    name: Backend (.NET)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - id: detect
+        run: |
+          if find src/backend -maxdepth 1 \( -name '*.sln' -o -name '*.slnx' \) 2>/dev/null | grep -q .; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::src/backend has no solution yet — skipped"
+          fi
+      - if: steps.detect.outputs.exists == 'true'
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: src/backend/global.json
+      - if: steps.detect.outputs.exists == 'true'
+        working-directory: src/backend
+        run: |
+          dotnet restore
+          dotnet build -c Release --no-restore
+          dotnet test -c Release --no-build
+        env:
+          Ai__Provider: Fake
+          AiEmbedding__Provider: Fake
+
+  frontend:
+    name: Frontend (npm workspace)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - id: detect
+        run: |
+          if [ -f src/frontend/package-lock.json ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::src/frontend has no package-lock.json yet — skipped"
+          fi
+      - if: steps.detect.outputs.exists == 'true'
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: src/frontend/package-lock.json
+      - if: steps.detect.outputs.exists == 'true'
+        working-directory: src/frontend
+        run: |
+          npm ci
+          npm run generate --if-present
+          git diff --exit-code -- . || { echo "::error::API types are out of date with openapi.yaml — run npm run generate"; exit 1; }
+          npm run lint --if-present
+          npm test --if-present
+          npm run build --if-present

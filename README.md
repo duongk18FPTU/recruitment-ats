@@ -555,6 +555,7 @@ classDiagram
 - [OpenAPI contract](docs/08-openapi-contract.md) · [OpenAPI YAML](docs/api/openapi.yaml)
 - [Frontend and backend folder structures](docs/09-folder-structure.md)
 - [Class design](docs/10-class-design.md) · [Sequence and state diagrams](docs/11-sequence-and-state-diagrams.md) · [Diagram sources](docs/diagrams/)
+- [Delivery plan](docs/12-delivery-plan.md) — milestones M0–M4, Definition of Done, local environment
 - [Mind map](docs/mindmap.png) · [XMind source](docs/mindmap/recruitment-ats.xmind)
 
 ## Project Progress
@@ -569,4 +570,7 @@ classDiagram
 - [x] Database design and OpenAPI contract
 - [x] Folder structures
 - [x] Class and sequence diagrams
+- [x] Delivery plan (milestones M0–M4)
 - [ ] Implementation
+  - [ ] M0 Foundation — CI and local Postgres + pgvector done; .NET 10 skeleton next
+  - [ ] M1 Core screening · [ ] M2 Interviews and candidates · [ ] M3 Intake, pool, and insight · [ ] M4 Should-have
