@@ -272,7 +272,7 @@ Enforced by `ArchitectureTests`:
 | Excel | `ClosedXML` |
 | PDF reports | `QuestPDF` (Community license) |
 | Logging | `Serilog.AspNetCore` (JSON to stdout) |
-| Tests | `xunit`, `Testcontainers.PostgreSql`, `Microsoft.AspNetCore.Mvc.Testing`, `NetArchTest.Rules` |
+| Tests | `xunit.v3` on Microsoft.Testing.Platform (enabled in `global.json`), `Testcontainers.PostgreSql`, `Microsoft.AspNetCore.Mvc.Testing`, `NetArchTest.Rules` |
 
 ## 4. Frontend — React (Vite, TypeScript)
 

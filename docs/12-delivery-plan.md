@@ -30,7 +30,7 @@ M1–M3 together are exactly the 26 Must-have stories. M4 can be cut or reordere
 | 1 | Delivery plan (this document) | No | Done |
 | 2 | CI workflow: OpenAPI validation, reference schema on Postgres + pgvector, backend and frontend jobs that start once the code exists | No (runs on GitHub) | Done |
 | 3 | Local Postgres 16 + pgvector with Docker Compose, `.env.example`, schema check script | ~150 MB image | Done |
-| 4 | Install .NET 10 SDK; solution skeleton, `Directory.Build.props`, `global.json`, architecture tests | ~250 MB SDK + NuGet | |
+| 4 | Install .NET 10 SDK; solution skeleton, `Directory.Build.props`, `global.json`, architecture tests | ~250 MB SDK + NuGet | Done |
 | 5 | Persistence: `AtsDbContext`, first migration compared with `schema.sql` | NuGet | |
 | 6 | Frontend npm workspace: two Vite apps, shared packages, API types generated from `openapi.yaml` | ~150–300 MB npm | |
 | 7 | Auth and Users end to end (start of M1) | — | |

@@ -572,5 +572,5 @@ classDiagram
 - [x] Class and sequence diagrams
 - [x] Delivery plan (milestones M0–M4)
 - [ ] Implementation
-  - [ ] M0 Foundation — CI and local Postgres + pgvector done; .NET 10 skeleton next
+  - [ ] M0 Foundation — CI, local Postgres + pgvector, and .NET 10 skeleton done; persistence next
   - [ ] M1 Core screening · [ ] M2 Interviews and candidates · [ ] M3 Intake, pool, and insight · [ ] M4 Should-have

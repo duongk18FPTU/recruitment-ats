@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/RecruitmentAts.Api/RecruitmentAts.Api.csproj" />
+    <Project Path="src/RecruitmentAts.Application/RecruitmentAts.Application.csproj" />
+    <Project Path="src/RecruitmentAts.Infrastructure/RecruitmentAts.Infrastructure.csproj" />
+    <Project Path="src/RecruitmentAts.Worker/RecruitmentAts.Worker.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/RecruitmentAts.Api.Tests/RecruitmentAts.Api.Tests.csproj" />
+    <Project Path="tests/RecruitmentAts.Application.Tests/RecruitmentAts.Application.Tests.csproj" />
+    <Project Path="tests/RecruitmentAts.ArchitectureTests/RecruitmentAts.ArchitectureTests.csproj" />
+    <Project Path="tests/RecruitmentAts.Infrastructure.Tests/RecruitmentAts.Infrastructure.Tests.csproj" />
+    <Project Path="tests/RecruitmentAts.Worker.Tests/RecruitmentAts.Worker.Tests.csproj" />
+  </Folder>
+</Solution>
