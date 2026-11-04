@@ -42,9 +42,10 @@ classDiagram
         <<record>>
         +Guid? UserId
         +Role? Role
-        +ActorType Type
-        +string? IpAddress
+        +AuditActorType Type
+        +IPAddress? IpAddress
         +string TraceId
+        +User(userId, role, ip, traceId)$ Actor
         +System(traceId)$ Actor
         +Candidate(ip, traceId)$ Actor
     }
@@ -60,7 +61,7 @@ classDiagram
         NOT_FOUND
         CONCURRENCY_CONFLICT
         INVALID_STAGE_TRANSITION
-        …32 codes
+        …33 codes
     }
     class PagedResult~T~ {
         <<record>>
@@ -71,11 +72,12 @@ classDiagram
         +int TotalPages
     }
     class AuditWriter {
-        +Write(Actor, AuditModule, AuditAction, string entityType, Guid? entityId, string summary, object? details) void
+        +Write(Actor, AuditModule, AuditAction, string? entityType, Guid? entityId, string summary, object? details) void
     }
     class IUnitOfWork {
         <<interface>>
         +ExecuteAsync(Func~Task~ work) void
+        +ExecuteAsync(Func~TaskOfT~ work) T
     }
     class IClock {
         <<interface>>
@@ -99,7 +101,9 @@ classDiagram
     SystemClock ..|> IClock
 ```
 
-- `IUnitOfWork.ExecuteAsync` opens one database transaction, runs the work, calls `SaveChanges`, and commits. Every command (and the audit entries, AI jobs, and emails it creates) is saved in one `ExecuteAsync`.
+- `IUnitOfWork.ExecuteAsync` opens one database transaction, runs the work, calls `SaveChanges`, and commits. Every command (and the audit entries, AI jobs, and emails it creates) is saved in one `ExecuteAsync`. `CreatedAt` / `UpdatedAt` are set from `IClock` by `TimestampInterceptor` on save, and `AuditWriter` sets `OccurredAt`, so no service writes timestamps by hand and tests control time.
+- `ActorAccessor` reads the access-token claims `sub` and `role` (`HR_MANAGER`, …); an anonymous request is `Actor.Candidate`. A signed-in token without a usable id or role is `UNAUTHENTICATED`.
+- Problems the framework creates (unknown route, model binding, status-code pages) are completed by `ProblemDetailsMapper.Complete`, so every error response has `errorCode` and `traceId`, and validation `errors` keys are camelCase.
 - Services throw `AppException` with an `ErrorCode`; only `ProblemDetailsMapper` turns it into an HTTP status. A stale `xmin` (`DbUpdateConcurrencyException`) is translated to `CONCURRENCY_CONFLICT` by `UnitOfWork`.
 - Record-level checks live in each module's `*Policy` class and return `FORBIDDEN` or `NOT_FOUND` (when existence must not leak, e.g. an Interviewer opening an application they do not interview).
 

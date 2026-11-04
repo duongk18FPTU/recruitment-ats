@@ -103,9 +103,9 @@ RecruitmentAts.Application/
 │   ├── Captcha/ICaptchaVerifier.cs
 │   └── Time/IClock.cs
 ├── Common/
-│   ├── Actor.cs                        # current user id, role, IP, traceId
+│   ├── Actor.cs                        # current user id, role, actor type, IP, traceId
 │   ├── AppException.cs                 # carries ErrorCode → mapped to ProblemDetails by Api
-│   ├── ErrorCodes.cs                   # the 32 codes from the OpenAPI contract
+│   ├── ErrorCode.cs                    # the 33 codes of the OpenAPI ErrorCode enum (checked by Api.Tests)
 │   ├── PagedResult.cs · PageQuery.cs
 │   └── Audit/AuditWriter.cs            # writes audit entries inside the caller's transaction
 ├── Auth/                               # AuthService, RefreshToken, lockout rules
@@ -162,7 +162,8 @@ RecruitmentAts.Infrastructure/
 │   ├── Migrations/                     # EF Core migrations; must match docs/database/schema.sql
 │   ├── Repositories/                   # one implementation per I<Aggregate>Repository
 │   ├── Queues/                         # AnalysisQueue, EmailQueue — FOR UPDATE SKIP LOCKED
-│   ├── UnitOfWork.cs
+│   ├── UnitOfWork.cs                   # one transaction per command; stale row → CONCURRENCY_CONFLICT
+│   ├── TimestampInterceptor.cs         # CreatedAt / UpdatedAt from IClock
 │   └── Seed/                           # admin user, departments, email templates
 ├── Ai/
 │   ├── OpenAiCompatibleResumeAnalyzer.cs  # any OpenAI-compatible API (DeepSeek, GLM, OpenAI, Gemini, Ollama)
@@ -213,7 +214,7 @@ RecruitmentAts.Api/
 ├── Forms/                              # multipart models with IFormFile (create application, apply, import)
 ├── Auth/                               # JWT setup, refresh cookie, ActorAccessor, role policies
 ├── RateLimiting/                       # login and public-apply policies (BR-21)
-├── Errors/ProblemDetailsMapper.cs      # AppException.ErrorCode → status + problem+json
+├── Errors/                             # ProblemDetailsMapper (ErrorCode → status + problem+json), AppExceptionHandler
 ├── Files/FileResults.cs                # streaming with Content-Disposition, no-store
 ├── appsettings.json                    # safe defaults only
 └── appsettings.Development.json
@@ -248,7 +249,7 @@ A job only loops, opens a DI scope, and calls one Application method; all decisi
 | `Application.Tests` | Rules and use cases per module: transitions, scoring, redaction, quote checks, blind scorecards, email delays and cancel, consent, import atomicity | xUnit, fakes for every port, `FakeClock` |
 | `Infrastructure.Tests` | EF mappings vs real schema (`SchemaMatchesReferenceTests`: migrated database vs `schema.sql` — columns, types, defaults, CHECKs, foreign keys, indexes — for every table the model has), constraints (exclusion, partial unique), queue claims under concurrency, text extraction, Excel | Testcontainers PostgreSQL 16, sample CV files |
 | `Api.Tests` | Status codes, ProblemDetails, auth matrix per `x-roles`, AI fields absent for Interviewer, rate limits, multipart | `WebApplicationFactory`, Testcontainers |
-| `Api.Tests/Contract` | Every `operationId` in `docs/api/openapi.yaml` has exactly one route with the same name, method, and path | Parse the YAML and compare with the endpoint data source |
+| `Api.Tests/Contract` | Every route under `/api` is named after an `operationId` in `docs/api/openapi.yaml` with the same method and path, and no `operationId` has two routes; the C# `ErrorCode` enum equals the contract's. Operations of stories not built yet have no route | Parse the YAML (YamlDotNet) and compare with the endpoint data source |
 | `Worker.Tests` | Job scheduling, lease recovery, retry timing | Fakes + `FakeClock` |
 | `ArchitectureTests` | Rules in §3.7 | NetArchTest |
 
@@ -285,7 +286,7 @@ Enforced by `ArchitectureTests`:
 | Excel | `ClosedXML` |
 | PDF reports | `QuestPDF` (Community license) |
 | Logging | `Serilog.AspNetCore` (JSON to stdout) |
-| Tests | `xunit.v3` on Microsoft.Testing.Platform (enabled in `global.json`), `Testcontainers.PostgreSql`, `Microsoft.AspNetCore.Mvc.Testing`, `NetArchTest.Rules` |
+| Tests | `xunit.v3` on Microsoft.Testing.Platform (enabled in `global.json`), `Testcontainers.PostgreSql`, `Microsoft.AspNetCore.Mvc.Testing`, `NetArchTest.Rules`, `YamlDotNet` (reads `openapi.yaml` in the contract test) |
 
 ## 4. Frontend — React (Vite, TypeScript)
 

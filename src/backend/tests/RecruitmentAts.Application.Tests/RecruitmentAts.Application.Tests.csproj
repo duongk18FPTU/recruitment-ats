@@ -1,10 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- No tests yet: allow "zero tests ran" (exit code 8). Remove with the first test. -->
-  <PropertyGroup>
-    <TestingPlatformCommandLineArguments>--ignore-exit-code 8</TestingPlatformCommandLineArguments>
-  </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\src\RecruitmentAts.Application\RecruitmentAts.Application.csproj" />
   </ItemGroup>

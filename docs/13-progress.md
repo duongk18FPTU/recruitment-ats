@@ -10,13 +10,13 @@
 | Milestone | Release | Stories done | Points done | Status |
 |---|---|---|---|---|
 | M0 Foundation | — | — | — | `DONE` |
-| M1 Core screening | **MVP** | 0 / 12 | 0 / 46 | `TODO` |
+| M1 Core screening | **MVP** | 0 / 12 | 0 / 46 | `DOING` |
 | M2 Interviews and candidates | — | 0 / 8 | 0 / 40 | `TODO` |
 | M3 Intake, pool, and insight | **v1.0** | 0 / 6 | 0 / 29 | `TODO` |
 | M4 Should-have | v1.1 | 0 / 8 | 0 / 34 | `TODO` |
 | **Total** | | **0 / 34** | **0 / 149** | |
 
-**Now:** M1 → T1.1 Cross-cutting.
+**Now:** M1 → T1.2 Seed.
 
 ## M0 Foundation — `DONE`
 
@@ -29,11 +29,11 @@
 | 0.5 | M1 persistence: 13 tables, migration `M1CoreScreening`, compared with `schema.sql` | `DONE` | `0fe53df` |
 | 0.6 | Frontend npm workspace: internal and career apps, `api-client`, `ui` | `DONE` | `8134f8f` |
 
-## M1 Core screening (MVP) — `TODO`
+## M1 Core screening (MVP) — `DOING`
 
 | Order | Item | Pts | Backend | Frontend | AC | Status |
 |---|---|---|---|---|---|---|
-| 1 | T1.1 Cross-cutting (errors, actor, audit, unit of work, contract test) | — | | — | — | `TODO` |
+| 1 | T1.1 Cross-cutting (errors, actor, audit, unit of work, contract test) | — | ✓ | — | — | `DONE` |
 | 2 | T1.2 Seed (first Admin, departments) | — | | — | — | `TODO` |
 | 3 | T1.3 Internal app shell (router, query, auth client, AppShell, 403) | — | — | | — | `TODO` |
 | 4 | US01 Login | 3 | | | 0 / 3 | `TODO` |
@@ -116,3 +116,7 @@ Deviations from the design documents, kept here so they are easy to review (each
 | 2026-11-04 | TypeScript 5.9 (tooling does not support 7.0 yet); frontend libraries added with the first feature that needs them | 09 §4.1 |
 | 2026-11-04 | Local Postgres on port 5433 (5432 is often taken by a native PostgreSQL) | `.env.example`, README |
 | 2026-11-04 | M1 is the MVP; production deployment moved into M3 (v1.0) | 12 |
+| 2026-11-04 | The contract has 33 error codes (documents said 32); C# `ErrorCode` is checked against the YAML enum | 09 §3.2, 10 §1 |
+| 2026-11-04 | `Actor.Type` reuses `AuditActorType`; `IpAddress` is `IPAddress?` (stored as `inet`) | 10 §1 |
+| 2026-11-04 | `CreatedAt` / `UpdatedAt` set by `TimestampInterceptor` from `IClock` | 09 §3.3, 10 §1 |
+| 2026-11-04 | Contract test checks routes against the YAML (name, method, path, no duplicates); operations of unbuilt stories have no route yet | 09 §3.6 |
