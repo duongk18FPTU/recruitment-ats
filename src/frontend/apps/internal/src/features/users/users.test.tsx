@@ -150,14 +150,40 @@ describe("SCR-70 users (US20)", () => {
     expect(calls).toBe(0);
   });
 
-  test("a taken email (409 DUPLICATE_EMAIL) is shown under the email field", async () => {
+  test("a taken email is reported while typing, before anything is submitted", async () => {
+    const queries = await openUsers();
+    let posts = 0;
+    server.use(
+      http.post("*/api/users", () => {
+        posts++;
+        return HttpResponse.json(long, { status: 201 });
+      }),
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "+ Thêm người dùng" }));
+    fillForm({ Email: "LONG.TRAN@recruitment-ats.vn " });
+
+    expect(await screen.findByText("Email này đã được dùng cho Trần Đức Long.")).toBeTruthy();
+    expect(screen.getByLabelText("Email").getAttribute("aria-invalid")).toBe("true");
+    expect(queries.at(-1)?.get("q")).toBe("long.tran@recruitment-ats.vn");
+
+    fillForm({ "Họ tên": "Lê Thị An", role: "RECRUITER", "Mật khẩu tạm": "Mat-khau-2026" });
+    fireEvent.click(screen.getByRole("button", { name: "Tạo tài khoản" }));
+    expect(document.activeElement).toBe(screen.getByLabelText("Email"));
+    expect(posts).toBe(0);
+
+    fillForm({ Email: "an.le@recruitment-ats.vn" });
+    await waitFor(() => expect(screen.queryByText("Email này đã được dùng cho Trần Đức Long.")).toBeNull());
+  });
+
+  test("an email taken in the meantime (409 DUPLICATE_EMAIL) is shown under the email field", async () => {
     await openUsers();
     server.use(
       http.post("*/api/users", () => problem(409, "DUPLICATE_EMAIL", "Email này đã được dùng cho một người dùng khác.")),
     );
 
     fireEvent.click(screen.getByRole("button", { name: "+ Thêm người dùng" }));
-    fillForm({ "Họ tên": "Lê Thị An", Email: long.email, role: "RECRUITER", "Mật khẩu tạm": "Mat-khau-2026" });
+    fillForm({ "Họ tên": "Lê Thị An", Email: "an.le@recruitment-ats.vn", role: "RECRUITER", "Mật khẩu tạm": "Mat-khau-2026" });
     fireEvent.click(screen.getByRole("button", { name: "Tạo tài khoản" }));
 
     expect(await screen.findByText("Email này đã được dùng cho một người dùng khác.")).toBeTruthy();
@@ -178,6 +204,8 @@ describe("SCR-70 users (US20)", () => {
     fireEvent.click(within(rowOf("Trần Đức Long")).getByRole("button", { name: "Thao tác với Trần Đức Long" }));
     fireEvent.click(screen.getByRole("menuitem", { name: "Sửa" }));
     expect((screen.getByLabelText("Email") as HTMLInputElement).value).toBe(long.email);
+    await new Promise((resolve) => setTimeout(resolve, 500)); // past the email check
+    expect(screen.queryByText(/Email này đã được dùng/)).toBeNull();
     expect(screen.queryByLabelText("Mật khẩu tạm")).toBeNull();
     fireEvent.click(screen.getByLabelText("Cấp mật khẩu tạm mới (người dùng quên mật khẩu)"));
     fillForm({ "Mật khẩu tạm": "Mat-khau-moi-2026" });

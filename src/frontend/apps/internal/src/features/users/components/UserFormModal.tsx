@@ -4,7 +4,7 @@ import { roleLabels } from "../../../app/navigation";
 import { Modal } from "../../../components/Modal";
 import { useToast } from "../../../components/Toasts";
 import type { User } from "../api";
-import { useCreateUser, useUpdateUser } from "../queries";
+import { useCreateUser, useEmailOwner, useUpdateUser } from "../queries";
 import {
   generateTemporaryPassword,
   validateUserForm,
@@ -40,8 +40,20 @@ export function UserFormModal({ user, onClose }: UserFormModalProps) {
   const [errors, setErrors] = useState<UserFormErrors>({});
   const [formError, setFormError] = useState<Error | null>(null);
 
-  const set = (field: UserFormField) => (value: string) => setValues((v) => ({ ...v, [field]: value }));
-  const bind = (name: UserFormField) => ({ name, value: values[name], onChange: set(name), error: errors[name] });
+  const emailOwner = useEmailOwner(values.email, user?.id);
+  const emailTaken = emailOwner ? `Email này đã được dùng cho ${emailOwner.fullName}.` : undefined;
+
+  // Editing a field clears its error; a taken email is reported as soon as it is typed.
+  const set = (field: UserFormField) => (value: string) => {
+    setValues((v) => ({ ...v, [field]: value }));
+    setErrors((current) => ({ ...current, [field]: undefined }));
+  };
+  const bind = (name: UserFormField) => ({
+    name,
+    value: values[name],
+    onChange: set(name),
+    error: errors[name] ?? (name === "email" ? emailTaken : undefined),
+  });
 
   const showErrors = (found: UserFormErrors) => {
     setErrors(found);
@@ -67,6 +79,9 @@ export function UserFormModal({ user, onClose }: UserFormModalProps) {
     event.preventDefault();
     setFormError(null);
     const found = validateUserForm(values, issuePassword);
+    if (!found.email && emailTaken) {
+      found.email = emailTaken;
+    }
     showErrors(found);
     if (Object.keys(found).length > 0) {
       return;

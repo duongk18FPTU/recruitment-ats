@@ -25,7 +25,7 @@ export function validateUserForm(values: UserFormValues, passwordRequired: boole
   }
   if (!email) {
     errors.email = "Nhập email.";
-  } else if (email.length > 254 || !/^[^\s@]+@[^\s@]+$/.test(email)) {
+  } else if (!isEmail(email)) {
     errors.email = "Email không hợp lệ.";
   }
   if (values.phone.trim().length > 20) {
@@ -45,6 +45,11 @@ export function validateUserForm(values: UserFormValues, passwordRequired: boole
     }
   }
   return errors;
+}
+
+/** Same shape check as the form; the API's validator is authoritative. */
+export function isEmail(value: string): boolean {
+  return value.length <= 254 && /^[^\s@]+@[^\s@]+$/.test(value);
 }
 
 // No look-alike characters (0/O, 1/l/I), so the password can be read out or typed from a message.

@@ -131,6 +131,7 @@ Deviations from the design documents, kept here so they are easy to review (each
 | 2026-11-05 | SCR-70 labels a deactivated account "Đã khoá" (Figma); the row menu offers "Khoá tài khoản" / "Mở khoá", hidden on one's own row. The user form is a modal (not in Figma) | 05 |
 | 2026-11-05 | Roles from `x-roles` are enforced with `[Authorize(Roles = RoleNames.…)]`; enum query parameters bind by their contract names (`?role=HR_MANAGER`), other spellings → 400 | 09 §3.4, 10 |
 | 2026-11-05 | Internal shared components `Modal`, `Pagination`, `RowMenu`, `Toasts` live in `apps/internal/src/components` (internal only); form and button styles moved from `auth.css` to `app.css`. The user form uses plain controlled inputs (React Hook Form + Zod still arrive with US05) | 09 §4.2 |
+| 2026-11-05 | The user form checks a taken email while the Admin types (400 ms after the last key) with `listUsers` filtered to an exact match — no new endpoint; `DUPLICATE_EMAIL` (409) still covers two Admins saving at once | 05 |
 | 2026-11-05 | Known limitation: two browser tabs refreshing with the same cookie at the same moment look like token reuse and end the session (single-flight works per tab only) | — |
 | 2026-11-04 | Internal app: every IA page has its route and sidebar item from T1.3; a page whose story is not built shows "Chức năng này đang được xây dựng". Nav icons come with the `ui` icon set | 09 §4.2 |
 | 2026-11-04 | React Router 8 (docs did not name a version); `packages/api-client` has its own Vitest project | 09 §4.1 |
