@@ -48,5 +48,15 @@ public sealed class AuthController(AuthService auth, ActorAccessor actors, IProb
         }
     }
 
+    /// <summary>Allowed before an issued password is replaced, so a user can always leave.</summary>
+    [HttpPost("logout", Name = "logout")]
+    [AllowPendingPasswordChange]
+    public async Task<IActionResult> Logout(CancellationToken cancellationToken)
+    {
+        await auth.LogoutAsync(RefreshCookie.Read(Request), actors.Current(), cancellationToken);
+        RefreshCookie.Delete(Response);
+        return NoContent();
+    }
+
     private string? UserAgent() => Request.Headers.UserAgent.ToString() is { Length: > 0 } agent ? agent : null;
 }

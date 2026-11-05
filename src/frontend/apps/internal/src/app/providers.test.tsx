@@ -1,5 +1,5 @@
-import { ApiError } from "@ats/api-client";
-import { useQuery } from "@tanstack/react-query";
+import { ApiError, authSession } from "@ats/api-client";
+import { useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { expect, test } from "vitest";
 import { Link, MemoryRouter, Route, Routes } from "react-router";
@@ -29,4 +29,26 @@ test("a 403 shows #/403 once; the user can then leave it", async () => {
   act(() => fireEvent.click(back));
 
   expect((await screen.findByRole("heading", { level: 1 })).textContent).toBe("Tổng quan");
+});
+
+function ExposeClient({ onClient }: { onClient: (client: QueryClient) => void }) {
+  onClient(useQueryClient());
+  return null;
+}
+
+test("AC-US02 #1: signing out removes every cached record", () => {
+  signIn("RECRUITER");
+  let client: QueryClient | undefined;
+  render(
+    <MemoryRouter>
+      <AppProviders restoreSession={async () => null}>
+        <ExposeClient onClient={(c) => (client = c)} />
+      </AppProviders>
+    </MemoryRouter>,
+  );
+  client!.setQueryData(["applications"], [{ id: "a1", candidate: "Lê Hoàng Nam" }]);
+
+  act(() => authSession.set(null));
+
+  expect(client!.getQueryData(["applications"])).toBeUndefined();
 });

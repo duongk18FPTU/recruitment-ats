@@ -1,6 +1,7 @@
 import type { UserProfile } from "@ats/api-client";
 import { Link, useLocation } from "react-router";
 import { roleLabels, sidebarFor, type AppPage } from "../../app/navigation";
+import { LogoutButton } from "../../features/auth";
 import { Logo } from "./Logo";
 
 export function Sidebar({ user }: { user: UserProfile }) {
@@ -40,15 +41,18 @@ export function Sidebar({ user }: { user: UserProfile }) {
         ))}
       </nav>
 
-      <Link to="/profile" className="sidebar__user" aria-label={`Hồ sơ cá nhân: ${user.fullName}`}>
-        <span className="sidebar__avatar" aria-hidden="true">
-          {initials(user.fullName)}
-        </span>
-        <span>
-          <span className="sidebar__user-name">{user.fullName}</span>
-          <span className="sidebar__user-role">{roleLabels[user.role]}</span>
-        </span>
-      </Link>
+      <div className="sidebar__user">
+        <Link to="/profile" className="sidebar__profile" aria-label={`Hồ sơ cá nhân: ${user.fullName}`}>
+          <span className="sidebar__avatar" aria-hidden="true">
+            {initials(user.fullName)}
+          </span>
+          <span>
+            <span className="sidebar__user-name">{user.fullName}</span>
+            <span className="sidebar__user-role">{roleLabels[user.role]}</span>
+          </span>
+        </Link>
+        <LogoutButton variant="icon" className="sidebar__logout" />
+      </div>
     </aside>
   );
 }

@@ -46,6 +46,16 @@
   font-size: 13px;
 }
 
+.link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-brand);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .field {
   margin-bottom: var(--space-16);
 }

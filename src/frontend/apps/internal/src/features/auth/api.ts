@@ -18,3 +18,15 @@ export async function changePassword(body: ChangePasswordRequest) {
   unwrap(await apiClient.PUT("/api/me/password", { body }));
   return refreshSession();
 }
+
+/**
+ * `logout` (US02). The local session is always cleared, even when the call fails (offline,
+ * expired session): the user must never stay signed in on this client after choosing to leave.
+ */
+export async function logout() {
+  try {
+    await apiClient.POST("/api/auth/logout");
+  } finally {
+    authSession.set(null);
+  }
+}

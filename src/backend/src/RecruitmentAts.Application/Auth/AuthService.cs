@@ -109,6 +109,33 @@ public sealed class AuthService(
         return result ?? throw SessionEnded();
     }
 
+    /// <summary>
+    /// Ends the caller's session (US02): revokes its refresh-token family — from the access token's
+    /// <c>sid</c>, or from the cookie when the claim is missing — and writes a <c>LOGOUT</c> entry.
+    /// </summary>
+    public Task LogoutAsync(string? rawRefreshToken, Actor actor, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+        var userId = actor.UserId ?? throw new AppException(ErrorCode.Unauthenticated, "Vui lòng đăng nhập.");
+
+        return unitOfWork.ExecuteAsync(async () =>
+        {
+            var familyId = actor.SessionId;
+            if (familyId is null && !string.IsNullOrEmpty(rawRefreshToken))
+            {
+                var token = await refreshTokens.FindByHashAsync(tokenIssuer.HashRefreshToken(rawRefreshToken), cancellationToken);
+                familyId = token?.UserId == userId ? token.FamilyId : null;
+            }
+
+            if (familyId is { } family)
+            {
+                await refreshTokens.RevokeFamilyAsync(family, clock.UtcNow, cancellationToken);
+            }
+
+            audit.Write(actor, AuditModule.Auth, AuditAction.Logout, "User", userId, "Đăng xuất");
+        }, cancellationToken);
+    }
+
     private AuthResult StartSession(
         User user,
         Guid familyId,

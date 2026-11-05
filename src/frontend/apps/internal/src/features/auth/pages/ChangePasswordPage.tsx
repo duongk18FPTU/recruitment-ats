@@ -6,6 +6,7 @@ import { changePassword } from "../api";
 import { useAuth } from "../AuthProvider";
 import { AuthCard } from "../components/AuthCard";
 import { FormError } from "../components/FormError";
+import { LogoutButton } from "../components/LogoutButton";
 import { PasswordField } from "../components/PasswordField";
 import { validateChangePassword, type ChangePasswordField, type FieldErrors } from "../validation";
 
@@ -65,7 +66,14 @@ export function ChangePasswordPage() {
   const apiFieldErrors = mutation.error instanceof ApiError && Object.keys(mutation.error.fieldErrors).length > 0;
 
   return (
-    <AuthCard title="Đổi mật khẩu">
+    <AuthCard
+      title="Đổi mật khẩu"
+      note={
+        <>
+          Không phải tài khoản của bạn? <LogoutButton variant="link" className="link-button" />
+        </>
+      }
+    >
       <p className="auth__lead">Đây là lần đăng nhập đầu tiên. Hãy đặt mật khẩu mới mà chỉ bạn biết.</p>
       <form noValidate onSubmit={submit}>
         {mutation.error && !apiFieldErrors && <FormError error={mutation.error} />}

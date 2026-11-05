@@ -246,7 +246,61 @@ public sealed class AuthApiTests(DatabaseApiFactory api) : IClassFixture<Databas
         Assert.Equal(64, stored.TokenHash.Length);
     }
 
+    // ---------------------------------------------------------------- logout (AC-US02 #1)
+
+    [Fact]
+    public async Task Logout_ends_this_session_only_and_writes_a_LOGOUT_entry()
+    {
+        var user = await api.CreateUserAsync(Password);
+        var login = await LoginAsync(user.Email, Password);
+        var cookie = RefreshTokenOf(login);
+        var otherSession = RefreshTokenOf(await LoginAsync(user.Email, Password));
+
+        var response = await LogoutAsync(await AccessTokenOf(login), cookie);
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        Assert.Contains(response.Headers.GetValues("Set-Cookie"), c => c.StartsWith(RefreshCookie.Name + "=;", StringComparison.Ordinal));
+        Assert.Equal(HttpStatusCode.Unauthorized, (await RefreshAsync(cookie)).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await RefreshAsync(otherSession)).StatusCode);
+        Assert.True(await api.QueryAsync(db =>
+            db.Set<AuditLog>().AnyAsync(a => a.ActorId == user.Id && a.Action == AuditAction.Logout, _ct)));
+    }
+
+    [Fact]
+    public async Task Logout_needs_a_signed_in_user()
+    {
+        var response = await LogoutAsync(accessToken: null, cookie: null);
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task A_user_with_an_issued_password_can_still_log_out()
+    {
+        var user = await api.CreateUserAsync(Password, mustChangePassword: true);
+        var login = await LoginAsync(user.Email, Password);
+
+        var response = await LogoutAsync(await AccessTokenOf(login), RefreshTokenOf(login));
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+
     // ---------------------------------------------------------------- helpers
+
+    private async Task<HttpResponseMessage> LogoutAsync(string? accessToken, string? cookie)
+    {
+        using var client = api.CreateClient(new() { HandleCookies = false });
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/api/auth/logout");
+        if (accessToken is not null)
+        {
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+        }
+        if (cookie is not null)
+        {
+            request.Headers.Add("Cookie", $"{RefreshCookie.Name}={cookie}");
+        }
+        return await client.SendAsync(request, _ct);
+    }
 
     private async Task<HttpResponseMessage> LoginAsync(string email, string password, string? ip = null)
     {
