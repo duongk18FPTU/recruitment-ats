@@ -41,7 +41,7 @@ Lifelines use the class names of the [class design](10-class-design.md), so ever
 | [seq_override_ai](#seq-override-ai) | Recruiter overrides one criterion result | US13, BR-13 |
 | [seq_move_stage](#seq-move-stage) | Reject an application, queue the email | US11, BR-01–04, BR-23 |
 | [seq_email_dispatch](#seq-email-dispatch) | Cancel a pending email; Worker sends due emails | US27, BR-23 |
-| [seq_schedule_interview](#seq-schedule-interview) | Schedule an interview, prevent double booking | US14 |
+| [seq_schedule_interview](#seq-schedule-interview) | Schedule an interview, prevent double booking, notify the panel | US14, US35, BR-29 |
 | [seq_submit_scorecard](#seq-submit-scorecard) | Blind scorecard submission | US15, BR-07 |
 | [seq_mailbox_intake](#seq-mailbox-intake) | Worker collects CVs from the mailbox | US25, BR-22 |
 | [seq_bulk_import](#seq-bulk-import) | Preview and atomic import | US16, BR-16 |
@@ -121,7 +121,7 @@ Cancel (`UPDATE … WHERE status = 'PENDING'`) and claim (`PENDING → SENDING`)
 
 ![Schedule interview](diagrams/out/seq_schedule_interview.png)
 
-The overlap query gives a readable error; the exclusion constraint `ex_panelist_overlap` catches two requests that pass the query at the same time. Rescheduling replaces a still-pending invitation instead of sending a second email.
+The overlap query gives a readable error; the exclusion constraint `ex_panelist_overlap` catches two requests that pass the query at the same time. Rescheduling replaces a still-pending invitation instead of sending a second email. `Notifier` adds the panel members' notifications in the same transaction, so a rejected interview notifies nobody; a later change cancels a panel email that is still pending (BR-29).
 
 <a id="seq-submit-scorecard"></a>
 ### Submit blind scorecard

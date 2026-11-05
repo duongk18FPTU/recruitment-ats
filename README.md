@@ -22,6 +22,7 @@ Small hiring teams collect CVs from many channels, screen them manually, track p
 | G8 Reuse of talent | Consented candidates searchable and addable to another position |
 | G9 Channel effectiveness | Applications per source, including LinkedIn and Facebook share links |
 | G10 AI across the hiring flow | Criteria drafts, semantic pool matches, and interview-question drafts — each reviewed by a person before use |
+| G11 The team acts on time | Panel members and position owners notified of work that concerns them (in the app; interviews also by email) |
 
 What makes this project different from a generic ATS:
 
@@ -38,7 +39,8 @@ What makes this project different from a generic ATS:
 - **Channels (all free).** Candidates apply on the career site — a separate public web app with its own domain — without an account. HR shares source-tagged links to a job post on LinkedIn, Facebook, or elsewhere (`?src=linkedin`), so applications are classified automatically. CVs sent to the recruitment mailbox are collected into a CV inbox. Recruiters can still add CVs manually or import Excel + ZIP.
 - **Candidate communication.** Automatic emails from editable templates: receipt immediately; interview invitation, change, cancellation, rejection, and offer notice after a 10-minute cancel window.
 - **Talent pool and export.** Consented candidates can be added to another position; candidate lists export to Excel.
-- **Out of scope:** candidate accounts, API integration with paid job boards (TopCV, VietnamWorks) and automatic posting to LinkedIn/Facebook (no public API), SMS and calendar integration, headcount planning, OCR for scanned CVs, offer letters and onboarding, and AI that learns from past decisions or makes reject/hire decisions.
+- **Team notifications.** A bell in the internal app tells panel members and position owners about interviews, new applications, completed scorecards, and failures; panel members also get interview emails.
+- **Out of scope:** candidate accounts, API integration with paid job boards (TopCV, VietnamWorks) and automatic posting to LinkedIn/Facebook (no public API), SMS and calendar integration, browser push or real-time notifications, a global search box, headcount planning, OCR for scanned CVs, offer letters and onboarding, and AI that learns from past decisions or makes reject/hire decisions.
 
 Full analysis, market research (Greenhouse, Base E-Hiring, FastWork, EasyHRM, Vingroup practice), channel feasibility, scope, constraints, and risks: [Top-down research](docs/01-research-top-down.md).
 
@@ -84,6 +86,7 @@ US31        Candidate data consent (join, leave, delete)
 US32        AI-suggested criteria from a job description
 US33        AI matching of pool candidates to a position (embeddings)
 US34        AI-suggested interview questions
+US35        In-app notifications (+ interview emails to panel members)
 ```
 
 Backlog, per-story INVEST review, and acceptance criteria: [INVEST requirements](docs/03-invest-requirements.md).
@@ -103,10 +106,10 @@ flowchart TB
 
     subgraph system["Recruitment ATS — System Boundary"]
         direction LR
-        adminCases["<b>Administrator</b><br/><br/>UC01–03 Login, logout, dashboard<br/>UC04–07 · UC22 Positions, job posts<br/>UC08–11 Applications<br/>UC16 Import · UC25 CV inbox<br/>UC26 Talent pool · UC30 Export<br/>UC12–13 AI analysis, override<br/>UC32–34 AI criteria, pool matches, questions<br/>UC14 Schedule interview<br/>UC27–28 Emails, templates<br/>UC17–19 Reports, audit<br/>UC20 Users · UC29 Mailbox & sender<br/>UC21 Profile"]
-        managerCases["<b>HR Manager</b><br/><br/>UC01–03 Login, logout, dashboard<br/>UC04–07 · UC22 Positions, job posts<br/>UC08–11 Applications incl. Offer/Hire<br/>UC16 Import · UC25 CV inbox<br/>UC26 Talent pool · UC30 Export<br/>UC12–13 AI analysis, override<br/>UC32–34 AI criteria, pool matches, questions<br/>UC14 Schedule · UC15 Scorecard<br/>UC27–28 Emails, templates<br/>UC17–19 Reports, audit<br/>UC21 Profile"]
-        recruiterCases["<b>Recruiter</b><br/><br/>UC01–03 Login, logout, dashboard<br/>UC04–06 · UC22 Own positions, job posts<br/>UC08–11 Applications up to Interview<br/>UC16 Import · UC25 CV inbox<br/>UC26 Talent pool · UC30 Export<br/>UC12–13 AI analysis, override<br/>UC32–34 AI criteria, pool matches, questions<br/>UC14 Schedule interview<br/>UC27 Candidate emails<br/>UC21 Profile"]
-        interviewerCases["<b>Interviewer</b><br/><br/>UC01–03 Login, logout, dashboard<br/>UC04 Assigned positions<br/>UC08 Assigned applications, no AI score<br/>UC15 Submit blind scorecard<br/>Sees attached interview questions<br/>UC21 Profile"]
+        adminCases["<b>Administrator</b><br/><br/>UC01–03 Login, logout, dashboard<br/>UC04–07 · UC22 Positions, job posts<br/>UC08–11 Applications<br/>UC16 Import · UC25 CV inbox<br/>UC26 Talent pool · UC30 Export<br/>UC12–13 AI analysis, override<br/>UC32–34 AI criteria, pool matches, questions<br/>UC14 Schedule interview<br/>UC27–28 Emails, templates<br/>UC17–19 Reports, audit<br/>UC20 Users · UC29 Mailbox & sender<br/>UC21 Profile · UC35 Notifications"]
+        managerCases["<b>HR Manager</b><br/><br/>UC01–03 Login, logout, dashboard<br/>UC04–07 · UC22 Positions, job posts<br/>UC08–11 Applications incl. Offer/Hire<br/>UC16 Import · UC25 CV inbox<br/>UC26 Talent pool · UC30 Export<br/>UC12–13 AI analysis, override<br/>UC32–34 AI criteria, pool matches, questions<br/>UC14 Schedule · UC15 Scorecard<br/>UC27–28 Emails, templates<br/>UC17–19 Reports, audit<br/>UC21 Profile · UC35 Notifications"]
+        recruiterCases["<b>Recruiter</b><br/><br/>UC01–03 Login, logout, dashboard<br/>UC04–06 · UC22 Own positions, job posts<br/>UC08–11 Applications up to Interview<br/>UC16 Import · UC25 CV inbox<br/>UC26 Talent pool · UC30 Export<br/>UC12–13 AI analysis, override<br/>UC32–34 AI criteria, pool matches, questions<br/>UC14 Schedule interview<br/>UC27 Candidate emails<br/>UC21 Profile · UC35 Notifications"]
+        interviewerCases["<b>Interviewer</b><br/><br/>UC01–03 Login, logout, dashboard<br/>UC04 Assigned positions<br/>UC08 Assigned applications, no AI score<br/>UC15 Submit blind scorecard<br/>Sees attached interview questions<br/>UC21 Profile · UC35 Notifications"]
         candidateCases["<b>Candidate</b><br/><br/>UC23 Browse job posts<br/>UC24 Apply online<br/>UC31 Manage data consent"]
     end
 
@@ -123,7 +126,7 @@ flowchart TB
     interviewer --> interviewerCases
     candidate --> candidateCases
     system -.->|UC12 · UC32–34 redacted text,<br/>job descriptions, embeddings| ai
-    system -.->|UC27 candidate emails| mail
+    system -.->|UC27 candidate emails<br/>UC35 panel emails| mail
     mailbox -.->|UC25 emailed CVs| system
 
     classDef actor fill:#666,color:#fff,stroke:#333
@@ -166,6 +169,7 @@ Four internal roles have accounts; candidates use the public career site without
 | Reports and export | Yes | Yes | No | No |
 | Audit log | Yes | Yes | No | No |
 | User management | Yes | No | No | No |
+| Notifications (own only) | Yes | Yes | Yes | Yes |
 
 **Candidate (no account):** browse published job posts, apply with consent, and join or leave the talent pool or delete their data from the signed link in any email.
 
@@ -202,6 +206,7 @@ Authenticated
 ├── Users
 ├── Settings: Email templates · Mailbox & sender
 ├── Profile
+├── Notifications panel (topbar bell)
 └── Forbidden
 ```
 
@@ -236,10 +241,12 @@ flowchart TB
     Shell --> Users["Users"]
     Shell --> Settings["Settings"]
     Shell --> Profile["Profile"]
+    Shell --> Notifications["Notifications panel"]
+    Notifications -.-> AppDetail
     Shell --> Forbidden["403"]
 ```
 
-Screen inventory (38 screens, including 6 public career-site screens), requirement-to-screen mapping, task flows, state contract, accessibility rules, and screen-to-API mapping: [Information architecture](docs/04-information-architecture.md).
+Screen inventory (39 screens, including 6 public career-site screens), requirement-to-screen mapping, task flows, state contract, accessibility rules, and screen-to-API mapping: [Information architecture](docs/04-information-architecture.md).
 
 ### 2.3 UI prototype
 
@@ -398,6 +405,7 @@ erDiagram
     applications ||--o{ email_messages : triggers
     email_templates ||--o{ email_messages : renders
     inbox_items |o--o| applications : "converted to"
+    users ||--o{ notifications : receives
     import_batches ||--o{ applications : creates
     users ||--o{ audit_logs : performs
     candidates ||--o| candidate_embeddings : "embedded as"
@@ -428,6 +436,7 @@ Full ER diagrams per domain, queue claims, retention jobs, and rule-to-constrain
 | Interviews, scorecards, AI question drafts | `/api/interviews`, `/api/applications/{id}/scorecards`, `/api/applications/{id}/interview-question-suggestions` | 10 |
 | Emails, CV inbox, talent pool, imports | `/api/emails`, `/api/inbox-items`, `/api/talent-pool`, `/api/imports` | 18 |
 | Reports, audit, users, settings | `/api/reports`, `/api/audit-logs`, `/api/users`, `/api/settings` | 15 |
+| Notifications | `/api/notifications` | 4 |
 | Public career site | `/api/public` | 8 |
 
 Every internal operation declares its roles in `x-roles`; errors use RFC 7807 Problem Details with a stable `errorCode` and `traceId`; Interviewers never receive AI fields. Conventions, status codes, error codes, the endpoint list, and story coverage: [OpenAPI contract](docs/08-openapi-contract.md).
@@ -449,10 +458,11 @@ src/backend/
 ├── RecruitmentAts.slnx
 ├── src/
 │   ├── RecruitmentAts.Application/     # modules: Positions, Applications, Screening, Interviews,
-│   │                                   # Communication, Inbox, Imports, Consent, … + Abstractions (ports)
+│   │                                   # Communication, Inbox, Imports, Consent, Notifications, … + Abstractions (ports)
 │   ├── RecruitmentAts.Infrastructure/  # EF Core + PostgreSQL, queues, MailKit, LLM, files, Excel, PDF
 │   ├── RecruitmentAts.Api/             # controllers (route name = operationId), JWT, ProblemDetails
-│   └── RecruitmentAts.Worker/          # AnalysisRunner, EmailDispatcher, MailboxPoller, RetentionJob
+│   └── RecruitmentAts.Worker/          # AnalysisRunner, EmailDispatcher, MailboxPoller, RetentionJob,
+│                                       # ScorecardReminderJob, EmbeddingRunner
 └── tests/                              # Application, Infrastructure (Testcontainers), Api (+ contract),
                                         # Worker, ArchitectureTests
 ```
@@ -473,7 +483,7 @@ src/frontend/
 ├── apps/
 │   ├── internal/src/features/          # auth, dashboard, positions, job-posts, applications, screening,
 │   │                                   # interviews, emails, inbox, talent-pool, imports, reports, audit,
-│   │                                   # users, settings, profile
+│   │                                   # users, settings, profile, notifications
 │   └── career/src/features/            # jobs, apply, consent, privacy
 ├── packages/
 │   ├── api-client/                     # types generated from docs/api/openapi.yaml, auth refresh, ProblemDetails

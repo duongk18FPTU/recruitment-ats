@@ -58,6 +58,7 @@ A separate Hiring Manager role (department head who requests and approves hiring
 | G8 — Reuse of talent | Candidates who consented can be found in the talent pool and added to another position in one action |
 | G9 — Channel effectiveness | Applications per source are reported, including LinkedIn and Facebook posts that link to the career site |
 | G10 — AI across the hiring flow | AI drafts position criteria from a job description, finds matching consented candidates in the talent pool, and suggests interview questions for unverified criteria — every suggestion is reviewed by a person before it takes effect |
+| G11 — The team acts on time | Panel members and position owners are notified in the app (and panel members by email) of work that concerns them; no one has to watch every screen |
 
 ## 4. Market research
 

@@ -341,7 +341,7 @@ def seq_email_dispatch():
 def seq_schedule_interview():
     s = Seq('Schedule interview', [user('R', 'Recruiter'), page('UI', ':Schedule interview modal'),
                                    ctl('API', ':InterviewsController'), ctl('S', ':InterviewService'),
-                                   ctl('ES', ':EmailScheduler'), DB])
+                                   ctl('ES', ':EmailScheduler'), ctl('N', ':Notifier'), DB])
     s.call('R', 'UI', 'time, place, panel, "Lưu lịch"')
     s.call('UI', 'API', 'POST …/{id}/interviews')
     s.call('API', 'S', 'ScheduleAsync(applicationId, request)')
@@ -362,7 +362,9 @@ def seq_schedule_interview():
     s.self_('S', 'create interview, panel slots')
     s.call('S', 'ES', 'ScheduleAsync(INVITATION)')
     s.reply('ES', 'S', 'email PENDING, +10 min')
-    s.call('S', 'DB', 'save interview, email, audit')
+    s.call('S', 'N', 'InterviewScheduledAsync(interview, actor)')
+    s.reply('N', 'S', 'a notification per panel member except the actor; panel email PENDING, +10 min')
+    s.call('S', 'DB', 'save interview, emails, notifications, audit')
     s.reply('DB', 'S', 'saved or exclusion violation')
     s.frag('alt', 'exclusion constraint violated')
     s.reply('S', 'API', 'INTERVIEW_OVERLAP')

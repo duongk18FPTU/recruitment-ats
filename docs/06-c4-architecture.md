@@ -227,6 +227,7 @@ flowchart TB
 | Applications & Pipeline | Candidate de-duplication, CV upload and replacement, stage moves, rejection reasons, stage history | US08–11, BR-01–06, BR-15, BR-18 |
 | Screening | Analysis status and history, re-run, per-criterion override with reason | US12, US13, BR-09, BR-13 |
 | Interviews | Scheduling with panel; AI-suggested questions attached by the scheduler; blind scorecards | US14, US15, US34, BR-07, BR-08, BR-28 |
+| Notifications | The signed-in user's notifications (list, unread count, mark read); `Notifier` is called by other modules inside their transaction and picks the recipients | US35, BR-29 |
 | Intake | Bulk import preview and atomic commit; CV inbox assign/dismiss; talent pool search, semantic pool matches for a position, add to position | US16, US25, US26, US33, BR-16, BR-22, BR-24, BR-27 |
 | Communication | List, edit, cancel, resend candidate emails; templates with preview; mailbox and sender settings with connection test | US27–29, BR-23 |
 | Insight & Admin | Dashboard, reports and export, candidate Excel export, audit log, user management | US03, US17–20, US30, BR-25 |
