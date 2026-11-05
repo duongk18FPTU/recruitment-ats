@@ -28,13 +28,16 @@ Why it fits this scale (35 stories, 29 tables, 92 operations, 2 hosts, 4 externa
 recruitment-ats/
 ├── docs/                               # documentation (this folder)
 │   ├── api/openapi.yaml                # API contract — single source of truth
-│   └── database/schema.sql             # reference DDL
+│   └── database/schema.sql             # reference DDL — the design every migration is compared with
 ├── src/
 │   ├── backend/                        # .NET solution (§3)
 │   └── frontend/                       # npm workspace: 2 apps + shared packages (§4)
 ├── deploy/
-│   ├── Caddyfile                       # domains, routing, crawler rule (AD-04, AD-05)
-│   └── backup/                         # pg_dump + file archive scripts
+│   ├── postgres/
+│   │   ├── init/01-extensions.sql      # vector, btree_gist — run once when the Compose volume is created
+│   │   └── check-schema.sh             # applies schema.sql to a throwaway database in the running container
+│   ├── Caddyfile                       # domains, routing, crawler rule (AD-04, AD-05) — added in M3
+│   └── backup/                         # pg_dump + file archive scripts — added in M3
 ├── compose.yaml                        # caddy, career-web, internal-web, api, worker, postgres
 ├── compose.override.yaml               # local only: Mailpit, GreenMail, exposed ports
 ├── .env.example                        # documented variable names, no secrets
@@ -159,8 +162,12 @@ The entity is named `JobApplication` (not `Application`) to avoid a clash with t
 RecruitmentAts.Infrastructure/
 ├── Persistence/
 │   ├── AtsDbContext.cs
+│   ├── AtsDbContextOptions.cs          # Npgsql + snake_case naming, shared by the app and design time
+│   ├── DesignTimeDbContextFactory.cs   # `dotnet ef` reads ConnectionStrings__Ats
+│   ├── UpperSnakeEnumConverter.cs      # C# enums stored as UPPER_SNAKE_CASE text (CHECKs generated from them)
 │   ├── Configurations/                 # one IEntityTypeConfiguration per table (snake_case, CHECKs, indexes)
-│   ├── Migrations/                     # EF Core migrations; must match docs/database/schema.sql
+│   ├── Migrations/                     # EF Core migrations, one per milestone plus changes (M1CoreScreening,
+│   │                                   # UserMustChangePassword); must match docs/database/schema.sql
 │   ├── Repositories/                   # one implementation per I<Aggregate>Repository
 │   ├── Queues/                         # AnalysisQueue, EmailQueue — FOR UPDATE SKIP LOCKED
 │   ├── UnitOfWork.cs                   # one transaction per command; stale row → CONCURRENCY_CONFLICT

@@ -448,8 +448,23 @@ The backend uses **Simplified Clean Architecture** (AD-11), the same three-proje
 | Option | Verdict |
 |---|---|
 | Layered N-tier | Rejected — business code would depend on EF Core and concrete adapters; AI, SMTP, and IMAP could not be faked cleanly, and the Worker could not reuse the services |
-| Full Clean Architecture (Domain project, MediatR, CQRS) | Rejected — ~85 handlers and an extra project add ceremony without a driver at this scale |
+| Full Clean Architecture (Domain project, MediatR, CQRS) | Rejected — ~90 handlers and an extra project add ceremony without a driver at this scale |
 | **Simplified Clean Architecture** | **Selected** — two hosts share one core; every external service is a replaceable port; pure rules are unit-tested without a database |
+
+```text
+recruitment-ats/
+├── docs/
+│   ├── api/openapi.yaml                # API contract
+│   └── database/schema.sql             # reference DDL (29 tables); migrations are compared with it
+├── src/
+│   ├── backend/                        # .NET solution (5.1)
+│   └── frontend/                       # npm workspace (5.2)
+├── deploy/postgres/                    # init/01-extensions.sql (vector, btree_gist), check-schema.sh
+├── compose.yaml · compose.override.yaml  # PostgreSQL 16 + pgvector; more services as their code exists
+└── .env.example
+```
+
+There is no separate database folder: in Clean Architecture the database is an infrastructure detail. The schema is code-first — table mappings in `Infrastructure/Persistence/Configurations`, EF Core migrations in `Infrastructure/Persistence/Migrations`, applied by `api migrate` — and `docs/database/schema.sql` is the reference design that `SchemaMatchesReferenceTests` compares the migrated database with, so there is only one source that creates tables.
 
 ### 5.1 Backend (.NET 10 LTS)
 
@@ -459,7 +474,9 @@ src/backend/
 ├── src/
 │   ├── RecruitmentAts.Application/     # modules: Positions, Applications, Screening, Interviews,
 │   │                                   # Communication, Inbox, Imports, Consent, Notifications, … + Abstractions (ports)
-│   ├── RecruitmentAts.Infrastructure/  # EF Core + PostgreSQL, queues, MailKit, LLM, files, Excel, PDF
+│   ├── RecruitmentAts.Infrastructure/  # Persistence/: AtsDbContext, Configurations (one per table),
+│   │                                   #   Migrations (EF Core, per milestone), Repositories, Seed, UnitOfWork;
+│   │                                   # queues, MailKit, LLM, files, Excel, PDF
 │   ├── RecruitmentAts.Api/             # controllers (route name = operationId), JWT, ProblemDetails
 │   └── RecruitmentAts.Worker/          # AnalysisRunner, EmailDispatcher, MailboxPoller, RetentionJob,
 │                                       # ScorecardReminderJob, EmbeddingRunner
