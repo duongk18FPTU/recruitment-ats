@@ -55,8 +55,9 @@ Priority uses MoSCoW (`M` must, `S` should, `C` could). Story points use the Fib
 | US32 | As an Admin, HR Manager, or position owner, I want AI to suggest weighted criteria from the job description so that I can set up a position faster and more consistently. | Faster, consistent setup | US05 | S | 3 |
 | US33 | As an Admin, HR Manager, or Recruiter, I want the system to find consented pool candidates whose CVs match a position by meaning so that I can reuse past talent without guessing keywords. | Talent reuse | US26, US12 | S | 8 |
 | US34 | As an Admin, HR Manager, or Recruiter, I want AI to suggest interview questions aimed at the criteria the CV did not clearly prove so that interviewers check what matters. | Focused interviews | US14, US12 | S | 5 |
+| US35 | As any internal user, I want to be notified in the app — and by email for interviews — about work that concerns me so that I act on time without watching every screen. | Timely action | US14, US15 | M | 5 |
 
-**Total:** 34 stories, 149 points. Must-have stories: 26 (115 points); the three AI-assistance stories are Should-have.
+**Total:** 35 stories, 154 points. Must-have stories: 27 (120 points); the three AI-assistance stories are Should-have.
 
 ## Per-story INVEST review
 
@@ -98,6 +99,7 @@ Priority uses MoSCoW (`M` must, `S` should, `C` could). Story points use the Fib
 | US32 | PASS | PASS | PASS | PASS | PASS | PASS | Synchronous draft-only call (BR-26); fake assistant in tests. |
 | US33 | PASS | PASS | PASS | PASS | PASS | PASS | 8 points. Splits into: embedding job, position-vector cache, vector search, UI tab. Fake embedding client in tests. |
 | US34 | PASS | PASS | PASS | PASS | PASS | PASS | Draft-only; interviewer view excludes every AI field (BR-28). |
+| US35 | PASS | PASS | PASS | PASS | PASS | PASS | Recipients and events are fixed by BR-29; the actor is never notified of their own action. Splits into: notification store + API, bell and panel, panel emails, scorecard reminder job. |
 
 ## Acceptance criteria
 
@@ -321,6 +323,14 @@ Format: **Given** context, **When** action, **Then** observable result.
 3. Given the user keeps at most 8 questions and saves the interview, then they are stored with it; more than 8 returns 400.
 4. Given a panel member opens the interview or scorecard, then they see the questions grouped by criterion and no AI result, quote, or score.
 5. Given no completed analysis, then questions are generated from the criteria alone and the response marks the basis `CRITERIA_ONLY`.
+
+### AC-US35 Notifications
+
+1. Given an interview is scheduled, changed, or cancelled, then each panel member except the user who did it gets a notification linking to the interview and an email queued for 10 minutes; a further change within those 10 minutes replaces the pending email instead of sending two.
+2. Given an application created from the career site or the mailbox, a failed AI analysis, or a failed candidate email, then the owner of the position is notified; an application the owner added themselves creates no notification.
+3. Given the last panel member submits a scorecard, then the position owner is notified; given an interview ended 24 hours ago without a member's scorecard, then that member is reminded once.
+4. Given notifications, then the bell shows the unread count (refreshed at least every 30 seconds) and the panel lists them newest first; opening one marks it read and opens its record; "Đánh dấu đã đọc tất cả" sets the count to 0.
+5. Given another user's notification id, then marking it read returns 404, and the list never contains other users' notifications.
 
 ## Cross-cutting acceptance constraints
 

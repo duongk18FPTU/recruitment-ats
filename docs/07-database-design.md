@@ -56,6 +56,9 @@ erDiagram
     positions ||--o| position_embeddings : "queried as"
     interviews ||--o{ interview_questions : asks
     position_criteria ||--o{ interview_questions : targets
+    users ||--o{ notifications : receives
+    applications ||--o{ notifications : "about"
+    interviews ||--o{ notifications : "about"
 ```
 
 `mail_settings` (one row) has no relationships other than `updated_by`.
@@ -396,6 +399,32 @@ erDiagram
 - **Bulk import (BR-16).** Preview validates and stores the rows in `preview_rows` with the uploaded files in a staging folder; confirm re-checks and creates every application in one transaction or none. Unconfirmed previews expire after 24 hours.
 - **Audit (US19).** Written in the same transaction as the change. `details` holds before/after values of changed fields, never passwords, tokens, or CV text. Audit rows are never updated or deleted; candidate names in `summary` are replaced by the candidate code on anonymization.
 
+## Notifications
+
+```mermaid
+erDiagram
+    notifications {
+        uuid id PK
+        uuid user_id FK "recipient"
+        varchar type "INTERVIEW_ASSIGNED INTERVIEW_CHANGED INTERVIEW_CANCELLED SCORECARD_REMINDER SCORECARDS_COMPLETE NEW_APPLICATION ANALYSIS_FAILED EMAIL_FAILED"
+        varchar title "Vietnamese text shown in the panel"
+        uuid application_id FK "nullable"
+        uuid interview_id FK "nullable"
+        timestamptz read_at "null = unread"
+        varchar email_status "null = no email; PENDING SENDING SENT FAILED CANCELLED"
+        timestamptz email_next_attempt_at
+        smallint email_attempt_count
+        timestamptz email_sent_at
+        timestamptz created_at
+    }
+    users ||--o{ notifications : receives
+```
+
+- **Who gets what (BR-29).** One row per recipient; recipients are chosen by the service that raises the event (panel members, the position owner), never the actor. A user reads only rows with their own `user_id`.
+- **Panel emails.** Interview notifications set `email_status = 'PENDING'` and `email_next_attempt_at = now() + 10 minutes`. A newer interview notification for the same `(interview_id, user_id)` sets the older pending one to `CANCELLED`, so only the latest state is mailed. The Worker's `EmailDispatcher` claims these rows like `email_messages` (same lease and retries) and sends to `users.email`; these emails are not part of the candidate's email log.
+- **Unread count.** Partial index `ix_notifications_unread (user_id) WHERE read_at IS NULL`; the list uses `ix_notifications_user (user_id, created_at DESC)`.
+- Rows are deleted 90 days after creation (Retention).
+
 ## AI matching and assistance
 
 ```mermaid
@@ -477,6 +506,7 @@ RETURNING *;
 |---|---|---|
 | `cv_analyses` | `COMPLETED`, results and scores saved, application's `fit_score` updated | Transient error and `attempt_count < 2` → `PENDING`, `available_at = now() + 10 s`; otherwise `FAILED` with `failure_reason` |
 | `email_messages` | `SENT`, `sent_at`, `provider_message_id` | `attempt_count` 1, 2, 3 → `PENDING` with `next_attempt_at` + 1, 5, 30 min; after the 4th failure `FAILED` |
+| `notifications` (panel emails) | `email_status = 'SENT'`, `email_sent_at` | Same schedule on `email_attempt_count` / `email_next_attempt_at`; then `FAILED` |
 
 ## Retention and anonymization
 
@@ -490,6 +520,7 @@ The Worker's `RetentionJob` runs daily and audits every deletion as `CV_DELETE` 
 | BR-22 | Inbox items `DISMISSED` more than 7 days ago | Delete the item, its attachments, and their files |
 | Import staging | `import_batches.expires_at < now()` and `PREVIEWED` | Delete staging files; status `EXPIRED` |
 | Refresh tokens | Expired more than 30 days ago | Delete rows |
+| BR-29 | `notifications.created_at` older than 90 days | Delete rows |
 | BR-27 | `candidate_embeddings` whose candidate is no longer in the pool (`talent_pool` view) or is anonymized | Delete rows (the `EmbeddingRunner` also removes them on its next run) |
 
 **Anonymize** (also used for "Xoá toàn bộ dữ liệu", US31): delete all CV files from storage and set `cv_files.deleted_at`, clear `extracted_text`; set `candidates.full_name = 'Ứng viên ' || short id`, clear `email*`, `phone*`, `notes`, `skills`, pool fields; increase `consent_token_version`; clear `cover_message` and `analysis_criterion_results.ai_quote`; replace `email_messages.to_address`, `subject`, and `body_html` with a placeholder; reject open applications with `CANDIDATE_WITHDREW`. Stage history, scores, and sources remain, so reports stay correct.
@@ -516,6 +547,7 @@ The Worker's `RetentionJob` runs daily and audits every deletion as `CV_DELETE` 
 | BR-26 | `ai_call_logs.purpose`, `actor_id`, and index `ix_ai_call_logs_actor` for the 30-per-hour count |
 | BR-27 | `candidate_embeddings` (one per candidate, cascades with the candidate and CV file), view `talent_pool` filter |
 | BR-28 | `interview_questions.sort_order BETWEEN 1 AND 8`; no AI result columns in the table |
+| BR-29 | `notifications.user_id` (one row per recipient), `email_status` queue columns |
 
 ## Seed data
 

@@ -1215,7 +1215,72 @@ classDiagram
 - **Embeddings (BR-27).** `CandidateEmbeddingService.EmbedPendingAsync` takes pool candidates whose latest CV differs from their stored embedding, redacts the CV text with the same `Redactor` as screening, embeds it, and upserts the vector; `DeleteStaleAsync` removes vectors of candidates who left the pool or were anonymized. `PoolMatchingService` embeds the position text (title, description, current criteria) once per criteria version, asks the repository for the nearest pool candidates who have not applied, and adds `SkillOverlap` from the candidates' extracted skills. It never creates an application.
 - **Failures.** Any AI timeout, HTTP error, or invalid JSON becomes `AppException(AI_UNAVAILABLE)` → 502; the user's form keeps its input.
 
-## 12. API-to-code traceability
+## 12. Notifications
+
+```mermaid
+classDiagram
+    direction TB
+    class NotificationsController {
+        +List(NotificationQuery) NotificationPage
+        +UnreadCount() UnreadCount
+        +MarkRead(Guid) NoContent
+        +MarkAllRead() NoContent
+    }
+    class ScorecardReminderJob {
+        <<Worker job>>
+        #RunOnceAsync(IServiceProvider) void
+    }
+    class NotificationService {
+        +ListAsync(NotificationQuery, Actor) PagedResult~NotificationItem~
+        +CountUnreadAsync(Actor) int
+        +MarkReadAsync(Guid, Actor) void
+        +MarkAllReadAsync(Actor) void
+    }
+    class Notifier {
+        +InterviewScheduledAsync(Interview, Actor) void
+        +InterviewChangedAsync(Interview, Actor) void
+        +InterviewCancelledAsync(Interview, Actor) void
+        +ApplicationReceivedAsync(JobApplication, IntakeChannel) void
+        +ScorecardsCompleteAsync(Interview) void
+        +AnalysisFailedAsync(CvAnalysis) void
+        +EmailFailedAsync(EmailMessage) void
+        +RemindMissingScorecardsAsync(now) int
+    }
+    class Notification {
+        <<entity>>
+        +Guid Id
+        +Guid UserId
+        +NotificationType Type
+        +string Title
+        +Guid? ApplicationId
+        +Guid? InterviewId
+        +DateTimeOffset? ReadAt
+        +NotificationEmailStatus? EmailStatus
+        +MarkRead(now) void
+        +SupersedeEmail() void
+    }
+    class INotificationRepository {
+        <<interface>>
+        +ListAsync(Guid userId, NotificationQuery) PagedResult~Notification~
+        +CountUnreadAsync(Guid userId) int
+        +FindOwnAsync(Guid id, Guid userId) Notification?
+        +MarkAllReadAsync(Guid userId, now) void
+        +CancelPendingEmailsAsync(Guid interviewId, Guid userId) void
+        +Add(Notification) void
+    }
+
+    NotificationsController --> NotificationService
+    ScorecardReminderJob --> Notifier
+    NotificationService --> INotificationRepository
+    Notifier --> INotificationRepository
+    INotificationRepository --> Notification
+```
+
+- **Raised inside the caller's unit of work (BR-29).** `InterviewService`, `IntakeService`, `ScorecardService`, `AnalysisRunner`, and `EmailDispatcher` call `Notifier` in the same transaction as the change, so a rolled-back change leaves no notification. `Notifier` picks the recipients (panel members, or the position owner) and skips `actor.UserId`.
+- **Panel emails.** For interview notifications `Notifier` first calls `CancelPendingEmailsAsync(interviewId, userId)`, then adds a row with `EmailStatus = Pending` due in 10 minutes; `EmailDispatcher` sends these rows too (see [database design](07-database-design.md#notifications)).
+- **Own rows only.** `FindOwnAsync` filters by `userId`, so another user's id is `NOT_FOUND` (404). `ScorecardReminderJob` runs every 15 minutes under an advisory lock and reminds each missing scorecard once.
+
+## 13. API-to-code traceability
 
 Every OpenAPI operation maps to one controller action and one Application method. Controller actions carry `Name = operationId`, which the contract test compares with `openapi.yaml`.
 
@@ -1291,6 +1356,10 @@ Roles: **A** Admin · **H** HR Manager · **R** Recruiter · **I** Interviewer �
 | `getReport` | `GET /api/reports` | A H | `ReportsController.Get` | `ReportService.GetAsync` |  |
 | `exportReport` | `GET /api/reports/export` | A H | `ReportsController.Export` | `ReportService.ExportAsync` |  |
 | `listAuditLogs` | `GET /api/audit-logs` | A H | `AuditLogsController.List` | `AuditQueryService.ListAsync` |  |
+| `listNotifications` | `GET /api/notifications` | A H R I | `NotificationsController.List` | `NotificationService.ListAsync` |  |
+| `getUnreadNotificationCount` | `GET /api/notifications/unread-count` | A H R I | `NotificationsController.UnreadCount` | `NotificationService.CountUnreadAsync` |  |
+| `markNotificationRead` | `POST /api/notifications/{notificationId}/read` | A H R I | `NotificationsController.MarkRead` | `NotificationService.MarkReadAsync` |  |
+| `markAllNotificationsRead` | `POST /api/notifications/read-all` | A H R I | `NotificationsController.MarkAllRead` | `NotificationService.MarkAllReadAsync` |  |
 | `listUsers` | `GET /api/users` | A | `UsersController.List` | `UserService.ListAsync` |  |
 | `createUser` | `POST /api/users` | A | `UsersController.Create` | `UserService.CreateAsync` |  |
 | `getUser` | `GET /api/users/{userId}` | A | `UsersController.Get` | `UserService.GetAsync` |  |

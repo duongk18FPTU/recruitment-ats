@@ -153,6 +153,18 @@ h1 {
   background: var(--color-brand-hover);
 }
 
+.button--icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+}
+
+.button--icon img {
+  flex: none;
+}
+
 .button--secondary {
   border-color: var(--color-line-strong);
   background: var(--color-surface);

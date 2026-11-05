@@ -160,7 +160,8 @@ Recruitment ATS
     ├── F8.1 Dashboard                               → US03
     ├── F8.2 Recruitment reports                     → US17
     ├── F8.3 Export reports (PDF / XLSX)             → US18
-    └── F8.4 Audit log                               → US19
+    ├── F8.4 Audit log                               → US19
+    └── F8.5 In-app notifications (+ panel emails)   → US35
 ```
 
 ## 7. Scope
@@ -178,13 +179,15 @@ Recruitment ATS
 - Talent pool of consented candidates; add a pool candidate to another position.
 - AI assistance outside screening: criteria drafted from a job description, semantic matching of consented pool candidates to a position, and interview questions drafted for criteria that need checking — all reviewed by a person before use.
 - Excel export of candidates and talent pool; dashboard, reports, report export, audit log, user management, profile.
+- In-app notifications for the people an event concerns, with emails to interview panel members.
 - Consent-based retention and automatic deletion of candidate data.
 
 ### Out of scope
 
 - Candidate accounts, login, or an application status page (candidates are informed by email).
 - API integration with paid job boards (TopCV, VietnamWorks) and automatic posting to LinkedIn or Facebook (no public API); these channels are covered by source-tagged share links and by CVs forwarded to the mailbox.
-- SMS, chat, call-center integration; calendar integrations (Google, Outlook).
+- SMS, chat, call-center integration; calendar integrations (Google, Outlook); browser push or real-time (WebSocket) notifications.
+- A global search box across positions and candidates (each list has its own search).
 - Headcount planning and multi-level approval of hiring requests.
 - OCR for scanned (image-only) CVs.
 - Offer letters, e-signature, onboarding, payroll.

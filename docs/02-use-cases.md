@@ -95,6 +95,7 @@ Menus and buttons are **not displayed** when the user lacks permission. Unauthor
 | BR-26 | **AI suggestions are drafts:** criteria suggestions (UC32) and interview-question suggestions (UC34) are shown beside the editable form and take effect only when a user saves them; the user may accept, edit, or discard each item. A suggestion call is limited to 30 per user per hour and every call is logged with model, duration, and outcome. Job descriptions sent for criteria suggestion are internal text, not candidate data. |
 | BR-27 | **Talent-pool matching:** only candidates with active pool consent (BR-24) are embedded and matched. Embeddings are computed from the same redacted CV text as BR-10, never from contact data, and are deleted when the candidate leaves the pool or is anonymized. A match is a ranking hint with a similarity value and the skills that overlap; it never creates an application — a user adds the candidate through UC26, after which normal screening applies. Candidates who already applied to the position are excluded. |
 | BR-28 | **Interview questions:** suggestions are generated from the position criteria, the current analysis results, and their verified quotes — never from contact data. The scheduler reviews them and attaches at most 8 to the interview. Interviewers see the attached questions grouped by criterion, but never the AI result, quote, or score (BR-08). |
+| BR-29 | **Internal notifications:** the system notifies only the people an event concerns — panel members about interviews they are on (assigned, changed, cancelled, scorecard not submitted 24 hours after the interview ends), and the position owner about new applications from the career site or mailbox, a panel whose scorecards are all submitted, a failed AI analysis, and a failed candidate email. The user who caused an event is never notified of it. Interview notifications are also emailed to the panel member, queued for 10 minutes like BR-23: a later change to the same interview replaces the pending email. A user sees only their own notifications; they are kept 90 days. |
 
 ## Use case diagram
 
@@ -167,6 +168,7 @@ flowchart LR
             uc19["UC19 View Audit Log"]
             uc20["UC20 Manage Users"]
             uc29["UC29 Configure Mailbox & Sender"]
+            uc35["UC35 Receive Notifications"]
         end
     end
 
@@ -180,13 +182,13 @@ flowchart LR
         mailbox(["Recruitment Mailbox<br/>(external)"])
     end
 
-    manager --> uc01 & uc02 & uc03 & uc04 & uc05 & uc06 & uc07 & uc22 & uc08 & uc09 & uc10 & uc11 & uc16 & uc25 & uc26 & uc30 & uc12 & uc13 & uc32 & uc33 & uc34 & uc14 & uc15 & uc27 & uc28 & uc17 & uc18 & uc19 & uc21
-    recruiter --> uc01 & uc02 & uc03 & uc04 & uc05 & uc06 & uc22 & uc08 & uc09 & uc10 & uc11 & uc16 & uc25 & uc26 & uc30 & uc12 & uc13 & uc32 & uc33 & uc34 & uc14 & uc27 & uc21
-    interviewer --> uc01 & uc02 & uc03 & uc04 & uc08 & uc15 & uc21
-    admin --> uc01 & uc02 & uc03 & uc04 & uc05 & uc06 & uc07 & uc22 & uc08 & uc09 & uc10 & uc11 & uc16 & uc25 & uc26 & uc30 & uc12 & uc13 & uc32 & uc33 & uc34 & uc14 & uc27 & uc28 & uc17 & uc18 & uc19 & uc20 & uc29 & uc21
+    manager --> uc01 & uc02 & uc03 & uc04 & uc05 & uc06 & uc07 & uc22 & uc08 & uc09 & uc10 & uc11 & uc16 & uc25 & uc26 & uc30 & uc12 & uc13 & uc32 & uc33 & uc34 & uc14 & uc15 & uc27 & uc28 & uc17 & uc18 & uc19 & uc21 & uc35
+    recruiter --> uc01 & uc02 & uc03 & uc04 & uc05 & uc06 & uc22 & uc08 & uc09 & uc10 & uc11 & uc16 & uc25 & uc26 & uc30 & uc12 & uc13 & uc32 & uc33 & uc34 & uc14 & uc27 & uc21 & uc35
+    interviewer --> uc01 & uc02 & uc03 & uc04 & uc08 & uc15 & uc21 & uc35
+    admin --> uc01 & uc02 & uc03 & uc04 & uc05 & uc06 & uc07 & uc22 & uc08 & uc09 & uc10 & uc11 & uc16 & uc25 & uc26 & uc30 & uc12 & uc13 & uc32 & uc33 & uc34 & uc14 & uc27 & uc28 & uc17 & uc18 & uc19 & uc20 & uc29 & uc21 & uc35
     candidate --> uc23 & uc24 & uc31
     uc12 & uc32 & uc33 & uc34 -.-> aiService
-    uc27 -.-> mailService
+    uc27 & uc35 -.-> mailService
     uc25 -.-> mailbox
 
     classDef actor fill:#666,color:#fff,stroke:#333
@@ -196,7 +198,7 @@ flowchart LR
     classDef publicCase fill:#0f766e,color:#fff,stroke:#0b5a54
     class manager,recruiter,interviewer,admin,candidate actor
     class aiService,mailService,mailbox external
-    class uc01,uc02,uc03,uc04,uc05,uc06,uc07,uc08,uc09,uc10,uc11,uc14,uc15,uc16,uc17,uc18,uc19,uc20,uc21,uc22,uc25,uc26,uc27,uc28,uc29,uc30 usecase
+    class uc01,uc02,uc03,uc04,uc05,uc06,uc07,uc08,uc09,uc10,uc11,uc14,uc15,uc16,uc17,uc18,uc19,uc20,uc21,uc22,uc25,uc26,uc27,uc28,uc29,uc30,uc35 usecase
     class uc12,uc13,uc32,uc33,uc34 aiCase
     class uc23,uc24,uc31 publicCase
     style left fill:#fff,stroke:#bbb,stroke-dasharray:5 5
@@ -339,7 +341,7 @@ flowchart LR
 
 - **Actor:** Admin, HR Manager, Recruiter
 - **Preconditions:** application is in `INTERVIEW`
-- **Main flow:** choose round name, date and time, duration, location or meeting link, panel (one or more Interviewers / HR Managers) → save → invitation email queued (BR-23)
+- **Main flow:** choose round name, date and time, duration, location or meeting link, panel (one or more Interviewers / HR Managers) → save → invitation email queued (BR-23) → each panel member is notified in the app and by email (UC35, BR-29)
 - **Alternative:** reschedule or cancel an interview → the pending invitation is replaced or cancelled; if already sent, a change or cancellation email is queued
 - **Validation:** time in the future; at least one panel member; a panel member cannot have two overlapping interviews
 - **Result:** the interview appears on panel members' dashboards
@@ -474,5 +476,13 @@ flowchart LR
 - **Main flow:** in the schedule-interview form, click **"Gợi ý câu hỏi"** → the API sends the criteria, the current analysis results, and their verified quotes (no contact data) → receives up to 10 questions, each linked to a criterion with a short purpose, criteria judged `PARTIAL`, `NOT_MET`, or `UNVERIFIED` first → the user edits, removes, or adds questions and keeps at most 8 → saving the interview stores them with it (BR-26, BR-28)
 - **Alternative:** no completed analysis → questions are generated from the criteria alone and the form says so; AI error → the interview can still be saved without questions
 - **Result:** panel members see the questions on their interview and scorecard page, grouped by criterion, without any AI result or score
+
+### UC35 Receive notifications
+
+- **Actor:** all internal roles; secondary actor: email service
+- **Trigger:** an event in BR-29 — interview assigned, changed, or cancelled; scorecard still missing 24 hours after the interview; new application from the career site or mailbox; all scorecards of an interview submitted; AI analysis failed; candidate email failed
+- **Main flow:** the bell in the topbar shows the unread count (refreshed at least every 30 seconds) → open the panel → notifications newest first, unread marked → click one → it is marked read and its application or interview opens; **"Đánh dấu đã đọc tất cả"** clears the count
+- **Alternative:** the linked record is no longer visible to the user (e.g. removed from the panel) → the notification opens a "Không còn quyền xem" message instead of the record
+- **Result:** people learn about work that concerns them without watching every screen; panel members also get the interview by email
 
 **Related:** [Research](01-research-top-down.md) · [INVEST requirements](03-invest-requirements.md) · [Information architecture](04-information-architecture.md)

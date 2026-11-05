@@ -21,7 +21,8 @@ Career site (Trang tuyển dụng) — separate public app for candidates, no lo
 
 Internal app (Recruitment ATS) — hiring team
 ├── Login (Đăng nhập)
-└── Authenticated (sidebar + topbar)
+└── Authenticated (sidebar + topbar: breadcrumb, notifications bell — no global search)
+    ├── Notifications panel (from the bell: unread first, mark read, mark all read)
     ├── Dashboard (Tổng quan)
     │   └── Interviewer variant: my interviews + pending scorecards
     ├── Positions (Vị trí tuyển dụng)
@@ -130,6 +131,7 @@ Unauthorized items are **not rendered** in the sidebar; direct URL access shows 
 | `SCR-76` | Settings — mailbox & sender | Page | US29 |
 | `SCR-80` | Personal profile | Tabbed page | US21 |
 | `SCR-90` | Forbidden | Page | Cross-cutting |
+| `SCR-91` | Notifications panel | Popover from the topbar bell | US35 |
 | `PUB-01` | Career site — job list | Public page | US23 |
 | `PUB-02` | Career site — job detail | Public page | US23 |
 | `PUB-03` | Career site — apply form | Public page | US24 |
@@ -175,6 +177,7 @@ Unauthorized items are **not rendered** in the sidebar; direct URL access shows 
 | US32 | `SCR-11` "Gợi ý tiêu chí bằng AI" → review drafts → accept / edit → save |
 | US33 | `SCR-12` → `SCR-15` ranked matches → "Thêm vào vị trí" (`SCR-46`) |
 | US34 | `SCR-30` "Gợi ý câu hỏi" → edit, keep ≤ 8 → save; panel sees them on `SCR-32` |
+| US35 | Topbar bell (unread count) → `SCR-91` → click a notification → its application (`SCR-22`) or interview (`SCR-32`) |
 
 ## Screen hierarchy
 

@@ -77,7 +77,9 @@ describe("SCR-70 users (US20)", () => {
     expect(within(row).getByText("Hoạt động")).toBeTruthy();
     expect(within(row).getByText("28/10/2026")).toBeTruthy();
     expect(within(rowOf("Đỗ Quang Huy")).getByText("Chưa đăng nhập")).toBeTruthy();
-    expect(screen.getByText("1–2 trong 2 người dùng")).toBeTruthy();
+    const pager = screen.getByRole("navigation", { name: "Phân trang" });
+    expect(within(pager).queryByText(/trong/)).toBeNull();
+    expect(within(pager).getByRole("button", { name: "Trang sau" }).hasAttribute("disabled")).toBe(true);
   });
 
   test("filters are sent to listUsers and restart at page 1", async () => {
@@ -105,7 +107,7 @@ describe("SCR-70 users (US20)", () => {
       }),
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "+ Thêm người dùng" }));
+    fireEvent.click(screen.getByRole("button", { name: "Thêm người dùng" }));
     const dialog = screen.getByRole("dialog", { name: "Thêm người dùng" });
     fillForm({
       "Họ tên": " Lê Thị An ",
@@ -136,7 +138,7 @@ describe("SCR-70 users (US20)", () => {
       }),
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "+ Thêm người dùng" }));
+    fireEvent.click(screen.getByRole("button", { name: "Thêm người dùng" }));
     fireEvent.click(screen.getByRole("button", { name: "Tạo tài khoản" }));
 
     expect(await screen.findByText("Nhập họ tên.")).toBeTruthy();
@@ -160,7 +162,7 @@ describe("SCR-70 users (US20)", () => {
       }),
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "+ Thêm người dùng" }));
+    fireEvent.click(screen.getByRole("button", { name: "Thêm người dùng" }));
     fillForm({ Email: "LONG.TRAN@recruitment-ats.vn " });
 
     expect(await screen.findByText("Email này đã được dùng cho Trần Đức Long.")).toBeTruthy();
@@ -182,7 +184,7 @@ describe("SCR-70 users (US20)", () => {
       http.post("*/api/users", () => problem(409, "DUPLICATE_EMAIL", "Email này đã được dùng cho một người dùng khác.")),
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "+ Thêm người dùng" }));
+    fireEvent.click(screen.getByRole("button", { name: "Thêm người dùng" }));
     fillForm({ "Họ tên": "Lê Thị An", Email: "an.le@recruitment-ats.vn", role: "RECRUITER", "Mật khẩu tạm": "Mat-khau-2026" });
     fireEvent.click(screen.getByRole("button", { name: "Tạo tài khoản" }));
 
@@ -241,6 +243,27 @@ describe("SCR-70 users (US20)", () => {
 
     expect(await screen.findByText("Đã khoá tài khoản Trần Đức Long.")).toBeTruthy();
     expect(body).toEqual({ isActive: false, userId: long.id });
+  });
+
+  test("pagination moves between pages", async () => {
+    const queries: URLSearchParams[] = [];
+    server.use(
+      http.get("*/api/users", ({ request }) => {
+        const params = new URL(request.url).searchParams;
+        queries.push(params);
+        const current = Number(params.get("page") ?? 1);
+        return HttpResponse.json({ items: [long], page: current, pageSize: 20, totalItems: 45, totalPages: 3 });
+      }),
+    );
+    signIn("ADMIN", "Đỗ Quang Huy");
+    renderApp("/users");
+
+    const pager = await screen.findByRole("navigation", { name: "Phân trang" });
+    expect(within(pager).queryByText(/trong/)).toBeNull();
+    expect(within(pager).getByRole("button", { name: "Trang trước" }).hasAttribute("disabled")).toBe(true);
+    fireEvent.click(within(pager).getByRole("button", { name: "Trang sau" }));
+
+    await waitFor(() => expect(queries.at(-1)?.get("page")).toBe("2"));
   });
 
   test("an empty list has its own message", async () => {

@@ -2,7 +2,7 @@
 
 > Status: ACTIVE — milestones are built for real, one after another, in the order below. **M1 is the MVP**: the smallest product a hiring team can use, so it comes first and nothing else starts before it works. Progress is tracked only in [Progress](13-progress.md).
 
-The backlog ([INVEST requirements](03-invest-requirements.md)) has 34 stories and 149 points: 26 Must-have (115 points) and 8 Should-have (34 points). After a foundation milestone, the plan delivers four vertical slices. Each slice ends with a demo a hiring team could use end to end, and the riskiest part of the product (AI screening with evidence) comes first.
+The backlog ([INVEST requirements](03-invest-requirements.md)) has 35 stories and 154 points: 27 Must-have (120 points) and 8 Should-have (34 points). After a foundation milestone, the plan delivers four vertical slices. Each slice ends with a demo a hiring team could use end to end, and the riskiest part of the product (AI screening with evidence) comes first.
 
 ## 1. Milestones
 
@@ -10,11 +10,11 @@ The backlog ([INVEST requirements](03-invest-requirements.md)) has 34 stories an
 |---|---|---|---|---|
 | **M0 Foundation** | CI green on every push; Postgres + pgvector locally; backend and frontend skeletons; first migration matches `schema.sql` | — (technical) | 0 | — |
 | **M1 Core screening** | Log in → create a position with weighted criteria → add a CV → AI scores it per criterion with quotes → override a criterion → move the application through stages | US01, US02, US20, US04, US05, US06, US07, US09, US08, US11, US12, US13 | 46 | **MVP** |
-| **M2 Interviews and candidates** | Publish a job post with share links → a candidate applies on the career site with consent and gets a receipt → schedule an interview → blind scorecards → outcome emails with a 10-minute cancel window → the candidate leaves the pool or deletes their data | US29, US27, US22, US23, US24, US31, US14, US15 | 40 | — |
+| **M2 Interviews and candidates** | Publish a job post with share links → a candidate applies on the career site with consent and gets a receipt → schedule an interview → blind scorecards → panel members are notified in the app and by email → outcome emails with a 10-minute cancel window → the candidate leaves the pool or deletes their data | US29, US27, US22, US23, US24, US31, US14, US15, US35 | 45 | — |
 | **M3 Intake, pool, and insight** | Emailed CVs land in the CV inbox → search the talent pool and add a past candidate → export to Excel → dashboard, reports, and audit log → production deployment | US25, US26, US30, US03, US17, US19 | 29 | **v1.0** (all Must-have) |
 | **M4 Should-have** | CV replacement, profile, editable templates, report export, bulk import, and the three AI-assistance features | US10, US21, US28, US18, US16, US32, US34, US33 | 34 | v1.1 |
 
-M1–M3 together are exactly the 26 Must-have stories. M4 can be cut or reordered without breaking anything delivered before it.
+M1–M3 together are exactly the 27 Must-have stories. M4 can be cut or reordered without breaking anything delivered before it.
 
 ### Why this order
 
@@ -53,6 +53,7 @@ Technical tasks (T) are the parts no single story owns. They are done at the poi
 | 3 | **T2.2 Career site:** routes, layout, public API client, Turnstile, rate limits (BR-21), Open Graph page for crawlers (AD-04) |
 | 4 | US22 Manage job post, US23 Browse job posts, US24 Apply online, US31 Manage data consent |
 | 5 | US14 Schedule interview (+ Interviewer assignment criteria from M1), US15 Submit scorecard |
+| 6 | US35 Notifications (bell, panel, panel emails through `EmailDispatcher`, Worker `ScorecardReminderJob`) — after US14 and US15 because most events come from them |
 
 **Done when:** every M2 criterion and the M1 criteria that waited for M2 pass; the M2 demo runs end to end with Mailpit; CI is green.
 

@@ -11,10 +11,10 @@
 |---|---|---|---|---|
 | M0 Foundation | — | — | — | `DONE` |
 | M1 Core screening | **MVP** | 3 / 12 | 7 / 46 | `DOING` |
-| M2 Interviews and candidates | — | 0 / 8 | 0 / 40 | `TODO` |
+| M2 Interviews and candidates | — | 0 / 9 | 0 / 45 | `TODO` |
 | M3 Intake, pool, and insight | **v1.0** | 0 / 6 | 0 / 29 | `TODO` |
 | M4 Should-have | v1.1 | 0 / 8 | 0 / 34 | `TODO` |
-| **Total** | | **3 / 34** | **7 / 149** | |
+| **Total** | | **3 / 35** | **7 / 154** | |
 
 **Now:** M1 → US04 View positions.
 
@@ -66,6 +66,7 @@
 | 4 | US31 Manage data consent | 3 | | | 0 / 3 | `TODO` |
 | 5 | US14 Schedule interview | 5 | | | 0 / 4 | `TODO` |
 | 5 | US15 Submit scorecard | 5 | | | 0 / 3 | `TODO` |
+| 6 | US35 Notifications | 5 | | | 0 / 5 | `TODO` |
 
 ## M3 Intake, pool, and insight — `TODO`
 
@@ -132,6 +133,10 @@ Deviations from the design documents, kept here so they are easy to review (each
 | 2026-11-05 | Roles from `x-roles` are enforced with `[Authorize(Roles = RoleNames.…)]`; enum query parameters bind by their contract names (`?role=HR_MANAGER`), other spellings → 400 | 09 §3.4, 10 |
 | 2026-11-05 | Internal shared components `Modal`, `Pagination`, `RowMenu`, `Toasts` live in `apps/internal/src/components` (internal only); form and button styles moved from `auth.css` to `app.css`. The user form uses plain controlled inputs (React Hook Form + Zod still arrive with US05) | 09 §4.2 |
 | 2026-11-05 | The user form checks a taken email while the Admin types (400 ms after the last key) with `listUsers` filtered to an exact match — no new endpoint; `DUPLICATE_EMAIL` (409) still covers two Admins saving at once | 05 |
+| 2026-11-05 | Pagination (Figma component `Pagination`, Style=Table, and code): the "1–20 trong 126" summary is removed, controls are 28 px and right-aligned. Updated in Figma for SCR-10, 11, 20, 40, 45, 70 and in their exported screenshots | 05, `images/screens` |
+| 2026-11-05 | The add-user button uses the Figma `plus` icon (16 px) instead of a typed "+" | — |
+| 2026-11-05 | **New story US35 Notifications (M, 5 points, M2 after US15) and BR-29**: the design told nobody inside the team about new work (the interview invitation goes to the candidate only; panel members had to open the dashboard). Bell with unread count, panel `SCR-91`, notifications to the people an event concerns, interview emails to panel members (10-minute window like BR-23), scorecard reminder after 24 h. Table `notifications`, 4 operations (92 in total) | 01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 12, README, `openapi.yaml`, `schema.sql` |
+| 2026-11-05 | No global search: the Figma topbar had a "Tìm ứng viên, vị trí, mã hồ sơ" box that no story or operation covered; removed from the `Topbar` component (17 screens re-exported). Each list keeps its own search | 01, 04, 05, `images/screens` |
 | 2026-11-05 | Known limitation: two browser tabs refreshing with the same cookie at the same moment look like token reuse and end the session (single-flight works per tab only) | — |
 | 2026-11-04 | Internal app: every IA page has its route and sidebar item from T1.3; a page whose story is not built shows "Chức năng này đang được xây dựng". Nav icons come with the `ui` icon set | 09 §4.2 |
 | 2026-11-04 | React Router 8 (docs did not name a version); `packages/api-client` has its own Vitest project | 09 §4.1 |

@@ -80,10 +80,10 @@ Spacing variables follow a 4 px grid (`space/4` … `space/48`); radii are `radi
 | `Field` | `State` = Default, Focus, Error, Disabled · `Label` · `Value` · `Helper` · `Show helper` · `Trailing icon` (select chevron, calendar, search, show password) |
 | `Checkbox` | `Checked` · `Label` |
 | `Tab` | `State` = Default, Active · `Label` |
-| `Pagination` | `Style` = Table (summary, page size, pages), Centered (pages only) · `Summary` |
+| `Pagination` | `Style` = Table (page size and pages, right-aligned, 28 px controls), Centered (pages only) |
 | `AI Score` | `State` = Scored, Pending, Failed · `Score` |
 | `Avatar` | `Initials` |
-| `NavItem` · `Sidebar` · `Topbar` | Sidebar `Role` = Admin, HR Manager, Recruiter, Interviewer (menu per the role matrix); NavItem `State`, `Icon`, `Count` |
+| `NavItem` · `Sidebar` · `Topbar` | Sidebar `Role` = Admin, HR Manager, Recruiter, Interviewer (menu per the role matrix); NavItem `State`, `Icon`, `Count`; Topbar = breadcrumb + notifications bell (no global search) |
 | `Candidate Card` · `Stat` | Kanban card (`Name`, `Meta`, `Missing must-have`); KPI |
 | `Career Header` · `Career Footer` · `Public Job Item` · `Public Job Mini` · `Chip` · `CV Upload` | Career-site header (`Active` link), footer, job row (`Title`, `Salary`, `Location`, `Deadline`, `Type`), compact job row (`State` = Default, Selected), department chip, CV drop zone (`State` = Empty, Selected, Error) |
 
@@ -135,13 +135,15 @@ Spacing variables follow a 4 px grid (`space/4` … `space/48`); radii are `radi
 | `SCR-45` Talent pool | SCR-45 Kho ứng viên | Recruiter | Skill search; latest application and result; consent expiry, soon-to-expire in amber; "Thêm vào vị trí"; Excel export |
 | `SCR-40` Bulk import | SCR-40 Nhập hàng loạt | Recruiter | Stepper; valid and error counts; error rows explained; import disabled while errors exist |
 | `SCR-50` Reports | SCR-50 Báo cáo | HR Manager | KPI strip; funnel, sources, rejection reasons as single-hue bars; per-position table; PDF and Excel export |
-| `SCR-70` Users | SCR-70 Người dùng | Admin | Role as plain text, status tag ("Hoạt động" / "Đã khoá" = deactivated), last login ("Hôm nay 08:12", "Hôm qua 17:45", else the date); pagination. The ⋯ menu has "Sửa" and "Khoá tài khoản" / "Mở khoá" (not on one's own row); create and edit open a modal (not in Figma) with a "Tạo ngẫu nhiên" temporary password, and editing can issue a new one. A taken email is reported under the field while typing ("Email này đã được dùng cho …"), before submitting |
+| `SCR-70` Users | SCR-70 Người dùng | Admin | Role as plain text, status tag ("Hoạt động" / "Đã khoá" = deactivated), last login ("Hôm nay 08:12", "Hôm qua 17:45", else the date); pagination (compact, right-aligned, no "1–20 trong 126" summary). The ⋯ menu has "Sửa" and "Khoá tài khoản" / "Mở khoá" (not on one's own row); create and edit open a modal (not in Figma) with a "Tạo ngẫu nhiên" temporary password, and editing can issue a new one. A taken email is reported under the field while typing ("Email này đã được dùng cho …"), before submitting |
 | `SCR-75` Email templates | SCR-75 Cài đặt — Mẫu email | HR Manager | Events with their send delay; placeholders in mono and insertable; preview and test send |
 | `SCR-76` Mailbox & sender | SCR-76 Cài đặt — Hộp thư & người gửi | Admin | IMAP and SMTP side by side; connection test result; masked passwords |
 
 Remaining screens from the [screen inventory](04-information-architecture.md#screen-inventory) (position overview and criteria tabs, add-application modal, move / reject modal, edit candidate, schedule interview, my interviews, assign inbox item, add pool candidate, audit log, profile, 403) reuse the same shell and components.
 
 **Not yet in Figma (added with US32–US34):** the pool-matches tab `SCR-15`, the "Gợi ý tiêu chí bằng AI" draft list in `SCR-11`, the "Gợi ý câu hỏi" draft list in `SCR-30`, and the attached-questions block in `SCR-32`. Their behaviour and states are specified in the [information architecture](04-information-architecture.md#ai-suggestion-states-criteria-interview-questions-pool-matches); they reuse the existing list, tag, and modal components.
+
+**Not yet in Figma (US35):** the unread count on the topbar bell and the notifications panel `SCR-91` (popover under the bell, newest first, unread rows marked by a dot and bold title, "Đánh dấu đã đọc tất cả"). Behaviour is specified in [use cases](02-use-cases.md#uc35-receive-notifications) and AC-US35.
 
 ![SCR-01 Login](images/screens/scr-01-login.png)
 

@@ -524,6 +524,30 @@ CREATE INDEX ix_email_messages_queue ON email_messages (next_attempt_at) WHERE s
 CREATE INDEX ix_email_messages_application ON email_messages (application_id, created_at DESC);
 CREATE INDEX ix_email_messages_failed ON email_messages (created_at DESC) WHERE status = 'FAILED';
 
+-- Internal notifications (BR-29). One row per recipient; interview notifications also queue
+-- an email to the panel member (email_* columns, claimed by the Worker like email_messages).
+CREATE TABLE notifications (
+    id                     uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id                uuid NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    type                   varchar(25) NOT NULL
+                           CHECK (type IN ('INTERVIEW_ASSIGNED', 'INTERVIEW_CHANGED', 'INTERVIEW_CANCELLED',
+                                           'SCORECARD_REMINDER', 'SCORECARDS_COMPLETE', 'NEW_APPLICATION',
+                                           'ANALYSIS_FAILED', 'EMAIL_FAILED')),
+    title                  varchar(200) NOT NULL,
+    application_id         uuid REFERENCES applications (id) ON DELETE CASCADE,
+    interview_id           uuid REFERENCES interviews (id) ON DELETE CASCADE,
+    read_at                timestamptz,
+    email_status           varchar(10) CHECK (email_status IN ('PENDING', 'SENDING', 'SENT', 'FAILED', 'CANCELLED')),
+    email_next_attempt_at  timestamptz,
+    email_attempt_count    smallint NOT NULL DEFAULT 0,
+    email_sent_at          timestamptz,
+    created_at             timestamptz NOT NULL DEFAULT now(),
+    CHECK ((email_status IS NULL) = (email_next_attempt_at IS NULL))
+);
+CREATE INDEX ix_notifications_user ON notifications (user_id, created_at DESC);
+CREATE INDEX ix_notifications_unread ON notifications (user_id) WHERE read_at IS NULL;
+CREATE INDEX ix_notifications_email_queue ON notifications (email_next_attempt_at) WHERE email_status IN ('PENDING', 'SENDING');
+
 -- Exactly one row (id = 1). Passwords are encrypted with ASP.NET Data Protection.
 CREATE TABLE mail_settings (
     id                       smallint PRIMARY KEY DEFAULT 1 CHECK (id = 1),

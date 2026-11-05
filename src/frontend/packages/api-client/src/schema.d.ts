@@ -1242,6 +1242,79 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The signed-in user's notifications, newest first (US35) */
+        get: operations["listNotifications"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notifications/unread-count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Unread count for the topbar bell; polled at least every 30 seconds (US35) */
+        get: operations["getUnreadNotificationCount"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notifications/{notificationId}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                notificationId: components["parameters"]["NotificationId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Mark one notification read (US35)
+         * @description Another user's notification → 404 (its existence is not revealed). Marking twice is allowed.
+         */
+        post: operations["markNotificationRead"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notifications/read-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark every notification of the signed-in user read (US35) */
+        post: operations["markAllNotificationsRead"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/users": {
         parameters: {
             query?: never;
@@ -1749,6 +1822,32 @@ export interface components {
         };
         UserPage: components["schemas"]["PageMeta"] & {
             items: components["schemas"]["User"][];
+        };
+        /** @enum {string} */
+        NotificationType: "INTERVIEW_ASSIGNED" | "INTERVIEW_CHANGED" | "INTERVIEW_CANCELLED" | "SCORECARD_REMINDER" | "SCORECARDS_COMPLETE" | "NEW_APPLICATION" | "ANALYSIS_FAILED" | "EMAIL_FAILED";
+        Notification: {
+            /** Format: uuid */
+            id: string;
+            type: components["schemas"]["NotificationType"];
+            /** @description Vietnamese text shown in the panel */
+            title: string;
+            /**
+             * Format: uuid
+             * @description Opens the application detail
+             */
+            applicationId?: string | null;
+            /**
+             * Format: uuid
+             * @description Opens the interview or scorecard
+             */
+            interviewId?: string | null;
+            /** Format: date-time */
+            readAt?: string | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        NotificationPage: components["schemas"]["PageMeta"] & {
+            items: components["schemas"]["Notification"][];
         };
         UserOption: {
             /** Format: uuid */
@@ -2815,6 +2914,7 @@ export interface components {
         EmailId: string;
         InboxItemId: string;
         BatchId: string;
+        NotificationId: string;
         UserId: string;
         Slug: string;
         EmailEventPath: components["schemas"]["EmailEvent"];
@@ -4705,6 +4805,95 @@ export interface operations {
             };
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+        };
+    };
+    listNotifications: {
+        parameters: {
+            query?: {
+                unreadOnly?: boolean;
+                page?: components["parameters"]["Page"];
+                pageSize?: components["parameters"]["PageSize"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Page of notifications */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationPage"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    getUnreadNotificationCount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unread count */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        count: number;
+                    };
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    markNotificationRead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                notificationId: components["parameters"]["NotificationId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Marked read */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    markAllNotificationsRead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description All marked read */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Unauthorized"];
         };
     };
     listUsers: {

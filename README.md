@@ -50,7 +50,7 @@ Editable source: [`docs/mindmap/recruitment-ats.xmind`](docs/mindmap/recruitment
 
 ### 1.3 INVEST requirements
 
-The backlog contains **34 user stories (149 story points)**, grouped by epic. Every story passes the INVEST review and has Given/When/Then acceptance criteria.
+The backlog contains **35 user stories (154 story points)**, grouped by epic. Every story passes the INVEST review and has Given/When/Then acceptance criteria.
 
 | Criterion | Meaning in Recruitment ATS |
 |---|---|
@@ -139,7 +139,7 @@ flowchart TB
     style system fill:#f8fbff,stroke:#1168bd,stroke-dasharray:5 5
 ```
 
-Detailed use case diagram (one node per use case), include/extend relationships, 28 business rules, and use case specifications: [Actors, business rules, and use cases](docs/02-use-cases.md).
+Detailed use case diagram (one node per use case), include/extend relationships, 29 business rules, and use case specifications: [Actors, business rules, and use cases](docs/02-use-cases.md).
 
 ### 1.5 Roles and permissions
 
@@ -375,7 +375,7 @@ Architecture drivers, full context and container diagrams, component diagrams fo
 
 ### 4.1 Database
 
-PostgreSQL 16 (with `pgvector`) and 28 tables. The schema enforces the rules that must hold even under concurrent requests: one application per candidate and position, no duplicate candidates by email or phone, a rejection reason exactly when rejected, and no overlapping interviews for a panel member (exclusion constraint). The AI analysis queue and the email queue are ordinary tables claimed with `FOR UPDATE SKIP LOCKED`.
+PostgreSQL 16 (with `pgvector`) and 29 tables. The schema enforces the rules that must hold even under concurrent requests: one application per candidate and position, no duplicate candidates by email or phone, a rejection reason exactly when rejected, and no overlapping interviews for a panel member (exclusion constraint). The AI analysis queue and the email queue are ordinary tables claimed with `FOR UPDATE SKIP LOCKED`.
 
 ```mermaid
 erDiagram
@@ -418,7 +418,7 @@ Full ER diagrams per domain, queue claims, retention jobs, and rule-to-constrain
 
 ### 4.2 OpenAPI 3.0 contract
 
-[`docs/api/openapi.yaml`](docs/api/openapi.yaml) — OpenAPI 3.0.3, **88 operations**, validated with `redocly lint`.
+[`docs/api/openapi.yaml`](docs/api/openapi.yaml) — OpenAPI 3.0.3, **92 operations**, validated with `redocly lint`.
 
 | Group | Base path | Operations |
 |---|---|---|

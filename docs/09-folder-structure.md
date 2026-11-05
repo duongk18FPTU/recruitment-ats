@@ -11,11 +11,11 @@ This document fixes where every piece of code lives and which way dependencies p
 | Option | Fit for Recruitment ATS | Verdict |
 |---|---|---|
 | **Layered (N-tier)** — Controllers → Services → Repositories, Business depends on Data | Simple, but business code depends on EF Core and concrete adapters, so the AI service, SMTP, and IMAP cannot be swapped for fakes cleanly; the Worker would have to reach into API-shaped services | Rejected |
-| **Full Clean Architecture** — Domain, Application, Infrastructure, Api; CQRS with MediatR, a handler per operation | 88 operations would become ~85 command/query classes plus handlers, pipelines, and a separate Domain project; ceremony larger than the problem | Rejected |
+| **Full Clean Architecture** — Domain, Application, Infrastructure, Api; CQRS with MediatR, a handler per operation | 92 operations would become ~90 command/query classes plus handlers, pipelines, and a separate Domain project; ceremony larger than the problem | Rejected |
 | **Vertical slices** — one folder per endpoint with its own data access | Good for many independent endpoints, but our rules (stage transitions, scoring, consent, audit) are shared across slices and by the Worker | Rejected |
 | **Simplified Clean Architecture** — Application (business rules + ports), Infrastructure (adapters), thin hosts (Api, Worker) | Same 3-project core as the reference project; dependencies point inward, so **two hosts reuse the same use cases** and every external service has a fake | **Selected (AD-11)** |
 
-Why it fits this scale (34 stories, 28 tables, 88 operations, 2 hosts, 4 external systems):
+Why it fits this scale (35 stories, 29 tables, 92 operations, 2 hosts, 4 external systems):
 
 1. **Two hosts, one core.** The API and the Worker run the same business rules (e.g. a mailbox CV and a manual upload go through the same intake). Business code must not depend on ASP.NET Core or on `BackgroundService`.
 2. **Replaceable adapters are a requirement**, not a nicety (constraint in [research §8](01-research-top-down.md#8-constraints-and-assumptions)): `IResumeAnalyzer`, `IEmailSender`, `IMailboxReader`, `IFileStorage`, `ICaptchaVerifier` are defined by Application and implemented by Infrastructure.
@@ -123,6 +123,7 @@ RecruitmentAts.Application/
 ├── Communication/                      # EmailMessage, EmailTemplate, TemplateRenderer, EmailScheduler, MailSettings
 ├── Inbox/                              # InboxItem, PositionCodeParser, MailboxIntakeService
 ├── Imports/                            # ImportBatch, ImportValidator
+├── Notifications/                      # Notification, NotificationService (list, unread count, mark read), Notifier (raised by Interviews, Intake, Screening, Communication — BR-29)
 ├── TalentPool/                         # TalentPoolService, PoolMatchingService (vector search), CandidateEmbeddingService
 ├── Consent/                            # ConsentRecord, ConsentService, AnonymizationService
 ├── Retention/                          # RetentionService (BR-17, BR-22, BR-24)
@@ -222,7 +223,7 @@ RecruitmentAts.Api/
 └── appsettings.Development.json
 ```
 
-**Contracts are not duplicated.** Controllers accept and return the records in `Application/<Module>/Contracts`, which mirror the OpenAPI schemas. The only Api-specific input types are multipart forms (`IFormFile` must not reach Application; forms are converted to a stream + metadata). This is a deliberate difference from the reference project: with 85 operations a second DTO layer and mapping code would double the surface without protecting anything.
+**Contracts are not duplicated.** Controllers accept and return the records in `Application/<Module>/Contracts`, which mirror the OpenAPI schemas. The only Api-specific input types are multipart forms (`IFormFile` must not reach Application; forms are converted to a stream + metadata). This is a deliberate difference from the reference project: with 92 operations a second DTO layer and mapping code would double the surface without protecting anything.
 
 ### 3.5 Worker
 
@@ -294,7 +295,7 @@ Enforced by `ArchitectureTests`:
 
 Two apps share design tokens, UI components, and the API client, so the frontend is one npm workspace.
 
-**TypeScript, not JavaScript (difference from the reference project).** With 88 operations, types generated from `openapi.yaml` turn contract drift into a build error instead of a runtime bug.
+**TypeScript, not JavaScript (difference from the reference project).** With 92 operations, types generated from `openapi.yaml` turn contract drift into a build error instead of a runtime bug.
 
 ### 4.1 Workspace
 
@@ -364,6 +365,7 @@ apps/internal/
     │   ├── audit/                      # SCR-60
     │   ├── users/                      # SCR-70
     │   ├── settings/                   # SCR-75 email templates, SCR-76 mailbox & sender
+    │   ├── notifications/              # topbar bell with unread count, SCR-91 panel (US35)
     │   └── profile/                    # SCR-80
     ├── pages/                          # ForbiddenPage (SCR-90), ComingSoonPage (until a page's story is built)
     └── test/                           # setup (MSW server, cleanup), renderApp + signIn; API mocks per test with server.use()

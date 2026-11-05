@@ -307,7 +307,8 @@ flowchart TB
 | Redactor | Removes the candidate's known name, email, and phone, plus patterns for contacts, birth dates, gender, and addresses; only text is ever sent, never the file | BR-10 |
 | QuoteVerifier | Normalizes whitespace and case and checks each quote exists in the original CV text | BR-11 |
 | FitScoreCalculator | Deterministic score and *Missing must-have* flag | BR-12 |
-| EmailDispatcher | Claims due emails, sends, records the result, schedules retries (1, 5, 30 min) | US27, BR-23 |
+| EmailDispatcher | Claims due candidate emails and panel-member notification emails, sends, records the result, schedules retries (1, 5, 30 min) | US27, US35, BR-23, BR-29 |
+| ScorecardReminderJob | Every 15 minutes: panel members without a submitted scorecard 24 hours after their interview ended get one reminder notification | US35, BR-29 |
 | MailboxPoller | Reads unseen messages read-only, de-duplicates by Message-ID, stores attachments, creates CV inbox items, auto-creates applications for `[JOB-xxx]` subjects | US25, BR-22 |
 | RetentionJob | BR-17 deletion and anonymization, BR-24 renewal emails and pool expiry, deletion of dismissed inbox items after 7 days; every deletion audited | US31, BR-17, BR-22, BR-24 |
 | EmbeddingRunner | Finds pool candidates whose latest CV has no current embedding, redacts and embeds the text, stores a 1024-dimension vector; deletes embeddings of candidates who left the pool or were anonymized | US33, BR-27 |
@@ -374,7 +375,7 @@ flowchart TB
 | AD-05 | **Public API is a route group in the same API**, anonymous, rate-limited, CAPTCHA with **Cloudflare Turnstile** | Separate public service; reCAPTCHA | One codebase for intake rules; Turnstile is free and needs no puzzle for most users |
 | AD-06 | **JWT access token (15 min, in memory) + rotating refresh token (7 days, `httpOnly` cookie, hashed in DB)** | Cookie session only; long-lived JWT in `localStorage` | Stateless API calls; refresh tokens are revocable when a user is disabled; nothing readable by scripts |
 | AD-07 | **Redaction runs in the Worker before the AI adapter**; the AI provider sits behind `IResumeAnalyzer` | Sending the raw CV; redaction by the AI itself | Personal data never leaves the system (BR-10); provider can change without touching business logic |
-| AD-08 | **The internal app polls** AI status every 5 s while pending | SignalR / WebSocket push | Simple and sufficient for a few users and a 60 s target |
+| AD-08 | **The internal app polls** AI status every 5 s while pending, and the unread-notification count every 30 s | SignalR / WebSocket push | Simple and sufficient for a few users and a 60 s target |
 | AD-09 | **One VM with Docker Compose** behind Caddy | Kubernetes; managed PaaS | Matches a small single-tenant deployment and free/low-cost constraint |
 | AD-10 | **Mermaid flowcharts with C4 styling** | Mermaid `C4Context` syntax; Structurizr; PlantUML | Renders reliably on GitHub, same style as the existing diagrams |
 | AD-11 | **Simplified Clean Architecture**: Application, Infrastructure, and two thin hosts (Api, Worker) — see [folder structures](09-folder-structure.md#1-architecture-choice) | Layered N-tier; full Clean Architecture with Domain project and MediatR; vertical slices | Both hosts reuse the same use cases; every external service is a replaceable port; no layers without a driver |

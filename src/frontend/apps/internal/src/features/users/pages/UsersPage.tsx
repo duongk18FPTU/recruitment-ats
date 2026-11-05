@@ -1,6 +1,7 @@
 import type { Role } from "@ats/api-client";
 import { useEffect, useState } from "react";
 import { roleLabels } from "../../../app/navigation";
+import plusIcon from "../../../assets/icons/plus.svg";
 import { initials } from "../../../components/initials";
 import { Pagination } from "../../../components/Pagination";
 import { RowMenu } from "../../../components/RowMenu";
@@ -42,8 +43,13 @@ export function UsersPage() {
     <section className="users">
       <header className="users__header">
         <h1>Người dùng</h1>
-        <button type="button" className="button button--primary" onClick={() => setDialog({ kind: "create" })}>
-          + Thêm người dùng
+        <button
+          type="button"
+          className="button button--primary button--icon"
+          onClick={() => setDialog({ kind: "create" })}
+        >
+          <img src={plusIcon} width={16} height={16} alt="" />
+          Thêm người dùng
         </button>
       </header>
 
@@ -162,9 +168,7 @@ export function UsersPage() {
             <Pagination
               page={users.data.page}
               pageSize={users.data.pageSize}
-              totalItems={users.data.totalItems}
               totalPages={users.data.totalPages}
-              noun="người dùng"
               onPageChange={(page) => setQuery((current) => ({ ...current, page }))}
               onPageSizeChange={(pageSize) => filter({ pageSize })}
             />

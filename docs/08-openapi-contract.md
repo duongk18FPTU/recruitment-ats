@@ -2,7 +2,7 @@
 
 > Design status: TARGET
 >
-> Contract: [`api/openapi.yaml`](api/openapi.yaml) (OpenAPI 3.0.3, 88 operations, passes `redocly lint` with the recommended rules). Preview it with `npx @redocly/cli preview-docs docs/api/openapi.yaml` or paste it into [Swagger Editor](https://editor.swagger.io).
+> Contract: [`api/openapi.yaml`](api/openapi.yaml) (OpenAPI 3.0.3, 92 operations, passes `redocly lint` with the recommended rules). Preview it with `npx @redocly/cli preview-docs docs/api/openapi.yaml` or paste it into [Swagger Editor](https://editor.swagger.io).
 
 The contract is the agreement between the two SPAs and the API. Operation IDs are final and replace the provisional names in the [screen-to-API mapping](04-information-architecture.md#screen-to-api-mapping-target); generated TypeScript clients use them as function names.
 
@@ -242,6 +242,17 @@ Roles: **A** Admin · **H** HR Manager · **R** Recruiter · **I** Interviewer. 
 |---|---|---|---|---|
 | `GET` | `/api/audit-logs` | `listAuditLogs` | A H | Audit log, newest first (US19) |
 
+### Notifications
+
+Every operation acts on the signed-in user's own notifications only.
+
+| Method | Path | Operation | Roles | Summary |
+|---|---|---|---|---|
+| `GET` | `/api/notifications` | `listNotifications` | A H R I | Newest first, optionally unread only (US35) |
+| `GET` | `/api/notifications/unread-count` | `getUnreadNotificationCount` | A H R I | Count for the topbar bell, polled every 30 s (US35) |
+| `POST` | `/api/notifications/{notificationId}/read` | `markNotificationRead` | A H R I | Mark one read; another user's id → 404 (US35) |
+| `POST` | `/api/notifications/read-all` | `markAllNotificationsRead` | A H R I | Mark all read (US35) |
+
 ### Users
 
 | Method | Path | Operation | Roles | Summary |
@@ -308,8 +319,9 @@ Roles: **A** Admin · **H** HR Manager · **R** Recruiter · **I** Interviewer. 
 | US32 | `suggestCriteria`, then `createPosition` / `updatePosition` |
 | US33 | `listPoolMatches`, then `addCandidateToPosition` |
 | US34 | `suggestInterviewQuestions`, then `createInterview` / `updateInterview` with `questions` |
+| US35 | `listNotifications`, `getUnreadNotificationCount`, `markNotificationRead`, `markAllNotificationsRead` |
 | Supporting forms and filters | `listDepartments`, `listUserOptions` |
 
-Work done by the Worker (AI analysis, CV embeddings, sending emails, mailbox polling, retention) has no endpoint; its results appear through the operations above.
+Work done by the Worker (AI analysis, CV embeddings, sending candidate and panel emails, scorecard reminders, mailbox polling, retention) has no endpoint; its results appear through the operations above.
 
 **Related:** [Database design](07-database-design.md) · [C4 architecture](06-c4-architecture.md) · [Information architecture](04-information-architecture.md)

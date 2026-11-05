@@ -58,6 +58,8 @@ tags:
     description: Recruitment reports and export
   - name: Audit
     description: Audit log
+  - name: Notifications
+    description: In-app notifications of the signed-in user (BR-29)
   - name: Users
     description: User administration
   - name: Settings
@@ -1607,6 +1609,66 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
 
+  # ---------------------------------------------------------------- Notifications
+  /api/notifications:
+    get:
+      tags: [Notifications]
+      operationId: listNotifications
+      summary: The signed-in user's notifications, newest first (US35)
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER, INTERVIEWER]
+      parameters:
+        - name: unreadOnly
+          in: query
+          schema: { type: boolean, default: false }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Page of notifications
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NotificationPage' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /api/notifications/unread-count:
+    get:
+      tags: [Notifications]
+      operationId: getUnreadNotificationCount
+      summary: Unread count for the topbar bell; polled at least every 30 seconds (US35)
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER, INTERVIEWER]
+      responses:
+        '200':
+          description: Unread count
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [count]
+                properties:
+                  count: { type: integer, minimum: 0 }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /api/notifications/{notificationId}/read:
+    parameters:
+      - $ref: '#/components/parameters/NotificationId'
+    post:
+      tags: [Notifications]
+      operationId: markNotificationRead
+      summary: Mark one notification read (US35)
+      description: Another user's notification → 404 (its existence is not revealed). Marking twice is allowed.
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER, INTERVIEWER]
+      responses:
+        '204': { description: Marked read }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/notifications/read-all:
+    post:
+      tags: [Notifications]
+      operationId: markAllNotificationsRead
+      summary: Mark every notification of the signed-in user read (US35)
+      x-roles: [ADMIN, HR_MANAGER, RECRUITER, INTERVIEWER]
+      responses:
+        '204': { description: All marked read }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
   # ---------------------------------------------------------------- Users
   /api/users:
     get:
@@ -2112,6 +2174,11 @@ components:
       in: path
       required: true
       schema: { type: string, format: uuid }
+    NotificationId:
+      name: notificationId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
     UserId:
       name: userId
       in: path
@@ -2490,6 +2557,30 @@ components:
             items:
               type: array
               items: { $ref: '#/components/schemas/User' }
+    NotificationType:
+      type: string
+      enum: [INTERVIEW_ASSIGNED, INTERVIEW_CHANGED, INTERVIEW_CANCELLED, SCORECARD_REMINDER, SCORECARDS_COMPLETE,
+             NEW_APPLICATION, ANALYSIS_FAILED, EMAIL_FAILED]
+    Notification:
+      type: object
+      required: [id, type, title, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        type: { $ref: '#/components/schemas/NotificationType' }
+        title: { type: string, description: Vietnamese text shown in the panel }
+        applicationId: { type: string, format: uuid, nullable: true, description: Opens the application detail }
+        interviewId: { type: string, format: uuid, nullable: true, description: Opens the interview or scorecard }
+        readAt: { type: string, format: date-time, nullable: true }
+        createdAt: { type: string, format: date-time }
+    NotificationPage:
+      allOf:
+        - $ref: '#/components/schemas/PageMeta'
+        - type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items: { $ref: '#/components/schemas/Notification' }
     UserOption:
       type: object
       required: [id, fullName, role]

@@ -1,3 +1,5 @@
+import chevronLeft from "../assets/icons/chevron-left.svg";
+import chevronRight from "../assets/icons/chevron-right.svg";
 import "./components.css";
 
 const PAGE_SIZES = [20, 50, 100] as const;
@@ -5,27 +7,19 @@ const PAGE_SIZES = [20, 50, 100] as const;
 interface PaginationProps {
   page: number;
   pageSize: number;
-  totalItems: number;
   totalPages: number;
-  /** Noun after the count, e.g. "người dùng" → "1–7 trong 7 người dùng". */
-  noun: string;
   onPageChange: (page: number) => void;
   onPageSizeChange: (pageSize: number) => void;
 }
 
-/** List footer (SCR-70): range, page size, previous / numbered pages / next. */
+/** List footer (SCR-70): page size, previous / numbered pages / next, right-aligned. */
 export function Pagination(props: PaginationProps) {
-  const { page, pageSize, totalItems, totalPages, noun, onPageChange, onPageSizeChange } = props;
-  const first = totalItems === 0 ? 0 : (page - 1) * pageSize + 1;
-  const last = Math.min(page * pageSize, totalItems);
+  const { page, pageSize, totalPages, onPageChange, onPageSizeChange } = props;
 
   return (
     <nav className="pagination" aria-label="Phân trang">
-      <p className="pagination__range">
-        {first}–{last} trong {totalItems} {noun}
-      </p>
       <select
-        className="select"
+        className="pagination__size"
         aria-label="Số dòng mỗi trang"
         value={pageSize}
         onChange={(event) => onPageSizeChange(Number(event.target.value))}
@@ -43,7 +37,7 @@ export function Pagination(props: PaginationProps) {
         disabled={page <= 1}
         onClick={() => onPageChange(page - 1)}
       >
-        ‹
+        <img src={chevronLeft} width={16} height={16} alt="" />
       </button>
       {pageNumbers(page, Math.max(totalPages, 1)).map((number, index) =>
         number === null ? (
@@ -70,7 +64,7 @@ export function Pagination(props: PaginationProps) {
         disabled={page >= totalPages}
         onClick={() => onPageChange(page + 1)}
       >
-        ›
+        <img src={chevronRight} width={16} height={16} alt="" />
       </button>
     </nav>
   );
