@@ -249,7 +249,7 @@ Roles: **A** Admin · **H** HR Manager · **R** Recruiter · **I** Interviewer. 
 | `GET` | `/api/users` | `listUsers` | A | Users (US20) |
 | `POST` | `/api/users` | `createUser` | A | Create a user with a temporary password (US20) |
 | `GET` | `/api/users/{userId}` | `getUser` | A | User detail |
-| `PUT` | `/api/users/{userId}` | `updateUser` | A | Edit a user (US20) |
+| `PUT` | `/api/users/{userId}` | `updateUser` | A | Edit a user; optionally issue a new temporary password (US20) |
 | `PUT` | `/api/users/{userId}/status` | `updateUserStatus` | A | Activate or deactivate a user (US20) |
 
 ### Settings

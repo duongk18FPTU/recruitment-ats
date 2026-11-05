@@ -1,0 +1,147 @@
+/* SCR-70 Người dùng (docs/05-ui-ux.md). */
+.users__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-16);
+}
+
+.users__header h1 {
+  margin: 0;
+}
+
+.users__card {
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.users__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-12);
+  padding: var(--space-12) var(--space-16);
+  border-bottom: 1px solid var(--color-line);
+}
+
+.users__search {
+  width: 280px;
+  height: 36px;
+  padding: 0 var(--space-12);
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-md);
+  font: inherit;
+}
+
+.users__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.users__table[aria-busy="true"] {
+  opacity: 0.6;
+}
+
+.users__table th {
+  padding: var(--space-8) var(--space-16);
+  border-bottom: 1px solid var(--color-line);
+  background: var(--color-surface-sunken);
+  color: var(--color-ink-2);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  text-align: left;
+}
+
+.users__table td {
+  padding: var(--space-12) var(--space-16);
+  border-bottom: 1px solid var(--color-line);
+}
+
+.users__person {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+}
+
+.users__avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-brand-soft);
+  color: var(--color-brand);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.users__name,
+.users__email {
+  display: block;
+}
+
+.users__name {
+  font-weight: 500;
+}
+
+.users__me {
+  color: var(--color-ink-3);
+  font-weight: 400;
+}
+
+.users__email {
+  color: var(--color-ink-2);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.users__actions {
+  width: 48px;
+  text-align: right;
+}
+
+.users-form__password {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-8);
+}
+
+.users-form__password .field {
+  flex: 1;
+}
+
+.users-form__password .button {
+  height: 36px;
+  margin-top: 20px;
+}
+
+.users-modal__text {
+  margin: 0 0 var(--space-8);
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  margin-bottom: var(--space-16);
+}
+
+/* Status tags: the text carries the meaning, the colour only supports it. */
+.tag {
+  display: inline-block;
+  padding: 1px var(--space-8);
+  border: 1px solid currentcolor;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.tag--active {
+  color: var(--color-success);
+}
+
+.tag--muted {
+  color: var(--color-ink-2);
+}

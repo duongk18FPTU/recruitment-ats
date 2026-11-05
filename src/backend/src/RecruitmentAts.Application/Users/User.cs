@@ -52,4 +52,17 @@ public sealed class User
         PasswordHash = newPasswordHash;
         MustChangePassword = false;
     }
+
+    /// <summary>An Admin sets a temporary password (US20): it must be replaced at the next login, and the lockout ends.</summary>
+    public void IssuePassword(string temporaryPasswordHash)
+    {
+        PasswordHash = temporaryPasswordHash;
+        MustChangePassword = true;
+        FailedLoginCount = 0;
+        LockedUntil = null;
+    }
+
+    public void Deactivate() => IsActive = false;
+
+    public void Activate() => IsActive = true;
 }

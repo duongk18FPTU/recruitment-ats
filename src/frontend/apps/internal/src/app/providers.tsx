@@ -2,6 +2,7 @@ import { ApiError, authSession } from "@ats/api-client";
 import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router";
+import { ToastProvider } from "../components/Toasts";
 import { AuthProvider } from "../features/auth";
 
 /**
@@ -62,7 +63,9 @@ export function AppProviders({ children, restoreSession }: AppProvidersProps) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider restore={restoreSession}>{children}</AuthProvider>
+      <AuthProvider restore={restoreSession}>
+        <ToastProvider>{children}</ToastProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

@@ -1271,7 +1271,10 @@ export interface paths {
         };
         /** User detail */
         get: operations["getUser"];
-        /** Edit a user (US20) */
+        /**
+         * Edit a user (US20)
+         * @description An email used by another user → 409 `DUPLICATE_EMAIL` (case-insensitive). `temporaryPassword` issues a new password.
+         */
         put: operations["updateUser"];
         post?: never;
         delete?: never;
@@ -1726,7 +1729,10 @@ export interface components {
             fullName: string;
             phone?: string | null;
             role: components["schemas"]["Role"];
-            /** Format: password */
+            /**
+             * Format: password
+             * @description At least 10 characters with letters and digits; the user must replace it at the first login
+             */
             temporaryPassword: string;
         };
         UserUpdateRequest: {
@@ -1735,6 +1741,11 @@ export interface components {
             fullName: string;
             phone?: string | null;
             role: components["schemas"]["Role"];
+            /**
+             * Format: password
+             * @description Optional. Issues a new temporary password (the user forgot theirs): the user must replace it at the next login, every session of the user is signed out, and a lockout ends.
+             */
+            temporaryPassword?: string | null;
         };
         UserPage: components["schemas"]["PageMeta"] & {
             items: components["schemas"]["User"][];

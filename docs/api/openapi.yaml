@@ -1673,6 +1673,7 @@ paths:
       tags: [Users]
       operationId: updateUser
       summary: Edit a user (US20)
+      description: An email used by another user → 409 `DUPLICATE_EMAIL` (case-insensitive). `temporaryPassword` issues a new password.
       x-roles: [ADMIN]
       requestBody:
         required: true
@@ -2457,7 +2458,12 @@ components:
         fullName: { type: string, minLength: 2, maxLength: 120 }
         phone: { type: string, maxLength: 20, nullable: true }
         role: { $ref: '#/components/schemas/Role' }
-        temporaryPassword: { type: string, format: password, minLength: 10, maxLength: 128 }
+        temporaryPassword:
+          type: string
+          format: password
+          minLength: 10
+          maxLength: 128
+          description: At least 10 characters with letters and digits; the user must replace it at the first login
     UserUpdateRequest:
       type: object
       required: [email, fullName, role]
@@ -2466,6 +2472,15 @@ components:
         fullName: { type: string, minLength: 2, maxLength: 120 }
         phone: { type: string, maxLength: 20, nullable: true }
         role: { $ref: '#/components/schemas/Role' }
+        temporaryPassword:
+          type: string
+          format: password
+          minLength: 10
+          maxLength: 128
+          nullable: true
+          description: >-
+            Optional. Issues a new temporary password (the user forgot theirs): the user must replace it
+            at the next login, every session of the user is signed out, and a lockout ends.
     UserPage:
       allOf:
         - $ref: '#/components/schemas/PageMeta'

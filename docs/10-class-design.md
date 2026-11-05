@@ -135,11 +135,11 @@ classDiagram
         +LogoutAsync(string? rawRefreshToken) void
     }
     class UserService {
-        +ListAsync(UserQuery) PagedResult~User~
-        +GetAsync(Guid) User
-        +CreateAsync(UserCreateRequest) User
-        +UpdateAsync(Guid, UserUpdateRequest) User
-        +SetActiveAsync(Guid, bool) User
+        +ListAsync(UserQuery) PagedResult~UserAccount~
+        +GetAsync(Guid) UserAccount
+        +CreateAsync(UserCreateRequest, Actor) UserAccount
+        +UpdateAsync(Guid, UserUpdateRequest, Actor) UserAccount
+        +SetActiveAsync(Guid, UserStatusRequest, Actor) UserAccount
     }
     class ProfileService {
         +GetAsync() UserProfile
@@ -166,6 +166,8 @@ classDiagram
         +RegisterFailedLogin(now) void
         +RegisterSuccessfulLogin(now) void
         +ChangePassword(string newHash) void
+        +IssuePassword(string temporaryHash) void
+        +Activate() void
         +Deactivate() void
     }
     class RefreshToken {
@@ -184,6 +186,7 @@ classDiagram
         +FindByEmailAsync(string) User?
         +FindAsync(Guid) User?
         +EmailExistsAsync(string, Guid? exceptId) bool
+        +ListAsync(UserQuery) PagedResult~User~
         +Add(User) void
     }
     class IRefreshTokenRepository {
@@ -227,7 +230,7 @@ classDiagram
 - `AuthService.LoginAsync` returns the same `INVALID_CREDENTIALS` for unknown email, wrong password, deactivated, and locked accounts; `User.RegisterFailedLogin` locks for 15 minutes after 5 failures.
 - `LogoutAsync` revokes the caller's refresh-token family (from the `sid` claim, else from the cookie) and writes `LOGOUT`; the Api deletes the cookie.
 - `RefreshAsync`: a token that is already revoked means reuse → `RevokeFamilyAsync` and 401. Otherwise the token is rotated (`RotateTo`) and a new access token is issued.
-- `UserService.SetActiveAsync(false)` on oneself → `SELF_DEACTIVATION`; deactivation calls `RevokeAllForUserAsync`. `ChangePasswordAsync` verifies the current password (400 `errors.currentPassword`), clears `MustChangePassword`, and revokes every refresh-token family except the caller's (`Actor.SessionId`, from the access-token claim `sid`).
+- `UserService` (US20) is Admin-only through `[Authorize(Roles = RoleNames.Admin)]` on `UsersController`. Emails are unique ignoring case (`DUPLICATE_EMAIL`). `SetActiveAsync(false)` on oneself → `SELF_DEACTIVATION`; deactivation calls `RevokeAllForUserAsync` (an access token already issued lives out its 15 minutes). `UpdateAsync` with `temporaryPassword` calls `User.IssuePassword` (sets `MustChangePassword`, ends a lockout) and revokes every session. Create, update, and status changes write `USER` audit entries with before/after values, never passwords. The contract record for the OpenAPI `User` schema is `UserAccount`, so it does not clash with the entity. `ChangePasswordAsync` verifies the current password (400 `errors.currentPassword`), clears `MustChangePassword`, and revokes every refresh-token family except the caller's (`Actor.SessionId`, from the access-token claim `sid`).
 - **Issued passwords (AC-US01 #4).** The seed and `UserService.CreateAsync` set `MustChangePassword`. The access token then carries the claim `pwd_change`, and the Api's `PasswordChangeGate` answers 403 `PASSWORD_CHANGE_REQUIRED` for every endpoint without `[AllowPendingPasswordChange]` (`changePassword` and `logout`; `login` and `refreshToken` are anonymous). After the change the client refreshes and gets a token without the claim.
 - Access-token claims: `sub` (user id), `role` (`HR_MANAGER`, …), `sid` (refresh-token family), `pwd_change` (only while required). Every endpoint requires a signed-in user unless marked `[AllowAnonymous]` (fallback policy).
 

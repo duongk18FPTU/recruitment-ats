@@ -109,7 +109,7 @@ RecruitmentAts.Application/
 │   ├── PagedResult.cs · PageQuery.cs
 │   └── Audit/AuditWriter.cs            # writes audit entries inside the caller's transaction
 ├── Auth/                               # AuthService (login, refresh rotation), RefreshToken, LoginRequestValidator
-├── Users/                              # User, UserService, Role
+├── Users/                              # User, UserService, Role; Contracts/UserAccount (= OpenAPI User, named apart from the entity)
 ├── Profile/                            # ProfileService (M1: the first-login password change), UserProfile
 ├── Lookups/                            # Department
 ├── Dashboard/                          # DashboardService (read models)
@@ -213,7 +213,8 @@ RecruitmentAts.Api/
 │       ├── PublicConsentController.cs
 │       └── SharePageController.cs      # Open Graph HTML for crawlers
 ├── Forms/                              # multipart models with IFormFile (create application, apply, import)
-├── Auth/                               # ActorAccessor, RefreshCookie, PasswordChangeGate (403 PASSWORD_CHANGE_REQUIRED); JWT setup in Program.cs
+├── Auth/                               # ActorAccessor, RefreshCookie, PasswordChangeGate (403 PASSWORD_CHANGE_REQUIRED), RoleNames for [Authorize(Roles)] from x-roles; JWT setup in Program.cs
+├── ModelBinding/                       # UpperSnakeEnumModelBinder: query enums by contract name (?role=HR_MANAGER)
 ├── RateLimiting/                       # login and public-apply policies (BR-21)
 ├── Errors/                             # ProblemDetailsMapper (ErrorCode → status + problem+json), AppExceptionHandler
 ├── Files/FileResults.cs                # streaming with Content-Disposition, no-store
@@ -342,10 +343,11 @@ apps/internal/
     ├── app/
     │   ├── App.tsx                     # HashRouter → AppProviders → AppRoutes
     │   ├── router.tsx                  # routes, RequireAuth, RequireRole → #/403; unbuilt pages show ComingSoonPage
-    │   ├── providers.tsx               # QueryClient (403 → #/403, no retry on 4xx), AuthProvider; Toasts with the first mutation
+    │   ├── providers.tsx               # QueryClient (403 → #/403, no retry on 4xx), AuthProvider, ToastProvider
     │   ├── navigation.ts               # pages, roles, and sidebar groups (IA navigation table)
     │   └── app.css                     # base styles on top of @ats/ui tokens
     ├── components/layout/              # AppShell, Sidebar (with the user block), Topbar (breadcrumb), Logo, layout.css
+    ├── components/                     # Modal, Pagination, RowMenu (⋯ row actions), Toasts, initials — internal-only, so not in packages/ui
     ├── features/
     │   ├── auth/                       # SCR-01 login, first-login password change, AuthProvider (session restore), RequireAuth / RequireRole
     │   ├── dashboard/                  # SCR-02 (+ interviewer variant)

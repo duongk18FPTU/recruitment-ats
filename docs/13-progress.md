@@ -10,13 +10,13 @@
 | Milestone | Release | Stories done | Points done | Status |
 |---|---|---|---|---|
 | M0 Foundation | — | — | — | `DONE` |
-| M1 Core screening | **MVP** | 2 / 12 | 4 / 46 | `DOING` |
+| M1 Core screening | **MVP** | 3 / 12 | 7 / 46 | `DOING` |
 | M2 Interviews and candidates | — | 0 / 8 | 0 / 40 | `TODO` |
 | M3 Intake, pool, and insight | **v1.0** | 0 / 6 | 0 / 29 | `TODO` |
 | M4 Should-have | v1.1 | 0 / 8 | 0 / 34 | `TODO` |
-| **Total** | | **2 / 34** | **4 / 149** | |
+| **Total** | | **3 / 34** | **7 / 149** | |
 
-**Now:** M1 → US20 Manage users.
+**Now:** M1 → US04 View positions.
 
 ## M0 Foundation — `DONE`
 
@@ -38,7 +38,7 @@
 | 3 | T1.3 Internal app shell (router, query, auth client, AppShell, 403) | — | — | ✓ | — | `DONE` |
 | 4 | US01 Login (+ first-login password change) | 3 | ✓ | ✓ | 4 / 4 | `DONE` |
 | 4 | US02 Logout | 1 | ✓ | ✓ | 2 / 2 | `DONE` |
-| 4 | US20 Manage users | 3 | | | 0 / 5 | `TODO` |
+| 4 | US20 Manage users | 3 | ✓ | ✓ | 5 / 5 | `DONE` |
 | 5 | US04 View positions | 3 | | | 0 / 2 | `TODO` |
 | 5 | US05 Create position | 5 | | | 0 / 3 | `TODO` |
 | 5 | US06 Edit position | 3 | | | 0 / 2 | `TODO` |
@@ -126,6 +126,11 @@ Deviations from the design documents, kept here so they are easy to review (each
 | 2026-11-05 | Every endpoint requires a signed-in user unless `[AllowAnonymous]`; an unknown `/api` route therefore answers 401 to anonymous callers (existence is not revealed) | 10 §2 |
 | 2026-11-05 | Be Vietnam Pro self-hosted with `@fontsource/be-vietnam-pro` (found missing when SCR-01 was compared with Figma in the browser) | 05, 09 §4.5 |
 | 2026-11-05 | Logout clears the client session even when the API call fails, and is allowed before an issued password is replaced (a user can always leave) | 10 §2 |
+| 2026-11-05 | `updateUser` takes an optional `temporaryPassword`: an Admin issues a new password to a user who forgot theirs (must be replaced at the next login; the user's sessions end; a lockout ends). This is the "Admin issues a new password" promised above for SCR-01 | 02, 08, 10, `openapi.yaml` |
+| 2026-11-05 | Deactivating a user revokes their refresh tokens; an access token already issued stays valid until it expires (at most 15 minutes) | 10 |
+| 2026-11-05 | SCR-70 labels a deactivated account "Đã khoá" (Figma); the row menu offers "Khoá tài khoản" / "Mở khoá", hidden on one's own row. The user form is a modal (not in Figma) | 05 |
+| 2026-11-05 | Roles from `x-roles` are enforced with `[Authorize(Roles = RoleNames.…)]`; enum query parameters bind by their contract names (`?role=HR_MANAGER`), other spellings → 400 | 09 §3.4, 10 |
+| 2026-11-05 | Internal shared components `Modal`, `Pagination`, `RowMenu`, `Toasts` live in `apps/internal/src/components` (internal only); form and button styles moved from `auth.css` to `app.css`. The user form uses plain controlled inputs (React Hook Form + Zod still arrive with US05) | 09 §4.2 |
 | 2026-11-05 | Known limitation: two browser tabs refreshing with the same cookie at the same moment look like token reuse and end the session (single-flight works per tab only) | — |
 | 2026-11-04 | Internal app: every IA page has its route and sidebar item from T1.3; a page whose story is not built shows "Chức năng này đang được xây dựng". Nav icons come with the `ui` icon set | 09 §4.2 |
 | 2026-11-04 | React Router 8 (docs did not name a version); `packages/api-client` has its own Vitest project | 09 §4.1 |

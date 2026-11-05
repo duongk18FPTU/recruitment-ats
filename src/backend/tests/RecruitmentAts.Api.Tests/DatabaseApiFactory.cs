@@ -41,14 +41,15 @@ public sealed class DatabaseApiFactory : TestApiFactory, IAsyncLifetime
         string password,
         Role role = Role.Recruiter,
         bool mustChangePassword = false,
-        bool isActive = true)
+        bool isActive = true,
+        string? fullName = null)
     {
         await using var scope = Services.CreateAsyncScope();
         var user = new User
         {
             Email = $"{Guid.NewGuid():N}@example.test",
             PasswordHash = scope.ServiceProvider.GetRequiredService<IPasswordHasher>().Hash(password),
-            FullName = "Nguyễn Minh Anh",
+            FullName = fullName ?? "Nguyễn Minh Anh",
             Role = role,
             MustChangePassword = mustChangePassword,
             IsActive = isActive,

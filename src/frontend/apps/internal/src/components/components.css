@@ -1,0 +1,174 @@
+/* Shared internal components: modal, pagination, toasts (docs/05-ui-ux.md). */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: var(--space-24);
+  background: rgb(23 25 30 / 40%);
+}
+
+.modal__panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 520px;
+  max-height: calc(100vh - 48px);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-20) var(--space-24) var(--space-12);
+}
+
+.modal__header h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.modal__close {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--color-ink-2);
+  cursor: pointer;
+}
+
+.modal__body {
+  overflow-y: auto;
+  padding: var(--space-8) var(--space-24);
+}
+
+.modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-8);
+  padding: var(--space-16) var(--space-24) var(--space-20);
+  border-top: 1px solid var(--color-line);
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  padding: var(--space-16);
+  border-top: 1px solid var(--color-line);
+}
+
+.pagination__range {
+  flex: 1;
+  margin: 0;
+  color: var(--color-ink-2);
+}
+
+.pagination__button {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 var(--space-8);
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.pagination__button[aria-current="page"] {
+  border-color: var(--color-brand);
+  background: var(--color-brand);
+  color: #fff;
+}
+
+.pagination__button:disabled {
+  color: var(--color-line-strong);
+  cursor: default;
+}
+
+.pagination__gap {
+  color: var(--color-ink-3);
+}
+
+.toasts {
+  position: fixed;
+  right: var(--space-24);
+  bottom: var(--space-24);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.toast {
+  margin: 0;
+  padding: var(--space-12) var(--space-16);
+  border-radius: var(--radius-md);
+  background: var(--color-ink);
+  color: #fff;
+}
+
+.row-menu {
+  position: relative;
+  display: inline-block;
+}
+
+.row-menu__button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--color-ink-2);
+  cursor: pointer;
+}
+
+.row-menu__button:hover,
+.row-menu__button[aria-expanded="true"] {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+}
+
+.row-menu__list {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 10;
+  min-width: 180px;
+  margin: var(--space-4) 0 0;
+  padding: var(--space-4);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: 0 4px 16px rgb(23 25 30 / 8%);
+  list-style: none;
+}
+
+.row-menu__list button {
+  display: block;
+  width: 100%;
+  padding: var(--space-8) var(--space-12);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.row-menu__list button:hover,
+.row-menu__list button:focus-visible {
+  background: var(--color-canvas);
+}

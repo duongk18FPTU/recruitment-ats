@@ -2,6 +2,7 @@ import type { UserProfile } from "@ats/api-client";
 import { Link, useLocation } from "react-router";
 import { roleLabels, sidebarFor, type AppPage } from "../../app/navigation";
 import { LogoutButton } from "../../features/auth";
+import { initials } from "../initials";
 import { Logo } from "./Logo";
 
 export function Sidebar({ user }: { user: UserProfile }) {
@@ -55,13 +56,4 @@ export function Sidebar({ user }: { user: UserProfile }) {
       </div>
     </aside>
   );
-}
-
-// "Phạm Thu Hà" → "TH": the given name is last in Vietnamese names.
-function initials(fullName: string): string {
-  const words = fullName.trim().split(/\s+/);
-  return words
-    .slice(-2)
-    .map((word) => word.charAt(0).toLocaleUpperCase("vi"))
-    .join("");
 }

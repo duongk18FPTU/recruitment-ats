@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using RecruitmentAts.Api.Auth;
 using RecruitmentAts.Api.Errors;
+using RecruitmentAts.Api.ModelBinding;
 using RecruitmentAts.Api.RateLimiting;
 using RecruitmentAts.Application;
 using RecruitmentAts.Infrastructure;
@@ -17,7 +18,7 @@ builder.Services
     .AddInfrastructure(builder.Configuration);
 
 builder.Services
-    .AddControllers()
+    .AddControllers(options => options.ModelBinderProviders.Insert(0, new UpperSnakeEnumModelBinderProvider()))
     .AddJsonOptions(options => ConfigureJson(options.JsonSerializerOptions));
 builder.Services.ConfigureHttpJsonOptions(options => ConfigureJson(options.SerializerOptions));
 

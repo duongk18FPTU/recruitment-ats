@@ -1,4 +1,5 @@
 using RecruitmentAts.Api.Auth;
+using RecruitmentAts.Application.Users;
 using RecruitmentAts.Infrastructure.Security;
 
 namespace RecruitmentAts.Api.Tests.Auth;
@@ -13,5 +14,15 @@ public class ClaimNamesTests
         Assert.Equal(JwtSettings.RoleClaim, ActorAccessor.RoleClaim);
         Assert.Equal(JwtSettings.SessionIdClaim, ActorAccessor.SessionIdClaim);
         Assert.Equal(JwtSettings.MustChangePasswordClaim, ActorAccessor.MustChangePasswordClaim);
+    }
+
+    [Fact]
+    public void RoleNames_are_the_contract_names_of_every_role()
+    {
+        string[] names = [RoleNames.Admin, RoleNames.HrManager, RoleNames.Recruiter, RoleNames.Interviewer];
+
+        Assert.Equal(
+            Enum.GetNames<Role>().Select(System.Text.Json.JsonNamingPolicy.SnakeCaseUpper.ConvertName),
+            names);
     }
 }

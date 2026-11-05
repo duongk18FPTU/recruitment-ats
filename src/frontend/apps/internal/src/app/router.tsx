@@ -2,12 +2,15 @@ import type { ReactNode } from "react";
 import { Navigate, Route, Routes } from "react-router";
 import { AppShell } from "../components/layout/AppShell";
 import { ChangePasswordPage, LoginPage, RequireAuth, RequireRole } from "../features/auth";
+import { UsersPage } from "../features/users";
 import { ComingSoonPage } from "../pages/ComingSoonPage";
 import { ForbiddenPage } from "../pages/ForbiddenPage";
 import { pages } from "./navigation";
 
 /** Built pages by path; every other page of the IA shows ComingSoonPage until its story is done. */
-const builtPages: Partial<Record<string, ReactNode>> = {};
+const builtPages: Partial<Record<string, ReactNode>> = {
+  "/users": <UsersPage />,
+};
 
 /** Hash routes of docs/04-information-architecture.md ("Routes"). */
 export function AppRoutes() {

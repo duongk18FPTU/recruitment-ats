@@ -375,7 +375,8 @@ flowchart LR
 ### UC20 Manage users
 
 - **Actor:** Admin
-- **Main flow:** list, create, edit (name, email, phone, role), activate / deactivate accounts; Admin cannot deactivate their own account
+- **Main flow:** list, create (with a temporary password), edit (name, email, phone, role), activate / deactivate accounts; Admin cannot deactivate their own account
+- **Alternative:** the user forgot their password → the Admin issues a new temporary password while editing; the user's sessions end and the password must be replaced at the next login
 
 ### UC21 Personal profile
 
