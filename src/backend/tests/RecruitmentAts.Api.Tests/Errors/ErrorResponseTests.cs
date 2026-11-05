@@ -2,9 +2,9 @@ using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using RecruitmentAts.Api.Auth;
@@ -48,9 +48,18 @@ public class ErrorResponseTests(ErrorResponseTests.Factory factory) : IClassFixt
     }
 
     [Fact]
-    public async Task Unknown_route_is_NOT_FOUND()
+    public async Task Unknown_route_needs_a_signed_in_user_first()
     {
         var (response, problem) = await GetProblemAsync("/api/does-not-exist");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        Assert.Equal("UNAUTHENTICATED", problem.GetProperty("errorCode").GetString());
+    }
+
+    [Fact]
+    public async Task Empty_404_becomes_a_NOT_FOUND_problem()
+    {
+        var (response, problem) = await GetProblemAsync("/test/not-found");
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
@@ -94,15 +103,19 @@ public class ErrorResponseTests(ErrorResponseTests.Factory factory) : IClassFixt
     }
 
     /// <summary>The real API plus <see cref="ErrorTestController"/>, which only exists in tests.</summary>
-    public sealed class Factory : WebApplicationFactory<Program>
+    public sealed class Factory : TestApiFactory
     {
-        protected override void ConfigureWebHost(IWebHostBuilder builder) =>
+        protected override void ConfigureWebHost(IWebHostBuilder builder)
+        {
+            base.ConfigureWebHost(builder);
             builder.ConfigureTestServices(services =>
                 services.AddControllers().AddApplicationPart(typeof(ErrorTestController).Assembly));
+        }
     }
 }
 
 [ApiController]
+[AllowAnonymous]
 [Route("test")]
 public sealed class ErrorTestController(ActorAccessor actors) : ControllerBase
 {
@@ -111,6 +124,9 @@ public sealed class ErrorTestController(ActorAccessor actors) : ControllerBase
         ErrorCode.InvalidStageTransition,
         "Không thể chuyển từ NEW sang INTERVIEW",
         new Dictionary<string, object?> { ["allowedStages"] = new[] { Stage.Screening, Stage.Rejected } });
+
+    [HttpGet("not-found")]
+    public IActionResult EmptyNotFound() => NotFound();
 
     [HttpGet("crash")]
     public IActionResult ThrowUnexpected() => throw new InvalidOperationException("secret connection string");

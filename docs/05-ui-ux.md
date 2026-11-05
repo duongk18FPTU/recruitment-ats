@@ -120,7 +120,7 @@ Spacing variables follow a 4 px grid (`space/4` … `space/48`); radii are `radi
 
 | Screen | Figma frame | Role shown | Key decisions |
 |---|---|---|---|
-| `SCR-01` Login | SCR-01 Đăng nhập | — | Single centred form under the logo; show-password icon |
+| `SCR-01` Login | SCR-01 Đăng nhập | — | Single centred form under the logo; show-password icon; "Chưa có tài khoản? Liên hệ quản trị viên" (accounts are issued). The Figma frame also shows "Ghi nhớ đăng nhập" and "Quên mật khẩu?", which are not built (see Progress, decisions). After login with an issued password, the same card asks for a new password |
 | `SCR-02` Dashboard | SCR-02 Tổng quan | HR Manager | KPI strip; pipeline per position; today's interviews; *Cần xử lý* list; new applications by source |
 | `SCR-10` Positions | SCR-10 Vị trí tuyển dụng | Recruiter | Status tabs with counts; job post status next to position status; pagination |
 | `SCR-11` Create position | SCR-11 Tạo vị trí tuyển dụng (modal) | Recruiter | Grouped sections; criteria as editable rows; "Lưu nháp" and "Lưu và mở tuyển" |

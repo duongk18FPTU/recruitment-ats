@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Navigate, Route, Routes } from "react-router";
 import { AppShell } from "../components/layout/AppShell";
-import { LoginPage, RequireAuth, RequireRole } from "../features/auth";
+import { ChangePasswordPage, LoginPage, RequireAuth, RequireRole } from "../features/auth";
 import { ComingSoonPage } from "../pages/ComingSoonPage";
 import { ForbiddenPage } from "../pages/ForbiddenPage";
 import { pages } from "./navigation";
@@ -14,6 +14,14 @@ export function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route
+        path="/change-password"
+        element={
+          <RequireAuth allowPendingPasswordChange>
+            <ChangePasswordPage />
+          </RequireAuth>
+        }
+      />
       <Route
         element={
           <RequireAuth>

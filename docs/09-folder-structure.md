@@ -105,12 +105,12 @@ RecruitmentAts.Application/
 ├── Common/
 │   ├── Actor.cs                        # current user id, role, actor type, IP, traceId
 │   ├── AppException.cs                 # carries ErrorCode → mapped to ProblemDetails by Api
-│   ├── ErrorCode.cs                    # the 33 codes of the OpenAPI ErrorCode enum (checked by Api.Tests)
+│   ├── ErrorCode.cs                    # the 34 codes of the OpenAPI ErrorCode enum (checked by Api.Tests)
 │   ├── PagedResult.cs · PageQuery.cs
 │   └── Audit/AuditWriter.cs            # writes audit entries inside the caller's transaction
-├── Auth/                               # AuthService, RefreshToken, lockout rules
+├── Auth/                               # AuthService (login, refresh rotation), RefreshToken, LoginRequestValidator
 ├── Users/                              # User, UserService, Role
-├── Profile/
+├── Profile/                            # ProfileService (M1: the first-login password change), UserProfile
 ├── Lookups/                            # Department
 ├── Dashboard/                          # DashboardService (read models)
 ├── Positions/                          # Position, PositionCriterion, criteria versioning, CriteriaSuggestionService (AI drafts)
@@ -213,7 +213,7 @@ RecruitmentAts.Api/
 │       ├── PublicConsentController.cs
 │       └── SharePageController.cs      # Open Graph HTML for crawlers
 ├── Forms/                              # multipart models with IFormFile (create application, apply, import)
-├── Auth/                               # JWT setup, refresh cookie, ActorAccessor, role policies
+├── Auth/                               # ActorAccessor, RefreshCookie, PasswordChangeGate (403 PASSWORD_CHANGE_REQUIRED); JWT setup in Program.cs
 ├── RateLimiting/                       # login and public-apply policies (BR-21)
 ├── Errors/                             # ProblemDetailsMapper (ErrorCode → status + problem+json), AppExceptionHandler
 ├── Files/FileResults.cs                # streaming with Content-Disposition, no-store
@@ -281,13 +281,13 @@ Enforced by `ArchitectureTests`:
 |---|---|
 | Persistence | `Npgsql.EntityFrameworkCore.PostgreSQL`, `EFCore.NamingConventions`, `Microsoft.EntityFrameworkCore.Relational` (pinned so that all projects use one EF Core version), `Microsoft.EntityFrameworkCore.Design` (migrations), `Pgvector.EntityFrameworkCore` (vector columns and `<=>` queries; added with US33) |
 | Validation | `FluentValidation` |
-| Auth | `Microsoft.AspNetCore.Authentication.JwtBearer` |
+| Auth | `Microsoft.AspNetCore.Authentication.JwtBearer` (Api), `Microsoft.IdentityModel.JsonWebTokens` (token issuing in Infrastructure) |
 | Email, mailbox | `MailKit` |
 | CV text | `UglyToad.PdfPig`, `DocumentFormat.OpenXml` |
 | Excel | `ClosedXML` |
 | PDF reports | `QuestPDF` (Community license) |
 | Logging | `Serilog.AspNetCore` (JSON to stdout) |
-| Tests | `xunit.v3` on Microsoft.Testing.Platform (enabled in `global.json`), `Testcontainers.PostgreSql`, `Microsoft.AspNetCore.Mvc.Testing`, `NetArchTest.Rules`, `YamlDotNet` (reads `openapi.yaml` in the contract test) |
+| Tests | `xunit.v3` on Microsoft.Testing.Platform (enabled in `global.json`), `Testcontainers.PostgreSql`, `Microsoft.AspNetCore.Mvc.Testing`, `NetArchTest.Rules`, `YamlDotNet` (reads `openapi.yaml` in the contract test). `Api.Tests` runs the API on Testcontainers PostgreSQL (`DatabaseApiFactory`) |
 
 ## 4. Frontend — React (Vite, TypeScript)
 
@@ -322,7 +322,7 @@ src/frontend/
 | Vitest, Testing Library, MSW | Unit and component tests with API mocks per `operationId` |
 | Playwright | End-to-end tests against the Compose stack |
 
-**Installed so far:** React, Vite, TypeScript, `openapi-typescript` + `openapi-fetch`, Vitest + Testing Library + jsdom, ESLint (`typescript-eslint`, `react-hooks`) in M0; React Router 8 and TanStack Query 5 in the internal app (T1.3). The other libraries are added with the first feature that needs them (forms with US01 / US05; Chart.js with the dashboard; MSW with the first API-backed screen; Playwright with the first end-to-end flow). Versions are exact (no `^`) and locked in `package-lock.json`; Node ≥ 24.15 (jsdom).
+**Installed so far:** React, Vite, TypeScript, `openapi-typescript` + `openapi-fetch`, Vitest + Testing Library + jsdom, ESLint (`typescript-eslint`, `react-hooks`) in M0; React Router 8 and TanStack Query 5 in the internal app (T1.3); MSW 3 with US01. The other libraries are added with the first feature that needs them (React Hook Form + Zod with US05, the first large form — the two US01 forms use plain controlled inputs; Chart.js with the dashboard; Playwright with the first end-to-end flow). Versions are exact (no `^`) and locked in `package-lock.json`; Node ≥ 24.15 (jsdom).
 
 | Script (in `src/frontend/`) | Does |
 |---|---|
@@ -347,7 +347,7 @@ apps/internal/
     │   └── app.css                     # base styles on top of @ats/ui tokens
     ├── components/layout/              # AppShell, Sidebar (with the user block), Topbar (breadcrumb), Logo, layout.css
     ├── features/
-    │   ├── auth/                       # SCR-01, session, refresh, role guards
+    │   ├── auth/                       # SCR-01 login, first-login password change, AuthProvider (session restore), RequireAuth / RequireRole
     │   ├── dashboard/                  # SCR-02 (+ interviewer variant)
     │   ├── positions/                  # SCR-10, SCR-11 (with AI criteria drafts), SCR-12 overview & criteria tabs
     │   ├── job-posts/                  # SCR-14 job post tab, share links
@@ -364,7 +364,7 @@ apps/internal/
     │   ├── settings/                   # SCR-75 email templates, SCR-76 mailbox & sender
     │   └── profile/                    # SCR-80
     ├── pages/                          # ForbiddenPage (SCR-90), ComingSoonPage (until a page's story is built)
-    └── test/                           # setup, renderApp + signIn; MSW handlers by operationId with the first API-backed screen
+    └── test/                           # setup (MSW server, cleanup), renderApp + signIn; API mocks per test with server.use()
 ```
 
 Feature template (from the reference project, adapted to TanStack Query):

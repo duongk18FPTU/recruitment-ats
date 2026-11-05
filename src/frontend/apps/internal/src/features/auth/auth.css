@@ -1,0 +1,157 @@
+/* SCR-01 and the first-login password change (docs/05-ui-ux.md). */
+.auth {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-24);
+  min-height: 100vh;
+  padding: var(--space-24);
+}
+
+.auth__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.auth__brand strong {
+  color: var(--color-brand);
+  font-weight: 600;
+}
+
+.auth__card {
+  width: 100%;
+  max-width: 400px;
+  padding: var(--space-32);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.auth__card h1 {
+  margin-bottom: var(--space-20);
+}
+
+.auth__lead {
+  margin: calc(var(--space-12) * -1) 0 var(--space-20);
+  color: var(--color-ink-2);
+}
+
+.auth__note {
+  margin: 0;
+  color: var(--color-ink-2);
+  font-size: 13px;
+}
+
+.field {
+  margin-bottom: var(--space-16);
+}
+
+.field label {
+  display: block;
+  margin-bottom: var(--space-4);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+}
+
+.field input {
+  width: 100%;
+  height: 36px;
+  padding: 0 var(--space-12);
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font: inherit;
+}
+
+.field input[aria-invalid="true"] {
+  border-color: var(--color-danger);
+}
+
+.field__password {
+  position: relative;
+}
+
+.field__password input {
+  padding-right: 40px;
+}
+
+.field__toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: none;
+  color: var(--color-ink-2);
+  cursor: pointer;
+}
+
+.field__error {
+  margin: var(--space-4) 0 0;
+  color: var(--color-danger);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.field__hint {
+  margin: calc(var(--space-12) * -1) 0 var(--space-16);
+  color: var(--color-ink-3);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.form-error {
+  margin-bottom: var(--space-16);
+  padding: var(--space-8) var(--space-12);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-md);
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.form-error p {
+  margin: 0;
+}
+
+.form-error__trace {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.button {
+  height: 40px;
+  padding: 0 var(--space-16);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.button--primary {
+  background: var(--color-brand);
+  color: #fff;
+}
+
+.button--primary:hover:not(:disabled) {
+  background: var(--color-brand-hover);
+}
+
+.button:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+.button--block {
+  width: 100%;
+  margin-top: var(--space-8);
+}

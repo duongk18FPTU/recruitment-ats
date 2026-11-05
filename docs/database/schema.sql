@@ -30,6 +30,7 @@ CREATE TABLE users (
     role                varchar(20) NOT NULL
                         CHECK (role IN ('ADMIN', 'HR_MANAGER', 'RECRUITER', 'INTERVIEWER')),
     is_active           boolean NOT NULL DEFAULT true,
+    must_change_password boolean NOT NULL DEFAULT false,  -- set for issued passwords (seed, US20)
     failed_login_count  integer NOT NULL DEFAULT 0,
     locked_until        timestamptz,
     last_login_at       timestamptz,

@@ -39,9 +39,3 @@ h1 {
   padding: var(--space-24);
   color: var(--color-ink-2);
 }
-
-.login {
-  display: grid;
-  place-items: center;
-  min-height: 100vh;
-}

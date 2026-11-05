@@ -3,8 +3,17 @@ import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router";
 import { useAuth } from "./AuthProvider";
 
-/** Signed-in users only; others go to Login and come back afterwards. */
-export function RequireAuth({ children }: { children: ReactNode }) {
+interface RequireAuthProps {
+  children: ReactNode;
+  /** Only the password-change page may open while an issued password is still in use. */
+  allowPendingPasswordChange?: boolean;
+}
+
+/**
+ * Signed-in users only; others go to Login and come back afterwards. A user with an issued
+ * password is kept on the password-change page.
+ */
+export function RequireAuth({ children, allowPendingPasswordChange = false }: RequireAuthProps) {
   const auth = useAuth();
   const location = useLocation();
 
@@ -17,6 +26,9 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   }
   if (auth.status === "anonymous") {
     return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+  if (auth.user.mustChangePassword && !allowPendingPasswordChange) {
+    return <Navigate to="/change-password" replace />;
   }
   return children;
 }

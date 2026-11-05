@@ -259,6 +259,7 @@ flowchart LR
 - **Preconditions:** an active account exists
 - **Main flow:** enter email and password → backend verifies credentials and account status → returns a Bearer access token and a safe profile → Dashboard
 - **Alternative:** invalid credentials or disabled account → generic error, remain on login screen
+- **Alternative:** the password was issued by an Admin (no self-registration; accounts come from the seed or UC20) → set a new password before anything else opens
 - **Result:** authenticated client session (15-minute access token, rotating refresh token in an `httpOnly` cookie — AD-06)
 
 ### UC02 Logout

@@ -38,5 +38,6 @@ public enum ErrorCode
     RateLimited,
     ConsentTokenInvalid,
     AiUnavailable,
+    PasswordChangeRequired,
     InternalError,
 }

@@ -97,8 +97,11 @@ export interface paths {
         };
         get?: never;
         /**
-         * Change my password (US21)
-         * @description Revokes all other refresh tokens of the user.
+         * Change my password (US01 first login, US21)
+         * @description Verifies the current password, clears `mustChangePassword`, and revokes every other
+         *     refresh token family of the user (the current one is identified by the access token).
+         *     Call `refreshToken` afterwards to receive an access token without the restriction.
+         *     A wrong current password returns 400 with `errors.currentPassword`.
          */
         put: operations["changePassword"];
         post?: never;
@@ -1565,7 +1568,7 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         /** @enum {string} */
-        ErrorCode: "VALIDATION_FAILED" | "INVALID_CREDENTIALS" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "CONCURRENCY_CONFLICT" | "DUPLICATE_EMAIL" | "DUPLICATE_APPLICATION" | "POSITION_NOT_OPEN" | "INVALID_POSITION_STATUS_CHANGE" | "INVALID_STAGE_TRANSITION" | "ANALYSIS_IN_PROGRESS" | "ANALYSIS_NOT_COMPLETED" | "APPLICATION_NOT_IN_INTERVIEW" | "INTERVIEW_OVERLAP" | "INTERVIEW_CANCELLED" | "SCORECARD_ALREADY_SUBMITTED" | "EMAIL_NOT_PENDING" | "EMAIL_NOT_FAILED" | "INBOX_ITEM_PROCESSED" | "IMPORT_INVALID_ROWS" | "IMPORT_EXPIRED" | "EXPORT_TOO_LARGE" | "UNSUPPORTED_FILE_TYPE" | "NO_EXTRACTABLE_TEXT" | "FILE_TOO_LARGE" | "SELF_DEACTIVATION" | "JOB_POST_EXPIRED" | "CAPTCHA_FAILED" | "RATE_LIMITED" | "CONSENT_TOKEN_INVALID" | "AI_UNAVAILABLE" | "INTERNAL_ERROR";
+        ErrorCode: "VALIDATION_FAILED" | "INVALID_CREDENTIALS" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "CONCURRENCY_CONFLICT" | "DUPLICATE_EMAIL" | "DUPLICATE_APPLICATION" | "POSITION_NOT_OPEN" | "INVALID_POSITION_STATUS_CHANGE" | "INVALID_STAGE_TRANSITION" | "ANALYSIS_IN_PROGRESS" | "ANALYSIS_NOT_COMPLETED" | "APPLICATION_NOT_IN_INTERVIEW" | "INTERVIEW_OVERLAP" | "INTERVIEW_CANCELLED" | "SCORECARD_ALREADY_SUBMITTED" | "EMAIL_NOT_PENDING" | "EMAIL_NOT_FAILED" | "INBOX_ITEM_PROCESSED" | "IMPORT_INVALID_ROWS" | "IMPORT_EXPIRED" | "EXPORT_TOO_LARGE" | "UNSUPPORTED_FILE_TYPE" | "NO_EXTRACTABLE_TEXT" | "FILE_TOO_LARGE" | "SELF_DEACTIVATION" | "JOB_POST_EXPIRED" | "CAPTCHA_FAILED" | "RATE_LIMITED" | "CONSENT_TOKEN_INVALID" | "AI_UNAVAILABLE" | "PASSWORD_CHANGE_REQUIRED" | "INTERNAL_ERROR";
         /** @description RFC 7807 problem; `detail` is a Vietnamese message safe to show to the user. */
         ProblemDetails: {
             /** @example https://ats.example.vn/errors/invalid-stage-transition */
@@ -1684,7 +1687,8 @@ export interface components {
             /** @example Asia/Ho_Chi_Minh */
             timezone: string;
             role: components["schemas"]["Role"];
-            mustChangePassword?: boolean;
+            /** @description True until the user replaces the password an Admin issued; see `changePassword`. */
+            mustChangePassword: boolean;
         };
         ProfileUpdateRequest: {
             fullName: string;

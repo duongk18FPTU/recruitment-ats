@@ -61,7 +61,7 @@ classDiagram
         NOT_FOUND
         CONCURRENCY_CONFLICT
         INVALID_STAGE_TRANSITION
-        …33 codes
+        …34 codes
     }
     class PagedResult~T~ {
         <<record>>
@@ -130,8 +130,8 @@ classDiagram
         +ChangePassword(ChangePasswordRequest) NoContent
     }
     class AuthService {
-        +LoginAsync(LoginRequest, ClientInfo) AuthResult
-        +RefreshAsync(string rawRefreshToken, ClientInfo) AuthResult
+        +LoginAsync(LoginRequest, string? userAgent) AuthResult
+        +RefreshAsync(string? rawRefreshToken, string? userAgent) AuthResult
         +LogoutAsync(string? rawRefreshToken) void
     }
     class UserService {
@@ -148,11 +148,9 @@ classDiagram
     }
     class AuthResult {
         <<record>>
-        +string AccessToken
-        +DateTimeOffset ExpiresAt
+        +AuthResponse Response
         +string RefreshToken
         +DateTimeOffset RefreshExpiresAt
-        +UserProfile User
     }
     class User {
         <<entity>>
@@ -161,11 +159,13 @@ classDiagram
         +string PasswordHash
         +Role Role
         +bool IsActive
+        +bool MustChangePassword
         +int FailedLoginCount
         +DateTimeOffset? LockedUntil
         +IsLocked(now) bool
         +RegisterFailedLogin(now) void
         +RegisterSuccessfulLogin(now) void
+        +ChangePassword(string newHash) void
         +Deactivate() void
     }
     class RefreshToken {
@@ -182,7 +182,7 @@ classDiagram
     class IUserRepository {
         <<interface>>
         +FindByEmailAsync(string) User?
-        +GetAsync(Guid) User
+        +FindAsync(Guid) User?
         +EmailExistsAsync(string, Guid? exceptId) bool
         +Add(User) void
     }
@@ -191,7 +191,7 @@ classDiagram
         +FindByHashAsync(string) RefreshToken?
         +Add(RefreshToken) void
         +RevokeFamilyAsync(Guid familyId, now) void
-        +RevokeAllForUserAsync(Guid userId, now) void
+        +RevokeAllForUserAsync(Guid userId, now, Guid? exceptFamilyId) void
     }
     class IPasswordHasher {
         <<interface>>
@@ -200,8 +200,9 @@ classDiagram
     }
     class ITokenIssuer {
         <<interface>>
-        +IssueAccessToken(User) AccessToken
-        +NewRefreshToken() RawToken
+        +IssueAccessToken(User, Guid sessionId) AccessToken
+        +NewRefreshToken() RawRefreshToken
+        +HashRefreshToken(string) string
     }
     class Pbkdf2PasswordHasher
     class JwtTokenIssuer
@@ -225,7 +226,9 @@ classDiagram
 
 - `AuthService.LoginAsync` returns the same `INVALID_CREDENTIALS` for unknown email, wrong password, deactivated, and locked accounts; `User.RegisterFailedLogin` locks for 15 minutes after 5 failures.
 - `RefreshAsync`: a token that is already revoked means reuse → `RevokeFamilyAsync` and 401. Otherwise the token is rotated (`RotateTo`) and a new access token is issued.
-- `UserService.SetActiveAsync(false)` on oneself → `SELF_DEACTIVATION`; deactivation calls `RevokeAllForUserAsync`. `ChangePasswordAsync` revokes all other refresh tokens.
+- `UserService.SetActiveAsync(false)` on oneself → `SELF_DEACTIVATION`; deactivation calls `RevokeAllForUserAsync`. `ChangePasswordAsync` verifies the current password (400 `errors.currentPassword`), clears `MustChangePassword`, and revokes every refresh-token family except the caller's (`Actor.SessionId`, from the access-token claim `sid`).
+- **Issued passwords (AC-US01 #4).** The seed and `UserService.CreateAsync` set `MustChangePassword`. The access token then carries the claim `pwd_change`, and the Api's `PasswordChangeGate` answers 403 `PASSWORD_CHANGE_REQUIRED` for every endpoint without `[AllowPendingPasswordChange]` (only `changePassword`; `login` and `refreshToken` are anonymous, `logout` joins with US02). After the change the client refreshes and gets a token without the claim.
+- Access-token claims: `sub` (user id), `role` (`HR_MANAGER`, …), `sid` (refresh-token family), `pwd_change` (only while required). Every endpoint requires a signed-in user unless marked `[AllowAnonymous]` (fallback policy).
 
 ## 3. Positions and job posts
 

@@ -64,6 +64,7 @@ internal sealed partial class DatabaseSeeder(
             PasswordHash = passwordHasher.Hash(password),
             FullName = configuration["Seed:AdminFullName"] is { Length: > 0 } name ? name : "Quản trị viên",
             Role = Role.Admin,
+            MustChangePassword = true, // the deployment secret is replaced at the first login
         };
         db.Add(admin);
         audit.Write(actor, AuditModule.User, AuditAction.Create, "User", admin.Id, "Tạo tài khoản Admin đầu tiên",

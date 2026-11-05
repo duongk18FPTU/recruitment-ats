@@ -5,11 +5,11 @@ import { AppProviders } from "../app/providers";
 import { AppRoutes } from "../app/router";
 
 /** Realistic signed-in user (docs/05-ui-ux.md: no placeholder names). */
-export function signIn(role: Role, fullName = "Phạm Thu Hà") {
+export function signIn(role: Role, fullName = "Phạm Thu Hà", mustChangePassword = false) {
   authSession.set({
     accessToken: "test-token",
     expiresAt: "2026-11-04T10:15:00Z",
-    user: { id: "0190a1b2-0000-7000-8000-000000000001", email: "ha.pham@example.test", fullName, role, timezone: "Asia/Ho_Chi_Minh" },
+    user: { id: "0190a1b2-0000-7000-8000-000000000001", email: "ha.pham@example.test", fullName, role, timezone: "Asia/Ho_Chi_Minh", mustChangePassword },
   });
 }
 

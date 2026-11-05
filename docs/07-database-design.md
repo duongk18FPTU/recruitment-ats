@@ -74,6 +74,7 @@ erDiagram
         varchar timezone "default Asia/Ho_Chi_Minh"
         varchar role "ADMIN HR_MANAGER RECRUITER INTERVIEWER"
         bool is_active
+        bool must_change_password "issued password not yet replaced"
         int failed_login_count
         timestamptz locked_until
         timestamptz last_login_at
@@ -520,7 +521,7 @@ The Worker's `RetentionJob` runs daily and audits every deletion as `CV_DELETE` 
 
 | Table | Rows |
 |---|---|
-| `users` | One `ADMIN` account, created only while no Admin exists, from the secrets `Seed__AdminEmail` and `Seed__AdminPassword` (10–128 characters); audited as `SYSTEM` / `USER` / `CREATE`. The password is changed later in the profile (US21) |
+| `users` | One `ADMIN` account, created only while no Admin exists, from the secrets `Seed__AdminEmail` and `Seed__AdminPassword` (10–128 characters); audited as `SYSTEM` / `USER` / `CREATE`. `must_change_password = true`: the deployment secret is replaced at the first login (AC-US01 #4) |
 | `departments` | The company's departments from `Seed:Departments` in the API's `appsettings.json`; names that are missing are added, existing rows are never changed |
 | `email_templates` | One Vietnamese template per event, each containing `{{link_dong_y}}` |
 | `mail_settings` | Row `id = 1` with `mailbox_enabled = false` |

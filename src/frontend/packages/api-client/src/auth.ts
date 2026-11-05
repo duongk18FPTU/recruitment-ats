@@ -34,7 +34,7 @@ export const authSession = {
 export function refreshSession(fetchImpl: typeof fetch = defaultFetch): Promise<AuthResponse | null> {
   refreshing ??= (async () => {
     try {
-      const response = await fetchImpl("/api/auth/refresh", { method: "POST", credentials: "same-origin" });
+      const response = await fetchImpl(`${apiOrigin()}/api/auth/refresh`, { method: "POST", credentials: "same-origin" });
       const next = response.ok ? ((await response.json()) as AuthResponse) : null;
       authSession.set(next);
       return next;
@@ -89,6 +89,11 @@ export function createAuthMiddleware(fetchImpl: typeof fetch = defaultFetch): Mi
 // A wrong password on login or a refused refresh is a real 401, not an expired token.
 function isTokenEndpoint(url: string): boolean {
   return /\/api\/auth\/(login|refresh)$/.test(new URL(url, "http://localhost").pathname);
+}
+
+/** The page's own origin: the API is same-origin (AD-05); absolute URLs also work outside a browser. */
+export function apiOrigin(): string {
+  return typeof location === "undefined" ? "" : location.origin;
 }
 
 function defaultFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {

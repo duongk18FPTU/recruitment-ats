@@ -15,6 +15,9 @@ info:
     * Public endpoints (`/api/public/*`) are anonymous, rate-limited, and served only on the
       career-site domain.
     * Errors use RFC 7807 Problem Details with a stable `errorCode` and `traceId`.
+    * Accounts are issued by an Admin (no self-registration). While `mustChangePassword` is true
+      (a new account, or the first Admin), every internal operation except `changePassword`,
+      `refreshToken`, and `logout` returns 403 `PASSWORD_CHANGE_REQUIRED`.
 servers:
   - url: https://ats.example.vn
     description: Internal app domain (`/api/*`)
@@ -158,8 +161,12 @@ paths:
     put:
       tags: [Profile]
       operationId: changePassword
-      summary: Change my password (US21)
-      description: Revokes all other refresh tokens of the user.
+      summary: Change my password (US01 first login, US21)
+      description: |
+        Verifies the current password, clears `mustChangePassword`, and revokes every other
+        refresh token family of the user (the current one is identified by the access token).
+        Call `refreshToken` afterwards to receive an access token without the restriction.
+        A wrong current password returns 400 with `errors.currentPassword`.
       requestBody:
         required: true
         content:
@@ -2259,6 +2266,7 @@ components:
         - RATE_LIMITED
         - CONSENT_TOKEN_INVALID
         - AI_UNAVAILABLE
+        - PASSWORD_CHANGE_REQUIRED
         - INTERNAL_ERROR
     ProblemDetails:
       type: object
@@ -2398,7 +2406,7 @@ components:
         user: { $ref: '#/components/schemas/UserProfile' }
     UserProfile:
       type: object
-      required: [id, email, fullName, role, timezone]
+      required: [id, email, fullName, role, timezone, mustChangePassword]
       properties:
         id: { type: string, format: uuid }
         email: { type: string, format: email }
@@ -2407,7 +2415,9 @@ components:
         avatarUrl: { type: string, format: uri, nullable: true }
         timezone: { type: string, example: Asia/Ho_Chi_Minh }
         role: { $ref: '#/components/schemas/Role' }
-        mustChangePassword: { type: boolean }
+        mustChangePassword:
+          type: boolean
+          description: True until the user replaces the password an Admin issued; see `changePassword`.
     ProfileUpdateRequest:
       type: object
       required: [fullName, timezone]

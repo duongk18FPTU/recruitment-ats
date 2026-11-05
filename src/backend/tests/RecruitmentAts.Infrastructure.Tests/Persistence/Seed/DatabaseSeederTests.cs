@@ -39,6 +39,7 @@ public sealed class DatabaseSeederTests(SeedPostgres postgres) : IClassFixture<S
         Assert.Equal("admin@example.test", admin.Email);
         Assert.Equal(Role.Admin, admin.Role);
         Assert.True(admin.IsActive);
+        Assert.True(admin.MustChangePassword);
         Assert.True(scope.ServiceProvider.GetRequiredService<IPasswordHasher>().Verify(admin.PasswordHash, "Admin-Password-1"));
 
         var departments = await db.Set<Department>().OrderBy(d => d.SortOrder).ToListAsync(_ct);

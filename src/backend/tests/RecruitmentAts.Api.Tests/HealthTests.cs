@@ -1,9 +1,8 @@
 using System.Net;
-using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace RecruitmentAts.Api.Tests;
 
-public class HealthTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
+public class HealthTests(TestApiFactory factory) : IClassFixture<TestApiFactory>
 {
     [Fact]
     public async Task Health_returns_200()

@@ -73,7 +73,8 @@ public static class ProblemDetailsMapper
             or ErrorCode.CaptchaFailed => StatusCodes.Status400BadRequest,
         ErrorCode.InvalidCredentials
             or ErrorCode.Unauthenticated => StatusCodes.Status401Unauthorized,
-        ErrorCode.Forbidden => StatusCodes.Status403Forbidden,
+        ErrorCode.Forbidden
+            or ErrorCode.PasswordChangeRequired => StatusCodes.Status403Forbidden,
         ErrorCode.NotFound
             or ErrorCode.ConsentTokenInvalid => StatusCodes.Status404NotFound,
         ErrorCode.ConcurrencyConflict

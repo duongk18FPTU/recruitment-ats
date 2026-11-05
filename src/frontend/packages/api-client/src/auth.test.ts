@@ -9,7 +9,7 @@ function session(token: string): AuthResponse {
   return {
     accessToken: token,
     expiresAt: "2026-11-04T10:15:00Z",
-    user: { id: "0190a1b2-0000-7000-8000-000000000001", email: "ha@example.test", fullName: "Phạm Thu Hà", role: "HR_MANAGER", timezone: "Asia/Ho_Chi_Minh" },
+    user: { id: "0190a1b2-0000-7000-8000-000000000001", email: "ha@example.test", fullName: "Phạm Thu Hà", role: "HR_MANAGER", timezone: "Asia/Ho_Chi_Minh", mustChangePassword: false },
   };
 }
 
@@ -104,7 +104,7 @@ describe("refreshSession", () => {
 
     await refreshSession(fetchImpl);
 
-    expect(fetchImpl).toHaveBeenCalledWith("/api/auth/refresh", { method: "POST", credentials: "same-origin" });
+    expect(fetchImpl).toHaveBeenCalledWith("/api/auth/refresh", { method: "POST", credentials: "same-origin" }); // node: no location
     expect(authSession.get()?.user.fullName).toBe("Phạm Thu Hà");
   });
 

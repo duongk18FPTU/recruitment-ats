@@ -9,8 +9,9 @@ import { AuthProvider } from "../features/auth";
  * signed in); 4xx errors are not retried because repeating them cannot succeed.
  */
 export function createQueryClient(onForbidden: () => void): QueryClient {
+  // PASSWORD_CHANGE_REQUIRED is routed by the session state (RequireAuth), not to #/403.
   const handle = (error: Error) => {
-    if (error instanceof ApiError && error.status === 403) {
+    if (error instanceof ApiError && error.status === 403 && error.errorCode !== "PASSWORD_CHANGE_REQUIRED") {
       onForbidden();
     }
   };

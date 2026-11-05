@@ -18,6 +18,12 @@ public sealed class ActorAccessor(IHttpContextAccessor httpContextAccessor)
     /// <summary>Access-token claim with the role as stored, e.g. <c>HR_MANAGER</c>.</summary>
     public const string RoleClaim = "role";
 
+    /// <summary>Access-token claim with the refresh-token family of the login.</summary>
+    public const string SessionIdClaim = "sid";
+
+    /// <summary>Present while the user must replace an issued password (<see cref="PasswordChangeGate"/>).</summary>
+    public const string MustChangePasswordClaim = "pwd_change";
+
     public Actor Current()
     {
         var httpContext = httpContextAccessor.HttpContext
@@ -42,7 +48,8 @@ public sealed class ActorAccessor(IHttpContextAccessor httpContextAccessor)
             throw new AppException(ErrorCode.Unauthenticated, "Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.");
         }
 
-        return Actor.User(userId, role, ipAddress, traceId);
+        var sessionId = Guid.TryParse(user.FindFirstValue(SessionIdClaim), out var sid) ? sid : (Guid?)null;
+        return Actor.User(userId, role, ipAddress, traceId, sessionId);
     }
 
     private static bool TryParseRole(string? value, out Role role)

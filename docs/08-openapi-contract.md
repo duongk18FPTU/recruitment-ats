@@ -13,6 +13,7 @@ The contract is the agreement between the two SPAs and the API. Operation IDs ar
 | Base paths | Internal: `https://ats.<domain>/api/*`. Public: `https://careers.<domain>/api/public/*`. Each domain exposes only its own group (AD-05) |
 | Format | JSON with `camelCase` properties; enums in `UPPER_SNAKE_CASE` as in the database; dates `YYYY-MM-DD`; timestamps ISO 8601 in UTC |
 | Resources and actions | Nouns for resources (`/positions/{id}`); state changes that carry business rules are explicit actions (`/stage`, `/publish`, `/cancel`, `/submit`) rather than generic field updates |
+| Accounts | Issued by an Admin (US20) or the deployment seed; there is no self-registration. An issued password must be replaced at the first login: until then the access token only allows `changePassword`, `refreshToken`, and `logout` (403 `PASSWORD_CHANGE_REQUIRED`) |
 | Authentication | `Authorization: Bearer <access token>` (JWT, 15 minutes). The refresh token lives in the `ats_refresh` cookie (`httpOnly`, `Secure`, `SameSite=Strict`, path `/api/auth`) and is rotated on every refresh (AD-06) |
 | Authorization | `x-roles` on each operation lists the roles; descriptions state record-level rules (ownership BR-14, panel assignment BR-08, blind scorecards BR-07). A role that is not listed gets 403; a record the caller may not see gets 404 when its existence must not leak (public API, interviewer access) |
 | Field-level hiding | For `INTERVIEWER`, AI fields (`fitScore`, `missingMustHave`, `analysisStatus`) are **absent** from responses, not null (AC-US08) |
@@ -72,6 +73,7 @@ The contract is the agreement between the two SPAs and the API. Operation IDs ar
 | `RATE_LIMITED` | 429 | Public endpoints, `login`, AI suggestion operations |
 | `CONSENT_TOKEN_INVALID` | 404 | `getConsent`, `updateConsent` |
 | `AI_UNAVAILABLE` | 502 | `suggestCriteria`, `listPoolMatches`, `suggestInterviewQuestions` when the AI service fails, times out, or returns invalid JSON |
+| `PASSWORD_CHANGE_REQUIRED` | 403 | Every internal operation except `changePassword`, `refreshToken`, and `logout` while the user still has an issued password (`mustChangePassword`) |
 | `INTERNAL_ERROR` | 500 | Unexpected errors (details only in logs, linked by `traceId`) |
 
 Example:

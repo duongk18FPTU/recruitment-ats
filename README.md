@@ -569,7 +569,7 @@ docker compose up -d postgres        # Postgres 16 + pgvector on localhost:5433
 
 cd src/backend
 dotnet tool restore
-for v in ConnectionStrings__Ats Seed__AdminEmail Seed__AdminPassword; do export "$v=$(grep "^$v=" ../../.env | cut -d= -f2-)"; done
+for v in ConnectionStrings__Ats Jwt__SigningKey Seed__AdminEmail Seed__AdminPassword; do export "$v=$(grep "^$v=" ../../.env | cut -d= -f2-)"; done
 dotnet run --project src/RecruitmentAts.Api -- migrate   # migrations + seed (first Admin, departments); safe to repeat
 dotnet build                         # warnings are errors
 dotnet test                          # all test projects; Infrastructure tests start Postgres with Testcontainers

@@ -10,13 +10,13 @@
 | Milestone | Release | Stories done | Points done | Status |
 |---|---|---|---|---|
 | M0 Foundation | — | — | — | `DONE` |
-| M1 Core screening | **MVP** | 0 / 12 | 0 / 46 | `DOING` |
+| M1 Core screening | **MVP** | 1 / 12 | 3 / 46 | `DOING` |
 | M2 Interviews and candidates | — | 0 / 8 | 0 / 40 | `TODO` |
 | M3 Intake, pool, and insight | **v1.0** | 0 / 6 | 0 / 29 | `TODO` |
 | M4 Should-have | v1.1 | 0 / 8 | 0 / 34 | `TODO` |
-| **Total** | | **0 / 34** | **0 / 149** | |
+| **Total** | | **1 / 34** | **3 / 149** | |
 
-**Now:** M1 → US01 Login.
+**Now:** M1 → US02 Logout.
 
 ## M0 Foundation — `DONE`
 
@@ -36,9 +36,9 @@
 | 1 | T1.1 Cross-cutting (errors, actor, audit, unit of work, contract test) | — | ✓ | — | — | `DONE` |
 | 2 | T1.2 Seed (first Admin, departments) | — | ✓ | — | — | `DONE` |
 | 3 | T1.3 Internal app shell (router, query, auth client, AppShell, 403) | — | — | ✓ | — | `DONE` |
-| 4 | US01 Login | 3 | | | 0 / 3 | `TODO` |
+| 4 | US01 Login (+ first-login password change) | 3 | ✓ | ✓ | 4 / 4 | `DONE` |
 | 4 | US02 Logout | 1 | | | 0 / 2 | `TODO` |
-| 4 | US20 Manage users | 3 | | | 0 / 4 | `TODO` |
+| 4 | US20 Manage users | 3 | | | 0 / 5 | `TODO` |
 | 5 | US04 View positions | 3 | | | 0 / 2 | `TODO` |
 | 5 | US05 Create position | 5 | | | 0 / 3 | `TODO` |
 | 5 | US06 Edit position | 3 | | | 0 / 2 | `TODO` |
@@ -119,8 +119,12 @@ Deviations from the design documents, kept here so they are easy to review (each
 | 2026-11-04 | The contract has 33 error codes (documents said 32); C# `ErrorCode` is checked against the YAML enum | 09 §3.2, 10 §1 |
 | 2026-11-04 | `Actor.Type` reuses `AuditActorType`; `IpAddress` is `IPAddress?` (stored as `inet`) | 10 §1 |
 | 2026-11-04 | `CreatedAt` / `UpdatedAt` set by `TimestampInterceptor` from `IClock` | 09 §3.3, 10 §1 |
-| 2026-11-04 | Seed runs with the migrations as `api migrate`; the first Admin comes from secrets. "Change password at first login" is not enforced: the contract has an optional `UserProfile.mustChangePassword`, but there is no column and no acceptance criterion — **open question for US01 / US20** | 06, 07, 09 §3.3, §7, README |
+| 2026-11-04 | Seed runs with the migrations as `api migrate`; the first Admin comes from secrets. The first-login password change was an open question here; it was decided on 2026-11-05 (below) | 06, 07, 09 §3.3, §7, README |
 | 2026-11-04 | `Pbkdf2PasswordHasher` added in T1.2 (needed by the seed), not US01 | 09 §3.3 |
+| 2026-11-05 | **Issued passwords must be replaced at the first login** (accounts are issued, never self-registered, and the Admin knows a temporary password): column `users.must_change_password` (migration `UserMustChangePassword`), error code `PASSWORD_CHANGE_REQUIRED`, AC-US01 #4 and AC-US20 #5. `changePassword` (US21) is built in M1 for this; the rest of US21 stays in M4 | 02, 03, 07, 08, 10, 11, `openapi.yaml`, `schema.sql` |
+| 2026-11-05 | SCR-01 has no "Ghi nhớ đăng nhập" (the refresh cookie already lasts 7 days) and no "Quên mật khẩu?" (no reset API; an Admin issues a new password in US20) | 05 |
+| 2026-11-05 | Every endpoint requires a signed-in user unless `[AllowAnonymous]`; an unknown `/api` route therefore answers 401 to anonymous callers (existence is not revealed) | 10 §2 |
+| 2026-11-05 | Known limitation: two browser tabs refreshing with the same cookie at the same moment look like token reuse and end the session (single-flight works per tab only) | — |
 | 2026-11-04 | Internal app: every IA page has its route and sidebar item from T1.3; a page whose story is not built shows "Chức năng này đang được xây dựng". Nav icons come with the `ui` icon set | 09 §4.2 |
 | 2026-11-04 | React Router 8 (docs did not name a version); `packages/api-client` has its own Vitest project | 09 §4.1 |
 | 2026-11-04 | Contract test checks routes against the YAML (name, method, path, no duplicates); operations of unbuilt stories have no route yet | 09 §3.6 |

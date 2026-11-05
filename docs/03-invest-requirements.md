@@ -108,6 +108,7 @@ Format: **Given** context, **When** action, **Then** observable result.
 1. Given an active account, when valid credentials are submitted, then the API returns 200 with an access token, expiry time, and a profile without the password hash, and the user lands on the Dashboard.
 2. Given wrong credentials **or** a deactivated account, when submitted, then the API returns 401 with the same generic message in both cases.
 3. Given an empty email or password, then the form shows a validation error and no request is sent.
+4. Given an account with an issued password (the first Admin or a user created by an Admin), when it logs in, then it must set a new password (10–128 characters, letters and digits) before any other screen opens, and every other API operation returns 403 `PASSWORD_CHANGE_REQUIRED` until then; afterwards the old password no longer works and other sessions are signed out.
 
 ### AC-US02 Logout
 
@@ -223,6 +224,7 @@ Format: **Given** context, **When** action, **Then** observable result.
 2. Given a duplicate email, then the API returns 409.
 3. Given an Admin deactivating their own account, then the API returns 409.
 4. Given a deactivated user, then login returns 401.
+5. Given a user created with a temporary password, when they first log in, then they must replace it (AC-US01 #4).
 
 ### AC-US21 Personal profile
 

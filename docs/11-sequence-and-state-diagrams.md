@@ -58,7 +58,7 @@ Lifelines use the class names of the [class design](10-class-design.md), so ever
 
 ![Login](diagrams/out/seq_login.png)
 
-Unknown email, inactive account, locked account, and wrong password all return the same `401 INVALID_CREDENTIALS` (AC-US01). Five failures lock the account for 15 minutes; the API still answers with the same message.
+Unknown email, inactive account, locked account, and wrong password all return the same `401 INVALID_CREDENTIALS` (AC-US01). Five failures lock the account for 15 minutes; the API still answers with the same message. When `mustChangePassword` is true (an issued password), step 17 opens the password-change page instead of the Dashboard, and `PUT /api/me/password` followed by a refresh precedes any other call (AC-US01 #4).
 
 <a id="seq-refresh-token"></a>
 ### Refresh access token

@@ -1,5 +1,4 @@
 using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,8 +11,7 @@ public sealed record MappedRoute(string? Name, string Method, string Path);
 /// method and path; no operationId has two routes. Operations whose story is not built yet have
 /// no route.
 /// </summary>
-public sealed partial class OpenApiContractTests(WebApplicationFactory<Program> factory)
-    : IClassFixture<WebApplicationFactory<Program>>
+public sealed partial class OpenApiContractTests(TestApiFactory factory) : IClassFixture<TestApiFactory>
 {
     [Fact]
     public void Spec_has_unique_operation_ids()
