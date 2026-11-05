@@ -124,6 +124,7 @@ Deviations from the design documents, kept here so they are easy to review (each
 | 2026-11-05 | **Issued passwords must be replaced at the first login** (accounts are issued, never self-registered, and the Admin knows a temporary password): column `users.must_change_password` (migration `UserMustChangePassword`), error code `PASSWORD_CHANGE_REQUIRED`, AC-US01 #4 and AC-US20 #5. `changePassword` (US21) is built in M1 for this; the rest of US21 stays in M4 | 02, 03, 07, 08, 10, 11, `openapi.yaml`, `schema.sql` |
 | 2026-11-05 | SCR-01 has no "Ghi nhớ đăng nhập" (the refresh cookie already lasts 7 days) and no "Quên mật khẩu?" (no reset API; an Admin issues a new password in US20) | 05 |
 | 2026-11-05 | Every endpoint requires a signed-in user unless `[AllowAnonymous]`; an unknown `/api` route therefore answers 401 to anonymous callers (existence is not revealed) | 10 §2 |
+| 2026-11-05 | Be Vietnam Pro self-hosted with `@fontsource/be-vietnam-pro` (found missing when SCR-01 was compared with Figma in the browser) | 05, 09 §4.5 |
 | 2026-11-05 | Known limitation: two browser tabs refreshing with the same cookie at the same moment look like token reuse and end the session (single-flight works per tab only) | — |
 | 2026-11-04 | Internal app: every IA page has its route and sidebar item from T1.3; a page whose story is not built shows "Chức năng này đang được xây dựng". Nav icons come with the `ui` icon set | 09 §4.2 |
 | 2026-11-04 | React Router 8 (docs did not name a version); `packages/api-client` has its own Vitest project | 09 §4.1 |

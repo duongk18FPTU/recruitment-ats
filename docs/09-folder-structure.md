@@ -421,7 +421,7 @@ CI runs `generate` and fails if `schema.d.ts` changed, so the frontend always ma
 ```text
 packages/ui/
 └── src/
-    ├── tokens.css                      # colors, type, spacing from Figma (UI/UX doc)
+    ├── tokens.css                      # colors, type, spacing from Figma (UI/UX doc); imports Be Vietnam Pro (@fontsource)
     ├── components/                     # Button, Input, Select, Checkbox, Modal, Table, Pagination,
     │                                   # Tag, Toast, EmptyState, Skeleton, FileDrop, Tabs, DateRange
     ├── icons/                          # the 47 icons from the Figma library

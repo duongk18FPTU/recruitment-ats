@@ -50,7 +50,7 @@ The logo is a rounded pine square with three bars of decreasing length — candi
 | `Public/H2` | Source Serif 4 | SemiBold | 30/38 | Long-form career-site headings (privacy policy) |
 | `Public/H3` · `Lead` · `Body` · `Small` | Be Vietnam Pro | — | 19/26 · 18/28 · 16/26 · 14/22 | Career-site text; body is 16 px for reading on phones |
 
-Be Vietnam Pro is designed for Vietnamese diacritics.
+Be Vietnam Pro is designed for Vietnamese diacritics. In code it is self-hosted from `@fontsource/be-vietnam-pro` (OFL-1.1, weights 400 / 500 / 600) and imported by `packages/ui/src/tokens.css`, so neither app calls an external font CDN. JetBrains Mono and Source Serif 4 are added with the first screen that uses them.
 
 ### Colour tokens (Figma variables, collection `ATS Tokens`)
 

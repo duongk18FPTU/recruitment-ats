@@ -1,4 +1,10 @@
 /* ATS Tokens — Figma variables documented in docs/05-ui-ux.md. */
+
+/* Be Vietnam Pro, self-hosted (OFL-1.1); the subsets, Vietnamese included, load by unicode-range. */
+@import "@fontsource/be-vietnam-pro/400.css";
+@import "@fontsource/be-vietnam-pro/500.css";
+@import "@fontsource/be-vietnam-pro/600.css";
+
 :root {
   /* Colour */
   --color-ink: #17191e;
