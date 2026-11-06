@@ -10,13 +10,13 @@
 | Milestone | Release | Stories done | Points done | Status |
 |---|---|---|---|---|
 | M0 Foundation | — | — | — | `DONE` |
-| M1 Core screening | **MVP** | 3 / 12 | 7 / 46 | `DOING` |
+| M1 Core screening | **MVP** | 4 / 12 | 12 / 46 | `DOING` |
 | M2 Interviews and candidates | — | 0 / 9 | 0 / 45 | `TODO` |
 | M3 Intake, pool, and insight | **v1.0** | 0 / 6 | 0 / 29 | `TODO` |
 | M4 Should-have | v1.1 | 0 / 8 | 0 / 34 | `TODO` |
-| **Total** | | **3 / 35** | **7 / 154** | |
+| **Total** | | **4 / 35** | **12 / 154** | |
 
-**Now:** M1 → US05 Create position.
+**Now:** M1 → US06 Edit position.
 
 ## M0 Foundation — `DONE`
 
@@ -40,7 +40,7 @@
 | 4 | US02 Logout | 1 | ✓ | ✓ | 2 / 2 | `DONE` |
 | 4 | US20 Manage users | 3 | ✓ | ✓ | 5 / 5 | `DONE` |
 | 5 | US04 View positions | 3 | ✓ | ✓ | 1 / 2 | `PARTIAL` |
-| 5 | US05 Create position | 5 | | | 0 / 3 | `TODO` |
+| 5 | US05 Create position | 5 | ✓ | ✓ | 3 / 3 | `DONE` |
 | 5 | US06 Edit position | 3 | | | 0 / 2 | `TODO` |
 | 5 | US07 Close / reopen position | 2 | | | 0 / 2 | `TODO` |
 | 6 | T1.4 CV files (storage, text extraction, BR-15) | — | | — | — | `TODO` |
@@ -144,6 +144,9 @@ Deviations from the design documents, kept here so they are easy to review (each
 | 2026-11-06 | SCR-10: tab counts come from `listPositions?status=…&pageSize=1` (`totalItems`, no new operation); "Sắp đến hạn" = an open position within 14 days of its target date (display only); the "Địa điểm" filter is removed (no such query parameter; removed in Figma too); the owner filter is hidden from Interviewers (`listUserOptions` is not open to them) | 05, `images/screens` |
 | 2026-11-06 | `listUserOptions?roles=` binds a comma-separated list of contract names (`style: form, explode: false`; repeated keys work too); other spellings → 400 | 10 |
 | 2026-11-06 | Internal app: `.tag` styles moved to `app.css` (shared by SCR-10 and SCR-70); position detail is `#/jobs/:id` (doc 09 said `#/positions/:id`) | 09 |
+| 2026-11-06 | **SCR-11 follows the contract** (the Figma frame was drawn from UC05, which had no level): "Cấp bậc" added (required `level`), "Địa điểm" is a text input (`location` is free text), "Người phụ trách" removed from create (`createPosition` makes the caller the owner; `ownerId` is on `updatePosition` for Admin / HR Manager), "Mô tả công việc" marked required. Updated in Figma and its screenshot; UC05 lists the level | 02, 05, `images/screens` |
+| 2026-11-06 | `createPosition` does not create the draft job post yet (the table comes with US22, which will create posts for positions that have none); "target hire date in the future" means after today in Asia/Ho_Chi_Minh; an inactive department is a field error on `departmentId` | 10 |
+| 2026-11-06 | React Hook Form 7.91 + Zod 4.6 (`@hookform/resolvers` 7) installed with US05; `Modal` has a `wide` size for SCR-11; `#/jobs/new` opens SCR-11 over SCR-10 (Admin, HR Manager, Recruiter) | 09 |
 | 2026-11-04 | Internal app: every IA page has its route and sidebar item from T1.3; a page whose story is not built shows "Chức năng này đang được xây dựng". Nav icons come with the `ui` icon set | 09 §4.2 |
 | 2026-11-04 | React Router 8 (docs did not name a version); `packages/api-client` has its own Vitest project | 09 §4.1 |
 | 2026-11-04 | Contract test checks routes against the YAML (name, method, path, no duplicates); operations of unbuilt stories have no route yet | 09 §3.6 |

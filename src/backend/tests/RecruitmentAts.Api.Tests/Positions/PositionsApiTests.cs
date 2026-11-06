@@ -2,6 +2,8 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
+using RecruitmentAts.Application.Audit;
 using RecruitmentAts.Application.Positions;
 using RecruitmentAts.Application.Users;
 
@@ -132,6 +134,95 @@ public sealed class PositionsApiTests(DatabaseApiFactory api) : IClassFixture<Da
         Assert.Equal(100, page.GetProperty("pageSize").GetInt32());
     }
 
+    // ---------------------------------------------------------------- create (AC-US05)
+
+    [Theory]
+    [InlineData(Role.Recruiter, "OPEN")]
+    [InlineData(Role.HrManager, "DRAFT")]
+    [InlineData(Role.Admin, null)]
+    public async Task A_created_position_is_owned_by_its_creator_at_criteria_version_1(Role role, string? status)
+    {
+        var creator = await SignInAsync(role);
+        var department = await api.CreateDepartmentAsync();
+
+        var response = await SendAsync(HttpMethod.Post, "/api/positions", creator.Token, NewPosition(department.Id, status));
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>(_ct);
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        var id = body.GetProperty("id").GetGuid();
+        Assert.EndsWith($"/api/positions/{id}", response.Headers.Location!.ToString(), StringComparison.OrdinalIgnoreCase);
+        Assert.Matches("^JOB-\\d{3,}$", body.GetProperty("code").GetString());
+        Assert.Equal("Kỹ sư dữ liệu", body.GetProperty("title").GetString());
+        Assert.Equal(status ?? "DRAFT", body.GetProperty("status").GetString());
+        Assert.Equal(creator.Id, body.GetProperty("owner").GetProperty("id").GetGuid());
+        Assert.Equal(1, body.GetProperty("criteriaVersion").GetInt32());
+        Assert.Equal(
+            ["Python", "Spark"],
+            body.GetProperty("criteria").EnumerateArray().Select(c => c.GetProperty("name").GetString()));
+        Assert.All(body.GetProperty("criteria").EnumerateArray(), c => Assert.Equal(1, c.GetProperty("version").GetInt32()));
+        Assert.True(await AuditedAsync(creator.Id, id, AuditAction.Create));
+    }
+
+    [Fact]
+    public async Task No_criteria_a_bad_weight_a_past_date_or_no_headcount_are_400_with_field_errors()
+    {
+        var recruiter = await SignInAsync(Role.Recruiter);
+        var department = await api.CreateDepartmentAsync();
+        var today = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(7));
+
+        var noCriteria = await ErrorsOf(await SendAsync(HttpMethod.Post, "/api/positions", recruiter.Token,
+            NewPosition(department.Id) with { criteria = [] }));
+        var badWeight = await ErrorsOf(await SendAsync(HttpMethod.Post, "/api/positions", recruiter.Token,
+            NewPosition(department.Id) with { criteria = [new { name = "Python", type = "MUST_HAVE", weight = 6 }] }));
+        var pastDate = await ErrorsOf(await SendAsync(HttpMethod.Post, "/api/positions", recruiter.Token,
+            NewPosition(department.Id) with { targetHireDate = today.ToString("yyyy-MM-dd") }));
+        var noHeadcount = await ErrorsOf(await SendAsync(HttpMethod.Post, "/api/positions", recruiter.Token,
+            NewPosition(department.Id) with { headcount = 0 }));
+
+        Assert.Equal(["criteria"], noCriteria);
+        Assert.Equal(["criteria[0].weight"], badWeight);
+        Assert.Equal(["targetHireDate"], pastDate);
+        Assert.Equal(["headcount"], noHeadcount);
+    }
+
+    [Fact]
+    public async Task Missing_fields_and_an_inactive_department_are_field_errors()
+    {
+        var recruiter = await SignInAsync(Role.Recruiter);
+        var inactive = await api.CreateDepartmentAsync(isActive: false);
+
+        var missing = await ErrorsOf(await SendAsync(HttpMethod.Post, "/api/positions", recruiter.Token, new
+        {
+            title = "A",
+            location = "",
+            description = "",
+            criteria = new[] { new { name = "P" } },
+        }));
+        var closedStatus = await ErrorsOf(await SendAsync(HttpMethod.Post, "/api/positions", recruiter.Token,
+            NewPosition(inactive.Id, "CLOSED")));
+        var inactiveDepartment = await ErrorsOf(await SendAsync(HttpMethod.Post, "/api/positions", recruiter.Token,
+            NewPosition(inactive.Id)));
+
+        Assert.Equal(
+            ["criteria[0].name", "criteria[0].type", "criteria[0].weight", "departmentId", "description", "employmentType",
+                "headcount", "level", "location", "targetHireDate", "title"],
+            missing);
+        Assert.Equal(["status"], closedStatus);
+        Assert.Equal(["departmentId"], inactiveDepartment);
+    }
+
+    [Fact]
+    public async Task An_Interviewer_cannot_create_a_position()
+    {
+        var interviewer = await SignInAsync(Role.Interviewer);
+        var department = await api.CreateDepartmentAsync();
+
+        var response = await SendAsync(HttpMethod.Post, "/api/positions", interviewer.Token, NewPosition(department.Id));
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Equal("FORBIDDEN", await ErrorCodeOf(response));
+    }
+
     // ---------------------------------------------------------------- detail
 
     [Fact]
@@ -260,6 +351,44 @@ public sealed class PositionsApiTests(DatabaseApiFactory api) : IClassFixture<Da
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         return await response.Content.ReadFromJsonAsync<JsonElement>(_ct);
     }
+
+    private sealed record PositionBody(
+        string title,
+        Guid departmentId,
+        string location,
+        string employmentType,
+        string level,
+        int headcount,
+        string targetHireDate,
+        string description,
+        object[] criteria,
+        string? status);
+
+    private static PositionBody NewPosition(Guid departmentId, string? status = null) => new(
+        "  Kỹ sư dữ liệu  ",
+        departmentId,
+        "TP. HCM",
+        "FULL_TIME",
+        "MIDDLE",
+        2,
+        DateOnly.FromDateTime(DateTime.UtcNow.AddDays(45)).ToString("yyyy-MM-dd"),
+        "Xây dựng pipeline dữ liệu.",
+        [
+            new { name = "Python", type = "MUST_HAVE", weight = 5 },
+            new { name = "Spark", description = "Đã chạy job trên cụm", type = "NICE_TO_HAVE", weight = 2 },
+        ],
+        status);
+
+    private async Task<List<string>> ErrorsOf(HttpResponseMessage response)
+    {
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var problem = await response.Content.ReadFromJsonAsync<JsonElement>(_ct);
+        return [.. problem.GetProperty("errors").EnumerateObject().Select(e => e.Name).Order(StringComparer.Ordinal)];
+    }
+
+    private Task<bool> AuditedAsync(Guid actorId, Guid positionId, AuditAction action) =>
+        api.QueryAsync(db => db.Set<AuditLog>().AnyAsync(
+            a => a.ActorId == actorId && a.EntityId == positionId && a.Module == AuditModule.Position && a.Action == action, _ct));
 
     private static List<string?> Titles(JsonElement page) =>
         [.. page.GetProperty("items").EnumerateArray().Select(p => p.GetProperty("title").GetString())];

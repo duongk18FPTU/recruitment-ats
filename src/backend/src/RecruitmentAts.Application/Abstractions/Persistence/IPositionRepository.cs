@@ -1,4 +1,5 @@
 using RecruitmentAts.Application.Common;
+using RecruitmentAts.Application.Positions;
 using RecruitmentAts.Application.Positions.Contracts;
 
 namespace RecruitmentAts.Application.Abstractions.Persistence;
@@ -10,4 +11,6 @@ public interface IPositionRepository
 
     /// <summary>The position with its current criteria version, or null.</summary>
     Task<PositionDetail?> GetDetailAsync(Guid id, CancellationToken cancellationToken);
+
+    void Add(Position position);
 }

@@ -12,3 +12,9 @@ export async function listPositions(query: PositionQuery) {
 export async function getPosition(positionId: string) {
   return unwrap(await apiClient.GET("/api/positions/{positionId}", { params: { path: { positionId } } }));
 }
+
+export type PositionCreateRequest = components["schemas"]["PositionCreateRequest"];
+
+export async function createPosition(body: PositionCreateRequest) {
+  return unwrap(await apiClient.POST("/api/positions", { body }));
+}

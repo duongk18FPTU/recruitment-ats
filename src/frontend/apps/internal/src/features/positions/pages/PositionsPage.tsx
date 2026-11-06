@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import plusIcon from "../../../assets/icons/plus.svg";
 import { Pagination } from "../../../components/Pagination";
 import { useAuth } from "../../auth";
 import { useDepartments, useUserOptions } from "../../lookups";
 import type { PositionQuery, PositionStatus } from "../api";
 import { formatDate, statusTag, todayIn } from "../format";
-import { canPickOwner } from "../permissions";
+import { PositionFormModal } from "../components/PositionFormModal";
+import { canCreatePosition, canPickOwner } from "../permissions";
 import { usePositions, useStatusCounts } from "../queries";
 import "../positions.css";
 
@@ -19,8 +21,12 @@ const tabs: { status: PositionStatus | undefined; label: string; key: "OPEN" | "
   { status: undefined, label: "Tất cả", key: "ALL" },
 ];
 
-/** SCR-10 Vị trí tuyển dụng (US04): status tabs with counts, search, department and owner filters, paging. */
-export function PositionsPage() {
+/**
+ * SCR-10 Vị trí tuyển dụng (US04): status tabs with counts, search, department and owner filters, paging.
+ * At `#/jobs/new` the SCR-11 create form opens over it (US05).
+ */
+export function PositionsPage({ creating = false }: { creating?: boolean }) {
+  const navigate = useNavigate();
   const auth = useAuth();
   const me = auth.status === "signed-in" ? auth.user : undefined;
   const showOwnerFilter = me ? canPickOwner(me.role) : false;
@@ -47,6 +53,12 @@ export function PositionsPage() {
     <section className="positions">
       <header className="positions__header">
         <h1>Vị trí tuyển dụng</h1>
+        {me && canCreatePosition(me.role) && (
+          <button type="button" className="button button--primary button--icon" onClick={() => navigate("/jobs/new")}>
+            <img src={plusIcon} width={16} height={16} alt="" />
+            Tạo vị trí
+          </button>
+        )}
       </header>
 
       <div className="positions__card">
@@ -174,6 +186,8 @@ export function PositionsPage() {
           </>
         )}
       </div>
+
+      {creating && <PositionFormModal today={today} onClose={() => navigate("/jobs")} />}
     </section>
   );
 }

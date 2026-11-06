@@ -176,3 +176,92 @@ a.positions__title:hover {
   color: var(--color-ink-2);
   font-size: 12px;
 }
+
+/* SCR-11 position form */
+.position-form__section {
+  margin: 0 0 var(--space-12);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.position-form__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  column-gap: var(--space-16);
+}
+
+.field textarea {
+  width: 100%;
+  padding: var(--space-8) var(--space-12);
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-md);
+  font: inherit;
+  resize: vertical;
+}
+
+.field textarea[aria-invalid="true"] {
+  border-color: var(--color-danger);
+}
+
+.position-form__criteria-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-8);
+}
+
+.position-form__add {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-12);
+  color: var(--color-brand);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.position-form__criteria-error {
+  margin: 0 0 var(--space-8);
+}
+
+.position-form__criteria {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.position-form__criteria th {
+  padding: 0 var(--space-8) var(--space-4) 0;
+  color: var(--color-ink-2);
+  font-size: 12px;
+  font-weight: 400;
+  text-align: left;
+}
+
+.position-form__criteria td {
+  padding: 0 var(--space-8) var(--space-8) 0;
+  vertical-align: top;
+}
+
+.position-form__criteria td:first-child {
+  width: 60%;
+}
+
+.position-form__cell {
+  margin-bottom: 0;
+}
+
+.position-form__remove {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--color-ink-2);
+  cursor: pointer;
+}
+
+.position-form__remove:hover {
+  background: var(--color-surface-sunken);
+}

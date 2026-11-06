@@ -43,6 +43,7 @@ public static class DependencyInjection
 
         services.AddScoped<PositionService>();
         services.AddSingleton<IValidator<PositionQuery>, PositionQueryValidator>();
+        services.AddSingleton<IValidator<PositionCreateRequest>, PositionCreateRequestValidator>();
 
         return services;
     }

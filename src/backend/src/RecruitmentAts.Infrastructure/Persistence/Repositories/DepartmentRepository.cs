@@ -11,4 +11,7 @@ internal sealed class DepartmentRepository(AtsDbContext db) : IDepartmentReposit
             .Where(d => d.IsActive)
             .OrderBy(d => d.SortOrder).ThenBy(d => d.Name)
             .ToListAsync(cancellationToken);
+
+    public Task<bool> IsActiveAsync(Guid id, CancellationToken cancellationToken) =>
+        db.Set<Department>().AnyAsync(d => d.Id == id && d.IsActive, cancellationToken);
 }

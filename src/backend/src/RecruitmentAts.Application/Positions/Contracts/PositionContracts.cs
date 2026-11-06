@@ -65,3 +65,36 @@ public sealed record PositionDetail(
     DateTimeOffset CreatedAt,
     DateTimeOffset? ClosedAt,
     string RowVersion);
+
+/// <summary>
+/// OpenAPI <c>CriterionInput</c>. <c>Id</c> names a criterion of the current version that is kept
+/// (US06); enums and numbers are nullable so a missing value is a validation error.
+/// </summary>
+public sealed record CriterionInput(Guid? Id, string Name, string? Description, CriterionType? Type, int? Weight);
+
+/// <summary>OpenAPI <c>PositionFields</c>, shared by create and update.</summary>
+public interface IPositionFields
+{
+    string Title { get; }
+    Guid? DepartmentId { get; }
+    string Location { get; }
+    EmploymentType? EmploymentType { get; }
+    PositionLevel? Level { get; }
+    int? Headcount { get; }
+    DateOnly? TargetHireDate { get; }
+    string Description { get; }
+    IReadOnlyList<CriterionInput>? Criteria { get; }
+}
+
+/// <summary>OpenAPI <c>PositionCreateRequest</c>: saved as <c>DRAFT</c> (default) or <c>OPEN</c>.</summary>
+public sealed record PositionCreateRequest(
+    string Title,
+    Guid? DepartmentId,
+    string Location,
+    EmploymentType? EmploymentType,
+    PositionLevel? Level,
+    int? Headcount,
+    DateOnly? TargetHireDate,
+    string Description,
+    IReadOnlyList<CriterionInput>? Criteria,
+    PositionStatus? Status = null) : IPositionFields;

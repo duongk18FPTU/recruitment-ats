@@ -285,9 +285,9 @@ flowchart LR
 ### UC05 Create position
 
 - **Actor:** Admin, HR Manager, Recruiter
-- **Main flow:** form: title, department, location, employment type, headcount, target hire date, internal job description → add criteria (name, type `MUST_HAVE` / `NICE_TO_HAVE`, weight 1–5) → save as `DRAFT` or `OPEN`
+- **Main flow:** form: title, department, location, employment type, level, headcount, target hire date, internal job description → add criteria (name, type `MUST_HAVE` / `NICE_TO_HAVE`, weight 1–5) → save as `DRAFT` or `OPEN`
 - **Validation:** at least one criterion; target hire date in the future; headcount ≥ 1
-- **Result:** position appears in the list with a code (e.g. `JOB-014`); the creator becomes the owner; a draft job post is prefilled from the position
+- **Result:** position appears in the list with a code (e.g. `JOB-014`); the creator becomes the owner (an Admin or HR Manager can reassign it when editing, UC06); a draft job post is prefilled from the position (built with US22)
 
 ### UC06 Edit position
 

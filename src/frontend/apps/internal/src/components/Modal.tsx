@@ -7,13 +7,15 @@ interface ModalProps {
   children: ReactNode;
   /** Buttons in the footer, right-aligned. */
   footer: ReactNode;
+  /** `wide` for forms with several columns (SCR-11). */
+  size?: "default" | "wide";
 }
 
 /**
  * A dialog over the page: Escape and the backdrop close it, focus moves into it and returns to
  * the element that opened it, and Tab stays inside.
  */
-export function Modal({ title, onClose, children, footer }: ModalProps) {
+export function Modal({ title, onClose, children, footer, size = "default" }: ModalProps) {
   const titleId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef(onClose);
@@ -57,7 +59,7 @@ export function Modal({ title, onClose, children, footer }: ModalProps) {
     <div className="modal" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
       <div
         ref={panelRef}
-        className="modal__panel"
+        className={size === "wide" ? "modal__panel modal__panel--wide" : "modal__panel"}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}

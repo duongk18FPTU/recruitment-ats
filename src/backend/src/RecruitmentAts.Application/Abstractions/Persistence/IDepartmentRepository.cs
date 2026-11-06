@@ -6,4 +6,6 @@ public interface IDepartmentRepository
 {
     /// <summary>Active departments in their display order.</summary>
     Task<IReadOnlyList<Department>> ListActiveAsync(CancellationToken cancellationToken);
+
+    Task<bool> IsActiveAsync(Guid id, CancellationToken cancellationToken);
 }

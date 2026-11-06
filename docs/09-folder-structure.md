@@ -331,7 +331,7 @@ src/frontend/
 | Vitest, Testing Library, MSW | Unit and component tests with API mocks per `operationId` |
 | Playwright | End-to-end tests against the Compose stack |
 
-**Installed so far:** React, Vite, TypeScript, `openapi-typescript` + `openapi-fetch`, Vitest + Testing Library + jsdom, ESLint (`typescript-eslint`, `react-hooks`) in M0; React Router 8 and TanStack Query 5 in the internal app (T1.3); MSW 3 with US01. The other libraries are added with the first feature that needs them (React Hook Form + Zod with US05, the first large form — the two US01 forms use plain controlled inputs; Chart.js with the dashboard; Playwright with the first end-to-end flow). Versions are exact (no `^`) and locked in `package-lock.json`; Node ≥ 24.15 (jsdom).
+**Installed so far:** React, Vite, TypeScript, `openapi-typescript` + `openapi-fetch`, Vitest + Testing Library + jsdom, ESLint (`typescript-eslint`, `react-hooks`) in M0; React Router 8 and TanStack Query 5 in the internal app (T1.3); MSW 3 with US01; React Hook Form 7 + Zod 4 (with `@hookform/resolvers`) with US05, the first large form (the US01 and US20 forms use plain controlled inputs). The other libraries are added with the first feature that needs them ( Chart.js with the dashboard; Playwright with the first end-to-end flow). Versions are exact (no `^`) and locked in `package-lock.json`; Node ≥ 24.15 (jsdom).
 
 | Script (in `src/frontend/`) | Does |
 |---|---|

@@ -19,6 +19,10 @@
   background: var(--color-surface);
 }
 
+.modal__panel--wide {
+  max-width: 760px;
+}
+
 .modal__header {
   display: flex;
   align-items: center;

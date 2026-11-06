@@ -1,5 +1,5 @@
-import { keepPreviousData, useQueries, useQuery } from "@tanstack/react-query";
-import { getPosition, listPositions, type PositionQuery, type PositionStatus } from "./api";
+import { keepPreviousData, useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createPosition, getPosition, listPositions, type PositionQuery, type PositionStatus } from "./api";
 
 export const positionsKey = ["positions"] as const;
 
@@ -31,3 +31,13 @@ export function useStatusCounts(filters: Omit<PositionQuery, "status" | "page" |
 export function usePosition(positionId: string) {
   return useQuery({ queryKey: [...positionsKey, "detail", positionId], queryFn: () => getPosition(positionId) });
 }
+
+function usePositionMutation<TVariables, TResult>(mutationFn: (variables: TVariables) => Promise<TResult>) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: positionsKey }),
+  });
+}
+
+export const useCreatePosition = () => usePositionMutation(createPosition);

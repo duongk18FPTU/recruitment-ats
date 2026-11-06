@@ -187,3 +187,135 @@ describe("SCR-12 position detail (US04)", () => {
     expect(screen.getByRole("link", { name: "Về danh sách vị trí" })).toBeTruthy();
   });
 });
+
+describe("SCR-11 create position (US05)", () => {
+  async function openForm() {
+    const queries = mockPositions([backend]);
+    const bodies: unknown[] = [];
+    server.use(
+      http.post("*/api/positions", async ({ request }) => {
+        bodies.push(await request.json());
+        return HttpResponse.json({ ...detail, id: "new", code: "JOB-015", title: "Kỹ sư dữ liệu" }, { status: 201 });
+      }),
+    );
+    signIn("RECRUITER", "Nguyễn Minh Anh");
+    renderApp("/jobs");
+    fireEvent.click(await screen.findByRole("button", { name: "Tạo vị trí" }));
+    const dialog = await screen.findByRole("dialog", { name: "Tạo vị trí tuyển dụng" });
+    await within(dialog).findByRole("option", { name: "Phòng Marketing" });
+    return { dialog, bodies, queries };
+  }
+
+  function fillGeneral(dialog: HTMLElement) {
+    const set = (label: string, value: string) =>
+      fireEvent.change(within(dialog).getByLabelText(label), { target: { value } });
+    set("Tên vị trí *", "Kỹ sư dữ liệu");
+    set("Phòng ban *", marketing.id);
+    set("Địa điểm *", "TP. HCM");
+    set("Cấp bậc *", "MIDDLE");
+    set("Số lượng *", "2");
+    set("Hạn tuyển *", "2099-12-31");
+    set("Mô tả công việc *", "Xây dựng pipeline dữ liệu.");
+    set("Tiêu chí 1", "Python");
+  }
+
+  test("an Interviewer has no create button and cannot open the form", async () => {
+    mockPositions([]);
+    signIn("INTERVIEWER");
+    renderApp("/jobs");
+    await screen.findByText("Không có vị trí nào khớp bộ lọc.");
+    expect(screen.queryByRole("button", { name: "Tạo vị trí" })).toBeNull();
+  });
+
+  test("an Interviewer opening #/jobs/new gets the 403 page", async () => {
+    signIn("INTERVIEWER");
+    renderApp("/jobs/new");
+    expect(await screen.findByRole("heading", { name: "Bạn không có quyền truy cập trang này" })).toBeTruthy();
+  });
+
+  test("required fields and a past date are reported under their fields without calling the API", async () => {
+    const { dialog, bodies } = await openForm();
+    fireEvent.change(within(dialog).getByLabelText("Hạn tuyển *"), { target: { value: "2000-01-01" } });
+
+    fireEvent.click(within(dialog).getByRole("button", { name: "Lưu và mở tuyển" }));
+
+    expect(await within(dialog).findByText("Tên vị trí phải có từ 2 đến 150 ký tự.")).toBeTruthy();
+    expect(within(dialog).getByText("Chọn phòng ban.")).toBeTruthy();
+    expect(within(dialog).getByText("Chọn cấp bậc.")).toBeTruthy();
+    expect(within(dialog).getByText("Hạn tuyển phải sau hôm nay.")).toBeTruthy();
+    expect(within(dialog).getByText("Tên tiêu chí phải có từ 2 đến 150 ký tự.")).toBeTruthy();
+    expect(within(dialog).getByLabelText("Tên vị trí *").getAttribute("aria-invalid")).toBe("true");
+    expect(bodies).toEqual([]);
+  });
+
+  test("removing the last criterion asks for at least one", async () => {
+    const { dialog, bodies } = await openForm();
+    fillGeneral(dialog);
+    fireEvent.click(within(dialog).getByRole("button", { name: "Xoá tiêu chí 1" }));
+
+    fireEvent.click(within(dialog).getByRole("button", { name: "Lưu nháp" }));
+
+    expect(await within(dialog).findByText("Thêm ít nhất một tiêu chí đánh giá.")).toBeTruthy();
+    expect(bodies).toEqual([]);
+  });
+
+  test("saving and opening sends the position with its weighted criteria and closes the form", async () => {
+    const { dialog, bodies, queries } = await openForm();
+    fillGeneral(dialog);
+    fireEvent.click(within(dialog).getByRole("button", { name: "Thêm tiêu chí" }));
+    fireEvent.change(within(dialog).getByLabelText("Tiêu chí 2"), { target: { value: "Spark" } });
+    fireEvent.change(within(dialog).getByLabelText("Loại tiêu chí 2"), { target: { value: "NICE_TO_HAVE" } });
+    fireEvent.change(within(dialog).getByLabelText("Trọng số tiêu chí 2"), { target: { value: "2" } });
+    const listCalls = queries.length;
+
+    fireEvent.click(within(dialog).getByRole("button", { name: "Lưu và mở tuyển" }));
+
+    expect(await screen.findByText("Đã tạo và mở tuyển JOB-015 Kỹ sư dữ liệu.")).toBeTruthy();
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(bodies).toEqual([
+      {
+        title: "Kỹ sư dữ liệu",
+        departmentId: marketing.id,
+        location: "TP. HCM",
+        employmentType: "FULL_TIME",
+        level: "MIDDLE",
+        headcount: 2,
+        targetHireDate: "2099-12-31",
+        description: "Xây dựng pipeline dữ liệu.",
+        criteria: [
+          { name: "Python", type: "MUST_HAVE", weight: 3, description: null },
+          { name: "Spark", type: "NICE_TO_HAVE", weight: 2, description: null },
+        ],
+        status: "OPEN",
+      },
+    ]);
+    await waitFor(() => expect(queries.length).toBeGreaterThan(listCalls)); // the list is refreshed
+  });
+
+  test("field errors from the API are shown under the matching criterion", async () => {
+    const { dialog } = await openForm();
+    server.use(
+      http.post("*/api/positions", () =>
+        HttpResponse.json(
+          {
+            type: "x",
+            title: "x",
+            status: 400,
+            detail: "Dữ liệu không hợp lệ.",
+            errorCode: "VALIDATION_FAILED",
+            traceId: "1",
+            errors: { departmentId: ["Phòng ban không tồn tại hoặc đã ngừng hoạt động."], "criteria[0].weight": ["Trọng số phải từ 1 đến 5."] },
+          },
+          { status: 400 },
+        ),
+      ),
+    );
+    fillGeneral(dialog);
+
+    fireEvent.click(within(dialog).getByRole("button", { name: "Lưu nháp" }));
+
+    expect(await within(dialog).findByText("Phòng ban không tồn tại hoặc đã ngừng hoạt động.")).toBeTruthy();
+    expect(within(dialog).getByText("Trọng số phải từ 1 đến 5.")).toBeTruthy();
+    expect(within(dialog).getByLabelText("Trọng số tiêu chí 1").getAttribute("aria-invalid")).toBe("true");
+  });
+});

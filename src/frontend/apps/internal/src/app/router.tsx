@@ -1,3 +1,4 @@
+import type { Role } from "@ats/api-client";
 import type { ReactNode } from "react";
 import { Navigate, Route, Routes } from "react-router";
 import { AppShell } from "../components/layout/AppShell";
@@ -14,8 +15,9 @@ const builtPages: Partial<Record<string, ReactNode>> = {
   "/users": <UsersPage />,
 };
 
-/** Pages below a top-level page; they take the roles of the page at their `parent` path. */
-const subPages: { path: string; parent: string; element: ReactNode }[] = [
+/** Pages below a top-level page; they take the roles of the page at their `parent` path unless they name their own. */
+const subPages: { path: string; parent: string; roles?: readonly Role[]; element: ReactNode }[] = [
+  { path: "/jobs/new", parent: "/jobs", roles: ["ADMIN", "HR_MANAGER", "RECRUITER"], element: <PositionsPage creating /> },
   { path: "/jobs/:positionId", parent: "/jobs", element: <PositionDetailPage /> },
 ];
 
@@ -55,7 +57,11 @@ export function AppRoutes() {
           <Route
             key={sub.path}
             path={sub.path}
-            element={<RequireRole roles={pages.find((page) => page.path === sub.parent)!.roles}>{sub.element}</RequireRole>}
+            element={
+              <RequireRole roles={sub.roles ?? pages.find((page) => page.path === sub.parent)!.roles}>
+                {sub.element}
+              </RequireRole>
+            }
           />
         ))}
         <Route path="/403" element={<ForbiddenPage />} />

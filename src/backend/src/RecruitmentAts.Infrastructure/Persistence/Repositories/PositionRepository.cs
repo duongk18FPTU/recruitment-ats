@@ -78,6 +78,8 @@ internal sealed class PositionRepository(AtsDbContext db) : IPositionRepository
             p.CreatedAt, p.ClosedAt, p.RowVersion.ToString(CultureInfo.InvariantCulture));
     }
 
+    public void Add(Position position) => db.Set<Position>().Add(position);
+
     private IQueryable<Row> Rows(IQueryable<Position> positions) =>
         from p in positions
         join d in db.Set<Department>() on p.DepartmentId equals d.Id
