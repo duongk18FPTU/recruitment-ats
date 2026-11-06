@@ -45,6 +45,7 @@ public static class DependencyInjection
         services.AddSingleton<IValidator<PositionQuery>, PositionQueryValidator>();
         services.AddSingleton<IValidator<PositionCreateRequest>, PositionCreateRequestValidator>();
         services.AddSingleton<IValidator<PositionUpdateRequest>, PositionUpdateRequestValidator>();
+        services.AddSingleton<IValidator<PositionStatusRequest>, PositionStatusRequestValidator>();
 
         return services;
     }

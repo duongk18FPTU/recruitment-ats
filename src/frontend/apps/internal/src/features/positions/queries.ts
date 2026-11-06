@@ -4,6 +4,7 @@ import {
   getPosition,
   listPositions,
   updatePosition,
+  updatePositionStatus,
   type PositionQuery,
   type PositionStatus,
   type PositionUpdateRequest,
@@ -53,4 +54,9 @@ export const useCreatePosition = () => usePositionMutation(createPosition);
 export const useUpdatePosition = () =>
   usePositionMutation(({ positionId, body }: { positionId: string; body: PositionUpdateRequest }) =>
     updatePosition(positionId, body),
+  );
+
+export const useUpdatePositionStatus = () =>
+  usePositionMutation(({ positionId, status }: { positionId: string; status: PositionStatus }) =>
+    updatePositionStatus(positionId, status),
   );

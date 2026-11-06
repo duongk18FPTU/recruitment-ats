@@ -56,6 +56,26 @@ public sealed class Position
     public IEnumerable<PositionCriterion> CurrentCriteria() =>
         Criteria.Where(c => c.Version == CriteriaVersion).OrderBy(c => c.SortOrder);
 
+    /// <summary>
+    /// Moves along docs/11 "Position status": <c>DRAFT → OPEN</c>, <c>OPEN → CLOSED</c>, <c>CLOSED → OPEN</c>.
+    /// Closing records <see cref="ClosedAt"/>; reopening clears it. Existing applications are not changed (BR-05).
+    /// </summary>
+    public void ChangeStatus(PositionStatus target, DateTimeOffset now)
+    {
+        if (!CanMoveTo(target))
+        {
+            throw new InvalidOperationException($"A position cannot move from {Status} to {target}.");
+        }
+
+        Status = target;
+        ClosedAt = target == PositionStatus.Closed ? now : null;
+    }
+
+    public bool CanMoveTo(PositionStatus target) => (Status, target) is
+        (PositionStatus.Draft, PositionStatus.Open) or
+        (PositionStatus.Open, PositionStatus.Closed) or
+        (PositionStatus.Closed, PositionStatus.Open);
+
     /// <summary>Replaces the general fields (US06); the criteria change through <see cref="ReplaceCriteria"/>.</summary>
     public void Update(IPositionFields fields)
     {

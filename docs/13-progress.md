@@ -16,7 +16,7 @@
 | M4 Should-have | v1.1 | 0 / 8 | 0 / 34 | `TODO` |
 | **Total** | | **5 / 35** | **15 / 154** | |
 
-**Now:** M1 → US07 Close / reopen position.
+**Now:** M1 → T1.4 CV files.
 
 ## M0 Foundation — `DONE`
 
@@ -42,7 +42,7 @@
 | 5 | US04 View positions | 3 | ✓ | ✓ | 1 / 2 | `PARTIAL` |
 | 5 | US05 Create position | 5 | ✓ | ✓ | 3 / 3 | `DONE` |
 | 5 | US06 Edit position | 3 | ✓ | ✓ | 2 / 2 | `DONE` |
-| 5 | US07 Close / reopen position | 2 | | | 0 / 2 | `TODO` |
+| 5 | US07 Close / reopen position | 2 | ✓ | ✓ | 1 / 2 | `PARTIAL` |
 | 6 | T1.4 CV files (storage, text extraction, BR-15) | — | | — | — | `TODO` |
 | 7 | US09 Add application with CV | 5 | | | 0 / 5 | `TODO` |
 | 7 | US08 View applications | 5 | | | 0 / 3 | `TODO` |
@@ -106,6 +106,8 @@ A story is `PARTIAL` while one of these is open; it becomes `DONE` when the crit
 | AC-US08 #3 — an Interviewer sees only assigned applications | US14 panel assignment | M2 |
 | AC-US11 #5 — moving to `REJECTED` / `OFFER` creates a pending email | US27 emails | M2 |
 | AC-US04 #2 — an Interviewer sees only positions where they sit on a panel (until then they see none) | US14 panel assignment | M2 |
+| AC-US07 #1 — adding an application to a closed position returns 409 (status, `closedAt`, and audit entry already pass) | US09 add application | M1 |
+| AC-US07 #1 — closing unpublishes the job post | US22 job posts | M2 |
 
 ## Decisions and changes during implementation
 
@@ -149,6 +151,8 @@ Deviations from the design documents, kept here so they are easy to review (each
 | 2026-11-06 | React Hook Form 7.91 + Zod 4.6 (`@hookform/resolvers` 7) installed with US05; `Modal` has a `wide` size for SCR-11; `#/jobs/new` opens SCR-11 over SCR-10 (Admin, HR Manager, Recruiter) | 09 |
 | 2026-11-06 | `updatePosition`: criteria are compared by value and order (name, description, type, weight) — the same list keeps the version, any change appends version + 1; an `id` must belong to the current version (else 400 on `criteria[i].id`); only `COMPLETED` analyses become `OUTDATED` (state diagram: "position criteria changed"); a stale `rowVersion` is checked before saving and by `xmin` while saving; a new owner must be an active Admin, HR Manager, or Recruiter (400 on `ownerId`); the target hire date must still be after today when saving | 10 |
 | 2026-11-06 | SCR-11 edits at `#/jobs/:id/edit` over SCR-12 ("Sửa vị trí") and from the SCR-10 ⋯ menu ("Sửa", shown only where the viewer may edit); the edit form has "Lưu thay đổi" instead of the two save buttons, and keeps criterion descriptions it does not show | 05 |
+| 2026-11-06 | `updatePositionStatus`: a move the state diagram does not allow (`DRAFT → CLOSED`, anything `→ DRAFT`) is 409 `INVALID_POSITION_STATUS_CHANGE`, checked before the role rule (403); the same status again is a no-op 200 without an audit entry; closing sets `closedAt`, reopening clears it; a missing status is 400, now listed in the contract | `openapi.yaml` |
+| 2026-11-06 | US07 actions: "Mở tuyển" (draft; Admin, HR Manager, owner), "Đóng vị trí" and "Mở lại" (Admin, HR Manager) in the SCR-10 ⋯ menu and the SCR-12 header, each behind a confirmation naming the position and the consequence | 05 |
 | 2026-11-04 | Internal app: every IA page has its route and sidebar item from T1.3; a page whose story is not built shows "Chức năng này đang được xây dựng". Nav icons come with the `ui` icon set | 09 §4.2 |
 | 2026-11-04 | React Router 8 (docs did not name a version); `packages/api-client` has its own Vitest project | 09 §4.1 |
 | 2026-11-04 | Contract test checks routes against the YAML (name, method, path, no duplicates); operations of unbuilt stories have no route yet | 09 §3.6 |

@@ -452,3 +452,104 @@ describe("SCR-11 edit position (US06)", () => {
     ).toBeTruthy();
   });
 });
+
+describe("close / reopen position (US07)", () => {
+  const ME = "0190a1b2-0000-7000-8000-000000000001"; // the id signIn() uses
+
+  function mockStatus(position: PositionDetail) {
+    const sent: unknown[] = [];
+    server.use(
+      http.get(`*/api/positions/${position.id}`, () => HttpResponse.json(position)),
+      http.put(`*/api/positions/${position.id}/status`, async ({ request }) => {
+        const body = (await request.json()) as { status: string };
+        sent.push(body);
+        return HttpResponse.json({ ...position, status: body.status });
+      }),
+    );
+    return sent;
+  }
+
+  test("an HR Manager closes a position from the list after a confirmation naming it", async () => {
+    mockPositions([backend]);
+    const sent = mockStatus(detail);
+    signIn("HR_MANAGER");
+    renderApp("/jobs");
+
+    fireEvent.click(await screen.findByRole("button", { name: "Thao tác với JOB-014 Backend Developer (.NET)" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Đóng vị trí" }));
+    const dialog = await screen.findByRole("dialog", { name: "Đóng vị trí?" });
+    expect(within(dialog).getByText("JOB-014 Backend Developer (.NET)")).toBeTruthy();
+    expect(within(dialog).getByText(/ngừng nhận hồ sơ mới/)).toBeTruthy();
+
+    fireEvent.click(within(dialog).getByRole("button", { name: "Đóng vị trí" }));
+
+    expect(await screen.findByText("Đã đóng JOB-014 Backend Developer (.NET).")).toBeTruthy();
+    expect(sent).toEqual([{ status: "CLOSED" }]);
+  });
+
+  test("a Recruiter has no close action, even on their own position", async () => {
+    const mine = { ...detail, owner: { id: ME, fullName: "Phạm Thu Hà", role: "RECRUITER" as const } };
+    mockStatus(mine);
+    signIn("RECRUITER");
+    renderApp(`/jobs/${mine.id}`);
+
+    expect(await screen.findByRole("button", { name: "Sửa vị trí" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Đóng vị trí" })).toBeNull();
+  });
+
+  test("the owning Recruiter opens their draft", async () => {
+    const draft: PositionDetail = { ...detail, status: "DRAFT", owner: { id: ME, fullName: "Phạm Thu Hà", role: "RECRUITER" } };
+    const sent = mockStatus(draft);
+    signIn("RECRUITER");
+    renderApp(`/jobs/${draft.id}`);
+
+    fireEvent.click(await screen.findByRole("button", { name: "Mở tuyển" }));
+    const dialog = await screen.findByRole("dialog", { name: "Mở tuyển vị trí?" });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Mở tuyển" }));
+
+    expect(await screen.findByText("Đã mở tuyển JOB-014 Backend Developer (.NET).")).toBeTruthy();
+    expect(sent).toEqual([{ status: "OPEN" }]);
+  });
+
+  test("an Admin reopens a closed position", async () => {
+    const closed: PositionDetail = { ...detail, status: "CLOSED", closedAt: "2026-11-01T03:00:00Z" };
+    const sent = mockStatus(closed);
+    signIn("ADMIN");
+    renderApp(`/jobs/${closed.id}`);
+
+    expect(await screen.findByText("Ngày đóng")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Mở lại" }));
+    const dialog = await screen.findByRole("dialog", { name: "Mở lại vị trí?" });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Mở lại" }));
+
+    expect(await screen.findByText("Đã mở lại JOB-014 Backend Developer (.NET).")).toBeTruthy();
+    expect(sent).toEqual([{ status: "OPEN" }]);
+  });
+
+  test("a refused change stays in the dialog with the reason", async () => {
+    server.use(
+      http.get(`*/api/positions/${detail.id}`, () => HttpResponse.json(detail)),
+      http.put(`*/api/positions/${detail.id}/status`, () =>
+        HttpResponse.json(
+          {
+            type: "x",
+            title: "x",
+            status: 409,
+            detail: "Không thể chuyển vị trí từ Đã đóng sang Đã đóng.",
+            errorCode: "INVALID_POSITION_STATUS_CHANGE",
+            traceId: "1",
+          },
+          { status: 409 },
+        ),
+      ),
+    );
+    signIn("HR_MANAGER");
+    renderApp(`/jobs/${detail.id}`);
+
+    fireEvent.click(await screen.findByRole("button", { name: "Đóng vị trí" }));
+    const dialog = await screen.findByRole("dialog", { name: "Đóng vị trí?" });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Đóng vị trí" }));
+
+    expect(await within(dialog).findByText("Không thể chuyển vị trí từ Đã đóng sang Đã đóng.")).toBeTruthy();
+  });
+});

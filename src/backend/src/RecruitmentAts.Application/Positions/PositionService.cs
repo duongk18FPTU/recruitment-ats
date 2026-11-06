@@ -1,6 +1,7 @@
 using System.Globalization;
 using FluentValidation;
 using RecruitmentAts.Application.Abstractions.Persistence;
+using RecruitmentAts.Application.Abstractions.Time;
 using RecruitmentAts.Application.Audit;
 using RecruitmentAts.Application.Common;
 using RecruitmentAts.Application.Common.Audit;
@@ -20,7 +21,9 @@ public sealed class PositionService(
     AuditWriter audit,
     IValidator<PositionQuery> queryValidator,
     IValidator<PositionCreateRequest> createValidator,
-    IValidator<PositionUpdateRequest> updateValidator)
+    IValidator<PositionUpdateRequest> updateValidator,
+    IValidator<PositionStatusRequest> statusValidator,
+    IClock clock)
 {
     public async Task<PagedResult<PositionSummary>> ListAsync(PositionQuery query, Actor actor, CancellationToken cancellationToken)
     {
@@ -114,6 +117,57 @@ public sealed class PositionService(
 
         return await positions.GetDetailAsync(positionId, cancellationToken) ?? throw PositionPolicy.PositionNotFound();
     }
+
+    /// <summary>
+    /// Opens a draft, closes, or reopens a position (US07); the same status again changes nothing. A move
+    /// the state diagram does not allow is 409 <c>INVALID_POSITION_STATUS_CHANGE</c>. Unpublishing the job
+    /// post on close (BR-05) comes with job posts (US22).
+    /// </summary>
+    public async Task<PositionDetail> ChangeStatusAsync(
+        Guid positionId, PositionStatusRequest request, Actor actor, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+        await statusValidator.ValidateOrThrowAsync(request, cancellationToken);
+        var target = request.Status!.Value;
+
+        await unitOfWork.ExecuteAsync(async () =>
+        {
+            var position = await positions.GetAsync(positionId, cancellationToken) ?? throw PositionPolicy.PositionNotFound();
+            if (position.Status == target)
+            {
+                return position.Id;
+            }
+
+            if (!position.CanMoveTo(target))
+            {
+                throw new AppException(ErrorCode.InvalidPositionStatusChange,
+                    $"Không thể chuyển vị trí từ {StatusLabel(position.Status)} sang {StatusLabel(target)}.");
+            }
+
+            PositionPolicy.EnsureCanChangeStatus(actor, position, target);
+            var from = position.Status;
+            position.ChangeStatus(target, clock.UtcNow);
+            audit.Write(actor, AuditModule.Position, AuditAction.StatusChange, "Position", position.Id,
+                $"{StatusVerb(from, target)} vị trí {position.Code} {position.Title}", new { from, to = target });
+            return position.Id;
+        }, cancellationToken);
+
+        return await positions.GetDetailAsync(positionId, cancellationToken) ?? throw PositionPolicy.PositionNotFound();
+    }
+
+    private static string StatusLabel(PositionStatus status) => status switch
+    {
+        PositionStatus.Draft => "Nháp",
+        PositionStatus.Open => "Đang tuyển",
+        _ => "Đã đóng",
+    };
+
+    private static string StatusVerb(PositionStatus from, PositionStatus to) => (from, to) switch
+    {
+        (PositionStatus.Draft, _) => "Mở tuyển",
+        (_, PositionStatus.Closed) => "Đóng",
+        _ => "Mở lại",
+    };
 
     private static object Snapshot(Position p) => new
     {

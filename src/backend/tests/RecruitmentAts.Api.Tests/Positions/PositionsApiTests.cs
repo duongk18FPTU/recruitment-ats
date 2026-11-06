@@ -363,6 +363,105 @@ public sealed class PositionsApiTests(DatabaseApiFactory api) : IClassFixture<Da
         Assert.Equal(HttpStatusCode.Forbidden, byInterviewer.StatusCode);
     }
 
+    // ---------------------------------------------------------------- close / reopen (AC-US07)
+
+    [Fact]
+    public async Task An_HR_Manager_closes_and_reopens_an_open_position_with_audit_entries()
+    {
+        var hr = await SignInAsync(Role.HrManager);
+        var owner = await api.CreateUserAsync(Password, Role.Recruiter);
+        var department = await api.CreateDepartmentAsync();
+        var position = await api.CreatePositionAsync(owner.Id, department.Id, status: PositionStatus.Open);
+        var analysis = await api.CreateAnalysisAsync(position.Id, 1, AnalysisStatus.Completed);
+
+        var closed = await SendAsync(HttpMethod.Put, $"/api/positions/{position.Id}/status", hr.Token, new { status = "CLOSED" });
+        var closedBody = await closed.Content.ReadFromJsonAsync<JsonElement>(_ct);
+
+        Assert.Equal(HttpStatusCode.OK, closed.StatusCode);
+        Assert.Equal("CLOSED", closedBody.GetProperty("status").GetString());
+        Assert.NotEqual(JsonValueKind.Null, closedBody.GetProperty("closedAt").ValueKind);
+        Assert.Equal(1, closedBody.GetProperty("applicationCount").GetInt32()); // existing applications stay (BR-05)
+        Assert.True(await AuditedAsync(hr.Id, position.Id, AuditAction.StatusChange));
+
+        var reopened = await SendAsync(HttpMethod.Put, $"/api/positions/{position.Id}/status", hr.Token, new { status = "OPEN" });
+        var reopenedBody = await reopened.Content.ReadFromJsonAsync<JsonElement>(_ct);
+
+        Assert.Equal(HttpStatusCode.OK, reopened.StatusCode);
+        Assert.Equal("OPEN", reopenedBody.GetProperty("status").GetString());
+        Assert.Equal(JsonValueKind.Null, reopenedBody.GetProperty("closedAt").ValueKind);
+        Assert.Equal(2, await api.QueryAsync(db => db.Set<AuditLog>().CountAsync(
+            a => a.EntityId == position.Id && a.Action == AuditAction.StatusChange, _ct)));
+        Assert.Equal(AnalysisStatus.Completed, await StatusOfAsync(analysis.Id));
+    }
+
+    [Fact]
+    public async Task A_Recruiter_cannot_close_or_reopen_even_their_own_position()
+    {
+        var recruiter = await SignInAsync(Role.Recruiter);
+        var department = await api.CreateDepartmentAsync();
+        var open = await api.CreatePositionAsync(recruiter.Id, department.Id, status: PositionStatus.Open);
+        var closed = await api.CreatePositionAsync(recruiter.Id, department.Id, status: PositionStatus.Closed);
+
+        var close = await SendAsync(HttpMethod.Put, $"/api/positions/{open.Id}/status", recruiter.Token, new { status = "CLOSED" });
+        var reopen = await SendAsync(HttpMethod.Put, $"/api/positions/{closed.Id}/status", recruiter.Token, new { status = "OPEN" });
+
+        Assert.Equal(HttpStatusCode.Forbidden, close.StatusCode);
+        Assert.Equal("FORBIDDEN", await ErrorCodeOf(close));
+        Assert.Equal(HttpStatusCode.Forbidden, reopen.StatusCode);
+    }
+
+    [Fact]
+    public async Task The_owner_opens_a_draft_but_another_Recruiter_cannot()
+    {
+        var owner = await SignInAsync(Role.Recruiter);
+        var other = await SignInAsync(Role.Recruiter);
+        var interviewer = await SignInAsync(Role.Interviewer);
+        var department = await api.CreateDepartmentAsync();
+        var draft = await api.CreatePositionAsync(owner.Id, department.Id, status: PositionStatus.Draft);
+
+        var byOther = await SendAsync(HttpMethod.Put, $"/api/positions/{draft.Id}/status", other.Token, new { status = "OPEN" });
+        var byInterviewer = await SendAsync(HttpMethod.Put, $"/api/positions/{draft.Id}/status", interviewer.Token, new { status = "OPEN" });
+        var byOwner = await SendAsync(HttpMethod.Put, $"/api/positions/{draft.Id}/status", owner.Token, new { status = "OPEN" });
+
+        Assert.Equal(HttpStatusCode.Forbidden, byOther.StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, byInterviewer.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, byOwner.StatusCode);
+        Assert.Equal("OPEN", (await byOwner.Content.ReadFromJsonAsync<JsonElement>(_ct)).GetProperty("status").GetString());
+    }
+
+    [Theory]
+    [InlineData(PositionStatus.Draft, "CLOSED")]
+    [InlineData(PositionStatus.Open, "DRAFT")]
+    [InlineData(PositionStatus.Closed, "DRAFT")]
+    public async Task A_move_the_state_diagram_does_not_allow_is_409(PositionStatus from, string to)
+    {
+        var admin = await SignInAsync(Role.Admin);
+        var department = await api.CreateDepartmentAsync();
+        var position = await api.CreatePositionAsync(admin.Id, department.Id, status: from);
+
+        var response = await SendAsync(HttpMethod.Put, $"/api/positions/{position.Id}/status", admin.Token, new { status = to });
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        Assert.Equal("INVALID_POSITION_STATUS_CHANGE", await ErrorCodeOf(response));
+    }
+
+    [Fact]
+    public async Task The_same_status_again_changes_nothing_and_a_missing_status_is_400()
+    {
+        var admin = await SignInAsync(Role.Admin);
+        var department = await api.CreateDepartmentAsync();
+        var position = await api.CreatePositionAsync(admin.Id, department.Id, status: PositionStatus.Open);
+
+        var same = await SendAsync(HttpMethod.Put, $"/api/positions/{position.Id}/status", admin.Token, new { status = "OPEN" });
+        var missing = await SendAsync(HttpMethod.Put, $"/api/positions/{position.Id}/status", admin.Token, new { });
+        var unknown = await SendAsync(HttpMethod.Put, $"/api/positions/{Guid.NewGuid()}/status", admin.Token, new { status = "CLOSED" });
+
+        Assert.Equal(HttpStatusCode.OK, same.StatusCode);
+        Assert.False(await AuditedAsync(admin.Id, position.Id, AuditAction.StatusChange));
+        Assert.Equal(["status"], await ErrorsOf(missing));
+        Assert.Equal(HttpStatusCode.NotFound, unknown.StatusCode);
+    }
+
     // ---------------------------------------------------------------- detail
 
     [Fact]

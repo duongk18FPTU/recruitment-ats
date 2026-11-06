@@ -28,6 +28,14 @@ public sealed class PositionUpdateRequestValidator : AbstractValidator<PositionU
     }
 }
 
+public sealed class PositionStatusRequestValidator : AbstractValidator<PositionStatusRequest>
+{
+    public PositionStatusRequestValidator()
+    {
+        RuleFor(x => x.Status).NotNull().WithMessage("Chọn trạng thái.").IsInEnum();
+    }
+}
+
 public sealed class CriterionInputValidator : AbstractValidator<CriterionInput>
 {
     public CriterionInputValidator()

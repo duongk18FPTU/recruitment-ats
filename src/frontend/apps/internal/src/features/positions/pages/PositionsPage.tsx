@@ -8,7 +8,8 @@ import { useDepartments, useUserOptions } from "../../lookups";
 import type { PositionQuery, PositionStatus, PositionSummary } from "../api";
 import { formatDate, statusTag, todayIn } from "../format";
 import { PositionFormModal } from "../components/PositionFormModal";
-import { canCreatePosition, canEditPosition, canPickOwner } from "../permissions";
+import { PositionStatusModal } from "../components/PositionStatusModal";
+import { canCreatePosition, canEditPosition, canPickOwner, statusActionLabel, statusTargets } from "../permissions";
 import { usePositions, useStatusCounts } from "../queries";
 import "../positions.css";
 
@@ -34,6 +35,7 @@ export function PositionsPage({ creating = false }: { creating?: boolean }) {
   const [search, setSearch] = useState("");
   const [query, setQuery] = useState<PositionQuery>({ status: "OPEN", page: 1, pageSize: 20 });
   const positions = usePositions(query);
+  const [statusChange, setStatusChange] = useState<{ position: PositionSummary; target: PositionStatus } | null>(null);
   const counts = useStatusCounts({ q: query.q, departmentId: query.departmentId, ownerId: query.ownerId });
   const departments = useDepartments();
   const owners = useUserOptions({ roles: [...OWNER_ROLES] }, showOwnerFilter);
@@ -52,8 +54,16 @@ export function PositionsPage({ creating = false }: { creating?: boolean }) {
 
   // Actions the viewer may take on a row; the API checks them again.
   const actionsFor = (position: PositionSummary): RowAction[] =>
-    me && canEditPosition(me, position)
-      ? [{ label: "Sửa", onSelect: () => navigate(`/jobs/${position.id}/edit`) }]
+    me
+      ? [
+          ...(canEditPosition(me, position)
+            ? [{ label: "Sửa", onSelect: () => navigate(`/jobs/${position.id}/edit`) }]
+            : []),
+          ...statusTargets(me, position).map((target) => ({
+            label: statusActionLabel(position.status, target),
+            onSelect: () => setStatusChange({ position, target }),
+          })),
+        ]
       : [];
 
   return (
@@ -204,6 +214,13 @@ export function PositionsPage({ creating = false }: { creating?: boolean }) {
       </div>
 
       {creating && <PositionFormModal today={today} onClose={() => navigate("/jobs")} />}
+      {statusChange && (
+        <PositionStatusModal
+          position={statusChange.position}
+          target={statusChange.target}
+          onClose={() => setStatusChange(null)}
+        />
+      )}
     </section>
   );
 }

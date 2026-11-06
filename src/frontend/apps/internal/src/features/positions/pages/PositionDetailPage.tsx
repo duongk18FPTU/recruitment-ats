@@ -2,7 +2,7 @@ import { ApiError } from "@ats/api-client";
 import { useState, type ReactNode } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { useAuth } from "../../auth";
-import type { PositionDetail } from "../api";
+import type { PositionDetail, PositionStatus } from "../api";
 import {
   criterionTypeLabels,
   employmentTypeLabels,
@@ -14,7 +14,8 @@ import {
   todayIn,
 } from "../format";
 import { PositionFormModal } from "../components/PositionFormModal";
-import { canChangeOwner, canEditPosition } from "../permissions";
+import { PositionStatusModal } from "../components/PositionStatusModal";
+import { canChangeOwner, canEditPosition, statusActionLabel, statusTargets } from "../permissions";
 import { usePosition } from "../queries";
 import "../positions.css";
 
@@ -29,6 +30,7 @@ export function PositionDetailPage({ editing = false }: { editing?: boolean }) {
   const navigate = useNavigate();
   const position = usePosition(positionId);
   const [tab, setTab] = useState<Tab>("overview");
+  const [statusTarget, setStatusTarget] = useState<PositionStatus | null>(null);
   const auth = useAuth();
   const me = auth.status === "signed-in" ? auth.user : undefined;
   const timeZone = me?.timezone ?? "Asia/Ho_Chi_Minh";
@@ -75,6 +77,17 @@ export function PositionDetailPage({ editing = false }: { editing?: boolean }) {
               Sửa vị trí
             </button>
           )}
+          {me &&
+            statusTargets(me, p).map((target) => (
+              <button
+                key={target}
+                type="button"
+                className={`button ${target === "CLOSED" ? "button--secondary" : "button--primary"}`}
+                onClick={() => setStatusTarget(target)}
+              >
+                {statusActionLabel(p.status, target)}
+              </button>
+            ))}
         </div>
       </header>
 
@@ -91,6 +104,9 @@ export function PositionDetailPage({ editing = false }: { editing?: boolean }) {
         {tab === "overview" ? <Overview position={p} timeZone={timeZone} /> : <Criteria position={p} />}
       </div>
 
+      {statusTarget && (
+        <PositionStatusModal position={p} target={statusTarget} onClose={() => setStatusTarget(null)} />
+      )}
       {editing && mayEdit && (
         <PositionFormModal
           // A fresh form for each saved version, so a reopened form never shows stale values.

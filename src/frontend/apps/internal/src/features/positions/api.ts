@@ -23,3 +23,9 @@ export async function createPosition(body: PositionCreateRequest) {
 export async function updatePosition(positionId: string, body: PositionUpdateRequest) {
   return unwrap(await apiClient.PUT("/api/positions/{positionId}", { params: { path: { positionId } }, body }));
 }
+
+export async function updatePositionStatus(positionId: string, status: PositionStatus) {
+  return unwrap(
+    await apiClient.PUT("/api/positions/{positionId}/status", { params: { path: { positionId } }, body: { status } }),
+  );
+}

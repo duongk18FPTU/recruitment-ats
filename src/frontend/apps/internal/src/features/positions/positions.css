@@ -282,3 +282,7 @@ a.positions__title:hover {
   display: flex;
   gap: var(--space-8);
 }
+
+.position-modal__text {
+  margin: 0 0 var(--space-8);
+}

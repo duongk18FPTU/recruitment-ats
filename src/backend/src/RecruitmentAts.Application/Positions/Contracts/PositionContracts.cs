@@ -99,6 +99,9 @@ public sealed record PositionCreateRequest(
     IReadOnlyList<CriterionInput>? Criteria,
     PositionStatus? Status = null) : IPositionFields;
 
+/// <summary>OpenAPI <c>PositionStatusRequest</c>; nullable so a missing status is a validation error.</summary>
+public sealed record PositionStatusRequest(PositionStatus? Status);
+
 /// <summary>
 /// OpenAPI <c>PositionUpdateRequest</c>. <c>OwnerId</c> may change only for Admin and HR Manager;
 /// <c>RowVersion</c> is the token from the last read.

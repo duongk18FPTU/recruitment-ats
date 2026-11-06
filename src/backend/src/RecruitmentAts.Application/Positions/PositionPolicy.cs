@@ -49,5 +49,28 @@ public static class PositionPolicy
         }
     }
 
+    /// <summary>
+    /// <c>DRAFT → OPEN</c>: Admin, HR Manager, or the owner. <c>OPEN → CLOSED</c> and <c>CLOSED → OPEN</c>:
+    /// Admin and HR Manager only (US07, AC-US07 #2).
+    /// </summary>
+    public static void EnsureCanChangeStatus(Actor actor, Position position, PositionStatus target)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+        ArgumentNullException.ThrowIfNull(position);
+        if (actor.Role is Role.Admin or Role.HrManager)
+        {
+            return;
+        }
+
+        var ownerOpensDraft = position.Status == PositionStatus.Draft && target == PositionStatus.Open
+            && actor.Role == Role.Recruiter && position.OwnerId == actor.UserId;
+        if (!ownerOpensDraft)
+        {
+            throw AppException.Forbidden(position.Status == PositionStatus.Draft
+                ? "Chỉ người phụ trách, Quản trị viên hoặc Trưởng tuyển dụng được mở tuyển vị trí này."
+                : "Chỉ Quản trị viên hoặc Trưởng tuyển dụng được đóng hoặc mở lại vị trí.");
+        }
+    }
+
     internal static AppException PositionNotFound() => AppException.NotFound("Không tìm thấy vị trí tuyển dụng.");
 }
