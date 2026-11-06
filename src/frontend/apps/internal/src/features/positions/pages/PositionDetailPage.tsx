@@ -2,13 +2,14 @@ import { ApiError } from "@ats/api-client";
 import { useState, type ReactNode } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { useAuth } from "../../auth";
-import type { PositionDetail, PositionStatus } from "../api";
+import type { PositionDetail, PositionStatus, Stage } from "../api";
 import {
   criterionTypeLabels,
   employmentTypeLabels,
   formatDate,
   formatDateTime,
   levelLabels,
+  pipelineStages,
   stageLabels,
   statusTag,
   todayIn,
@@ -148,7 +149,6 @@ function TabButton({
 }
 
 function Overview({ position: p, timeZone }: { position: PositionDetail; timeZone: string }) {
-  const stages = p.stageCounts ?? [];
   return (
     <div className="position__overview">
       <dl className="position__facts">
@@ -161,15 +161,35 @@ function Overview({ position: p, timeZone }: { position: PositionDetail; timeZon
         <Fact label="Người phụ trách">{p.owner.fullName}</Fact>
         <Fact label="Ngày tạo">{formatDateTime(p.createdAt, timeZone)}</Fact>
         {p.closedAt && <Fact label="Ngày đóng">{formatDateTime(p.closedAt, timeZone)}</Fact>}
-        <Fact label="Hồ sơ">
-          {p.applicationCount === 0
-            ? "Chưa có hồ sơ"
-            : stages.map((s) => `${stageLabels[s.stage]} ${s.count}`).join(" · ")}
-        </Fact>
       </dl>
       <h2 className="position__subtitle">Mô tả công việc</h2>
       <p className="position__description">{p.description}</p>
+      <ApplicationSummary position={p} />
     </div>
+  );
+}
+
+/** Applications per stage, in pipeline order, zeros included; the board itself is SCR-13 (US08). */
+function ApplicationSummary({ position: p }: { position: PositionDetail }) {
+  const count = (stage: Stage) => p.stageCounts?.find((s) => s.stage === stage)?.count ?? 0;
+  return (
+    <section aria-labelledby="position-applications">
+      <h2 id="position-applications" className="position__subtitle">
+        Hồ sơ ứng tuyển · {p.applicationCount}
+      </h2>
+      {p.applicationCount === 0 ? (
+        <p className="position__hint">Chưa có hồ sơ nào.</p>
+      ) : (
+        <ol className="position__stages">
+          {pipelineStages.map((stage) => (
+            <li key={stage} className={stage === "REJECTED" ? "position__stage position__stage--muted" : "position__stage"}>
+              <span className="position__stage-count">{count(stage)}</span>
+              <span className="position__stage-label">{stageLabels[stage]}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+    </section>
   );
 }
 

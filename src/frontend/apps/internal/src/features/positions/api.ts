@@ -3,6 +3,7 @@ import { apiClient, unwrap, type components, type operations } from "@ats/api-cl
 export type PositionSummary = components["schemas"]["PositionSummary"];
 export type PositionDetail = components["schemas"]["PositionDetail"];
 export type PositionStatus = components["schemas"]["PositionStatus"];
+export type Stage = components["schemas"]["Stage"];
 export type PositionQuery = NonNullable<operations["listPositions"]["parameters"]["query"]>;
 
 export async function listPositions(query: PositionQuery) {

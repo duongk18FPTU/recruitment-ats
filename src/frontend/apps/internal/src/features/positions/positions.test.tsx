@@ -159,7 +159,9 @@ describe("SCR-12 position detail (US04)", () => {
     expect(await screen.findByText(/JOB-014/)).toBeTruthy();
     expect(screen.getByText("Toàn thời gian")).toBeTruthy();
     expect(screen.getByText("Senior")).toBeTruthy();
-    expect(screen.getByText("Mới 30 · Đã tuyển 1")).toBeTruthy();
+    const applications = screen.getByRole("region", { name: "Hồ sơ ứng tuyển · 42" });
+    const stages = within(applications).getAllByRole("listitem").map((item) => item.textContent);
+    expect(stages).toEqual(["30Mới", "0Sàng lọc", "0Phỏng vấn", "0Offer", "1Đã tuyển", "0Từ chối"]);
     expect(screen.getByText("Phát triển API cho hệ thống tuyển dụng.")).toBeTruthy();
 
     fireEvent.click(screen.getByRole("tab", { name: "Tiêu chí · 2" }));

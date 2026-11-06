@@ -34,6 +34,9 @@ export const criterionTypeLabels: Record<CriterionType, string> = {
   NICE_TO_HAVE: "Cộng điểm",
 };
 
+/** Pipeline order (docs/11 "Application stage"); REJECTED last. */
+export const pipelineStages: readonly Stage[] = ["NEW", "SCREENING", "INTERVIEW", "OFFER", "HIRED", "REJECTED"];
+
 export const stageLabels: Record<Stage, string> = {
   NEW: "Mới",
   SCREENING: "Sàng lọc",
