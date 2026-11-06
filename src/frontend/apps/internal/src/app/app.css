@@ -208,3 +208,25 @@ h1 {
   clip-path: inset(50%);
   white-space: nowrap;
 }
+
+/* Status tags: the text carries the meaning, the colour only supports it. */
+.tag {
+  display: inline-block;
+  padding: 1px var(--space-8);
+  border: 1px solid currentcolor;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.tag--active {
+  color: var(--color-success);
+}
+
+.tag--muted {
+  color: var(--color-ink-2);
+}
+
+.tag--warning {
+  color: var(--color-warning);
+}

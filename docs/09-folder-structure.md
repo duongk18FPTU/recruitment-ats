@@ -323,7 +323,7 @@ src/frontend/
 | Library | Use |
 |---|---|
 | React 19, Vite, TypeScript 5.9 | Both apps. TypeScript stays on 5.9 until `typescript-eslint` (< 6.1) and `openapi-typescript` (`^5.x`) support newer versions |
-| React Router | Internal: hash routes (`#/positions/:id`, as in [IA](04-information-architecture.md#routes)); career: path routes (`/jobs/:slug`) for shareable links |
+| React Router | Internal: hash routes (`#/jobs/:id`, as in [IA](04-information-architecture.md#routes)); career: path routes (`/jobs/:slug`) for shareable links |
 | TanStack Query | Server state, cache invalidation after mutations, polling AI status every 5 s |
 | `openapi-typescript` + `openapi-fetch` | Types and typed requests from `docs/api/openapi.yaml` |
 | React Hook Form + Zod | Forms and client-side validation (UX only; the API is authoritative) |
@@ -360,6 +360,7 @@ apps/internal/
     │   ├── auth/                       # SCR-01 login, first-login password change, AuthProvider (session restore), RequireAuth / RequireRole
     │   ├── dashboard/                  # SCR-02 (+ interviewer variant)
     │   ├── positions/                  # SCR-10, SCR-11 (with AI criteria drafts), SCR-12 overview & criteria tabs
+    │   ├── lookups/                    # listDepartments, listUserOptions queries shared by forms and filters
     │   ├── job-posts/                  # SCR-14 job post tab, share links
     │   ├── applications/               # SCR-13 pipeline, SCR-20 table, SCR-21 add, SCR-22 detail, SCR-25 move, SCR-26 edit
     │   ├── screening/                  # SCR-23 evaluation tab, SCR-24 override

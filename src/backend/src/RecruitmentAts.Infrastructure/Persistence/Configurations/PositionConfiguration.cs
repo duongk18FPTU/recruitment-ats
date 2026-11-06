@@ -30,6 +30,7 @@ internal sealed class PositionConfiguration : IEntityTypeConfiguration<Position>
         builder.Property(x => x.CriteriaVersion).HasDbDefault("1");
         builder.Property(x => x.CreatedAt).HasDbDefault("now()");
         builder.Property(x => x.UpdatedAt).HasDbDefault("now()");
+        builder.Property(x => x.RowVersion).IsRowVersion(); // maps to the system column xmin, not a real column
 
         builder.HasOne<Department>().WithMany().HasForeignKey(x => x.DepartmentId).OnDelete(DeleteBehavior.NoAction);
         builder.HasOne<User>().WithMany().HasForeignKey(x => x.OwnerId).OnDelete(DeleteBehavior.NoAction);

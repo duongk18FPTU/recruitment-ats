@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using RecruitmentAts.Application.Abstractions.Security;
+using RecruitmentAts.Application.Lookups;
+using RecruitmentAts.Application.Positions;
 using RecruitmentAts.Application.Users;
 using RecruitmentAts.Infrastructure.Persistence;
 using Testcontainers.PostgreSql;
@@ -58,6 +60,49 @@ public sealed class DatabaseApiFactory : TestApiFactory, IAsyncLifetime
         db.Add(user);
         await db.SaveChangesAsync();
         return user;
+    }
+
+    public async Task<Department> CreateDepartmentAsync(string? name = null, bool isActive = true)
+    {
+        var department = new Department { Name = name ?? $"Phòng {Guid.NewGuid():N}", IsActive = isActive };
+        await QueryAsync(db =>
+        {
+            db.Add(department);
+            return db.SaveChangesAsync();
+        });
+        return department;
+    }
+
+    /// <summary>A position with one must-have criterion (version 1), saved as the given status.</summary>
+    public async Task<Position> CreatePositionAsync(
+        Guid ownerId,
+        Guid departmentId,
+        string title = "Lập trình viên Backend .NET",
+        PositionStatus status = PositionStatus.Open,
+        DateOnly? targetHireDate = null,
+        int headcount = 2)
+    {
+        var position = new Position
+        {
+            Title = title,
+            DepartmentId = departmentId,
+            Location = "Hà Nội",
+            EmploymentType = EmploymentType.FullTime,
+            Level = PositionLevel.Senior,
+            Headcount = headcount,
+            TargetHireDate = targetHireDate ?? DateOnly.FromDateTime(DateTime.UtcNow.AddDays(30)),
+            Description = "Phát triển API tuyển dụng.",
+            Status = status,
+            OwnerId = ownerId,
+            CreatedBy = ownerId,
+        };
+        position.Criteria.Add(new PositionCriterion { Version = 1, Name = "C# và .NET", Type = CriterionType.MustHave, Weight = 5 });
+        await QueryAsync(db =>
+        {
+            db.Add(position);
+            return db.SaveChangesAsync();
+        });
+        return position;
     }
 
     public async Task<T> QueryAsync<T>(Func<AtsDbContext, Task<T>> query)

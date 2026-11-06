@@ -16,7 +16,7 @@
 | M4 Should-have | v1.1 | 0 / 8 | 0 / 34 | `TODO` |
 | **Total** | | **3 / 35** | **7 / 154** | |
 
-**Now:** M1 → US04 View positions.
+**Now:** M1 → US05 Create position.
 
 ## M0 Foundation — `DONE`
 
@@ -39,7 +39,7 @@
 | 4 | US01 Login (+ first-login password change) | 3 | ✓ | ✓ | 4 / 4 | `DONE` |
 | 4 | US02 Logout | 1 | ✓ | ✓ | 2 / 2 | `DONE` |
 | 4 | US20 Manage users | 3 | ✓ | ✓ | 5 / 5 | `DONE` |
-| 5 | US04 View positions | 3 | | | 0 / 2 | `TODO` |
+| 5 | US04 View positions | 3 | ✓ | ✓ | 1 / 2 | `PARTIAL` |
 | 5 | US05 Create position | 5 | | | 0 / 3 | `TODO` |
 | 5 | US06 Edit position | 3 | | | 0 / 2 | `TODO` |
 | 5 | US07 Close / reopen position | 2 | | | 0 / 2 | `TODO` |
@@ -105,6 +105,7 @@ A story is `PARTIAL` while one of these is open; it becomes `DONE` when the crit
 | AC-US09 #1 — receipt email sent when an application is added | US27 emails | M2 |
 | AC-US08 #3 — an Interviewer sees only assigned applications | US14 panel assignment | M2 |
 | AC-US11 #5 — moving to `REJECTED` / `OFFER` creates a pending email | US27 emails | M2 |
+| AC-US04 #2 — an Interviewer sees only positions where they sit on a panel (until then they see none) | US14 panel assignment | M2 |
 
 ## Decisions and changes during implementation
 
@@ -138,6 +139,11 @@ Deviations from the design documents, kept here so they are easy to review (each
 | 2026-11-05 | **New story US35 Notifications (M, 5 points, M2 after US15) and BR-29**: the design told nobody inside the team about new work (the interview invitation goes to the candidate only; panel members had to open the dashboard). Bell with unread count, panel `SCR-91`, notifications to the people an event concerns, interview emails to panel members (10-minute window like BR-23), scorecard reminder after 24 h. Table `notifications`, 4 operations (92 in total), goal G11 | 01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11 (`seq_schedule_interview`), 12, README, mind map (XMind + PNG), `openapi.yaml`, `schema.sql` |
 | 2026-11-05 | No global search: the Figma topbar had a "Tìm ứng viên, vị trí, mã hồ sơ" box that no story or operation covered; removed from the `Topbar` component (17 screens re-exported). Each list keeps its own search | 01, 04, 05, `images/screens` |
 | 2026-11-05 | Known limitation: two browser tabs refreshing with the same cookie at the same moment look like token reuse and end the session (single-flight works per tab only) | — |
+| 2026-11-06 | **Positions before job posts and panels:** `job_posts` (US22) and `interview_panelists` (US14) are not migrated early. An Interviewer gets an empty `listPositions` and 404 on `getPosition` (existence does not leak) until US14; `jobPostStatus` is left out of `PositionSummary`, the `jobPostStatus` filter matches nothing, and the SCR-10 "Tin tuyển dụng" column is shown from US22 | 05, 10 |
+| 2026-11-06 | `rowVersion` of a position is PostgreSQL `xmin` (`IsRowVersion`); migration `PositionRowVersion` only updates the model snapshot (no SQL) | 10 |
+| 2026-11-06 | SCR-10: tab counts come from `listPositions?status=…&pageSize=1` (`totalItems`, no new operation); "Sắp đến hạn" = an open position within 14 days of its target date (display only); the "Địa điểm" filter is removed (no such query parameter; removed in Figma too); the owner filter is hidden from Interviewers (`listUserOptions` is not open to them) | 05, `images/screens` |
+| 2026-11-06 | `listUserOptions?roles=` binds a comma-separated list of contract names (`style: form, explode: false`; repeated keys work too); other spellings → 400 | 10 |
+| 2026-11-06 | Internal app: `.tag` styles moved to `app.css` (shared by SCR-10 and SCR-70); position detail is `#/jobs/:id` (doc 09 said `#/positions/:id`) | 09 |
 | 2026-11-04 | Internal app: every IA page has its route and sidebar item from T1.3; a page whose story is not built shows "Chức năng này đang được xây dựng". Nav icons come with the `ui` icon set | 09 §4.2 |
 | 2026-11-04 | React Router 8 (docs did not name a version); `packages/api-client` has its own Vitest project | 09 §4.1 |
 | 2026-11-04 | Contract test checks routes against the YAML (name, method, path, no duplicates); operations of unbuilt stories have no route yet | 09 §3.6 |

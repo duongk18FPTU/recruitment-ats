@@ -4,6 +4,12 @@ using RecruitmentAts.Application.Auth;
 using RecruitmentAts.Application.Auth.Contracts;
 using RecruitmentAts.Application.Auth.Validation;
 using RecruitmentAts.Application.Common.Audit;
+using RecruitmentAts.Application.Lookups;
+using RecruitmentAts.Application.Lookups.Contracts;
+using RecruitmentAts.Application.Lookups.Validation;
+using RecruitmentAts.Application.Positions;
+using RecruitmentAts.Application.Positions.Contracts;
+using RecruitmentAts.Application.Positions.Validation;
 using RecruitmentAts.Application.Profile;
 using RecruitmentAts.Application.Profile.Contracts;
 using RecruitmentAts.Application.Profile.Validation;
@@ -31,6 +37,12 @@ public static class DependencyInjection
         services.AddSingleton<IValidator<UserCreateRequest>, UserCreateRequestValidator>();
         services.AddSingleton<IValidator<UserUpdateRequest>, UserUpdateRequestValidator>();
         services.AddSingleton<IValidator<UserStatusRequest>, UserStatusRequestValidator>();
+
+        services.AddScoped<LookupService>();
+        services.AddSingleton<IValidator<UserOptionQuery>, UserOptionQueryValidator>();
+
+        services.AddScoped<PositionService>();
+        services.AddSingleton<IValidator<PositionQuery>, PositionQueryValidator>();
 
         return services;
     }

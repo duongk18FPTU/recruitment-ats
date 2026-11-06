@@ -1,4 +1,5 @@
 using RecruitmentAts.Application.Common;
+using RecruitmentAts.Application.Lookups.Contracts;
 using RecruitmentAts.Application.Users;
 using RecruitmentAts.Application.Users.Contracts;
 
@@ -16,6 +17,9 @@ public interface IUserRepository
 
     /// <summary>Oldest account first; <c>q</c> matches name or email, ignoring case.</summary>
     Task<PagedResult<User>> ListAsync(UserQuery query, CancellationToken cancellationToken);
+
+    /// <summary>Active users for pickers, by name; <c>q</c> matches the name, ignoring case.</summary>
+    Task<IReadOnlyList<UserOption>> ListOptionsAsync(UserOptionQuery query, CancellationToken cancellationToken);
 
     void Add(User user);
 }

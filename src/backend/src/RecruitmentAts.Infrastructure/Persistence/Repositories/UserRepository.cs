@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using RecruitmentAts.Application.Abstractions.Persistence;
 using RecruitmentAts.Application.Common;
+using RecruitmentAts.Application.Lookups.Contracts;
 using RecruitmentAts.Application.Users;
 using RecruitmentAts.Application.Users.Contracts;
 
@@ -44,6 +45,26 @@ internal sealed class UserRepository(AtsDbContext db) : IUserRepository
             .Skip(query.Skip).Take(query.PageSize)
             .ToListAsync(cancellationToken);
         return new PagedResult<User>(items, query.Page, query.PageSize, total);
+    }
+
+    public async Task<IReadOnlyList<UserOption>> ListOptionsAsync(UserOptionQuery query, CancellationToken cancellationToken)
+    {
+        var users = db.Set<User>().AsNoTracking().Where(u => u.IsActive);
+        if (query.Roles is { Count: > 0 } roles)
+        {
+            users = users.Where(u => roles.Contains(u.Role));
+        }
+
+        if (!string.IsNullOrEmpty(query.Q))
+        {
+            var pattern = LikePattern.Contains(query.Q);
+            users = users.Where(u => EF.Functions.ILike(u.FullName, pattern, LikePattern.Escape));
+        }
+
+        return await users
+            .OrderBy(u => u.FullName).ThenBy(u => u.Id)
+            .Select(u => new UserOption(u.Id, u.FullName, u.Role))
+            .ToListAsync(cancellationToken);
     }
 
     public void Add(User user) => db.Set<User>().Add(user);

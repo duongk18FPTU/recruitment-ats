@@ -21,4 +21,7 @@ public sealed class Position
     public DateTimeOffset UpdatedAt { get; set; }
     public DateTimeOffset? ClosedAt { get; set; }
     public List<PositionCriterion> Criteria { get; set; } = [];
+
+    /// <summary>PostgreSQL <c>xmin</c>: the optimistic concurrency token (<c>rowVersion</c> in the contract).</summary>
+    public uint RowVersion { get; set; }
 }
