@@ -3,8 +3,10 @@ import { pageAt } from "../../app/navigation";
 import { useBreadcrumbItemLabel } from "./breadcrumb";
 
 /**
- * Breadcrumb. On a top-level page: its sidebar group, then its title. Below it (a position, a new
- * position): the page's title as a link back to it, then the record the page names (SCR-13 in Figma).
+ * Breadcrumb, as in every Figma frame. On a top-level page: its sidebar group, then its title
+ * ("Tuyển dụng / Vị trí tuyển dụng"). Below it: the page's title as a link back, then the record the
+ * page names with `useBreadcrumbItem` ("Vị trí tuyển dụng / Backend Developer (.NET)",
+ * "Ứng viên / Lê Hoàng Nam", "Lịch phỏng vấn / Phiếu đánh giá").
  */
 export function Topbar() {
   const { pathname } = useLocation();
@@ -27,7 +29,7 @@ export function Topbar() {
             ) : (
               <>
                 <li>{page.group}</li>
-                <li aria-current="page">{page.title}</li>
+                <li aria-current="page">{page.crumb ?? page.title}</li>
               </>
             )}
           </ol>

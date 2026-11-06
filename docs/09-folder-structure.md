@@ -354,7 +354,7 @@ apps/internal/
     │   ├── providers.tsx               # QueryClient (403 → #/403, no retry on 4xx), AuthProvider, ToastProvider
     │   ├── navigation.ts               # pages, roles, and sidebar groups (IA navigation table)
     │   └── app.css                     # base styles on top of @ats/ui tokens
-    ├── components/layout/              # AppShell, Sidebar (with the user block), Topbar (breadcrumb), Logo, layout.css
+    ├── components/layout/              # AppShell, Sidebar (with the user block), Topbar (breadcrumb; pages below a top-level page name their record with useBreadcrumbItem), Logo, layout.css
     ├── components/                     # Modal, Pagination, RowMenu (⋯ row actions), Toasts, initials — internal-only, so not in packages/ui
     ├── features/
     │   ├── auth/                       # SCR-01 login, first-login password change, AuthProvider (session restore), RequireAuth / RequireRole

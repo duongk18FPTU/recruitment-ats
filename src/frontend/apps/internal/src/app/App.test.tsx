@@ -58,6 +58,14 @@ describe("app shell", () => {
     expect(screen.getByRole("link", { name: "Hồ sơ cá nhân: Phạm Thu Hà" }).textContent).toContain("Trưởng tuyển dụng");
   });
 
+  test("settings pages use the Figma breadcrumb Quản trị / Cài đặt", async () => {
+    signIn("ADMIN");
+    renderApp("/settings/mailbox");
+    await heading();
+
+    expect(screen.getByRole("navigation", { name: "Breadcrumb" }).textContent).toBe("Quản trịCài đặt");
+  });
+
   test("the user block shows initials of the last two words", async () => {
     signIn("RECRUITER", "Trần Đức Long");
     renderApp("/dashboard");

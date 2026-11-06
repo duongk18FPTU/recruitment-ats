@@ -139,9 +139,11 @@ Spacing variables follow a 4 px grid (`space/4` … `space/48`); radii are `radi
 | `SCR-75` Email templates | SCR-75 Cài đặt — Mẫu email | HR Manager | Events with their send delay; placeholders in mono and insertable; preview and test send |
 | `SCR-76` Mailbox & sender | SCR-76 Cài đặt — Hộp thư & người gửi | Admin | IMAP and SMTP side by side; connection test result; masked passwords |
 
-**Position detail `SCR-12` (US04, US06, US07; no Figma frame):** breadcrumb "Vị trí tuyển dụng / <title>" with the first item linking back to `SCR-10`; the `SCR-13` header — title with status tag, then code · department · location · target date · hired / headcount, with "Sửa vị trí" and the status action ("Mở tuyển" for a draft, "Đóng vị trí", or "Mở lại") on the right, each shown only to roles allowed to use it — and the tabs "Tổng quan" and "Tiêu chí · n" (the job post and pipeline tabs come with US22 and US08). "Tổng quan" shows the facts grid, the job description, and below it "Hồ sơ ứng tuyển · n": one cell per stage in pipeline order (Mới, Sàng lọc, Phỏng vấn, Offer, Đã tuyển, Từ chối), zeros included — counts only, so it stays the same size with thousands of applications; the cards themselves are the pipeline tab (`SCR-13`, US08). Closing, reopening, and opening a draft ask for confirmation naming the position and what changes ("Vị trí sẽ ngừng nhận hồ sơ mới. Các hồ sơ hiện có vẫn được giữ nguyên.").
+**Position detail `SCR-12` (US04, US06, US07; Figma "SCR-12 Chi tiết vị trí — Tổng quan" and "— Tiêu chí", built from the `SCR-13` frame):** breadcrumb "Vị trí tuyển dụng / <title>" with the first item linking back to `SCR-10`; the `SCR-13` header — title with status tag, then code · department · location · target date · hired / headcount, with "Sửa vị trí" and the status action ("Mở tuyển" for a draft, "Đóng vị trí", or "Mở lại") on the right, each shown only to roles allowed to use it — and the tabs "Tổng quan" and "Tiêu chí · n" (the job post and pipeline tabs come with US22 and US08). "Tổng quan" shows the facts grid, the job description, and below it "Hồ sơ ứng tuyển · n": one cell per stage in pipeline order (Mới, Sàng lọc, Phỏng vấn, Offer, Đã tuyển, Từ chối), zeros included — counts only, so it stays the same size with thousands of applications; the cards themselves are the pipeline tab (`SCR-13`, US08). Closing, reopening, and opening a draft ask for confirmation naming the position and what changes ("Vị trí sẽ ngừng nhận hồ sơ mới. Các hồ sơ hiện có vẫn được giữ nguyên.").
 
-Remaining screens from the [screen inventory](04-information-architecture.md#screen-inventory) (position overview and criteria tabs, add-application modal, move / reject modal, edit candidate, schedule interview, my interviews, assign inbox item, add pool candidate, audit log, profile, 403) reuse the same shell and components.
+**Breadcrumb (every internal screen):** a top-level page shows its sidebar group, then its title ("Tuyển dụng / Vị trí tuyển dụng"; both settings pages "Quản trị / Cài đặt"); the group is a heading, not a link. A page below it shows the parent page as a link back, then the record it opened ("Vị trí tuyển dụng / Backend Developer (.NET)", "Ứng viên / Lê Hoàng Nam", "Lịch phỏng vấn / Phiếu đánh giá").
+
+Remaining screens from the [screen inventory](04-information-architecture.md#screen-inventory) (add-application modal, move / reject modal, edit candidate, schedule interview, my interviews, assign inbox item, add pool candidate, audit log, profile, 403) reuse the same shell and components.
 
 **Not yet in Figma (added with US32–US34):** the pool-matches tab `SCR-15`, the "Gợi ý tiêu chí bằng AI" draft list in `SCR-11`, the "Gợi ý câu hỏi" draft list in `SCR-30`, and the attached-questions block in `SCR-32`. Their behaviour and states are specified in the [information architecture](04-information-architecture.md#ai-suggestion-states-criteria-interview-questions-pool-matches); they reuse the existing list, tag, and modal components.
 
@@ -156,6 +158,10 @@ Remaining screens from the [screen inventory](04-information-architecture.md#scr
 ![SCR-11 Create position](images/screens/scr-11-position-form.png)
 
 ![SCR-14 Job post](images/screens/scr-14-job-post.png)
+
+![SCR-12 Position overview](images/screens/scr-12-overview.png)
+
+![SCR-12 Position criteria](images/screens/scr-12-criteria.png)
 
 ![SCR-13 Pipeline](images/screens/scr-13-pipeline.png)
 

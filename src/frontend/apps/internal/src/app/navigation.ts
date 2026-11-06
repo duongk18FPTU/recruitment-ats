@@ -4,8 +4,10 @@ export type NavGroup = "Tuyển dụng" | "Nguồn hồ sơ" | "Quản trị" | 
 
 export interface AppPage {
   path: string;
-  /** Page and breadcrumb title. */
+  /** Page title, and the breadcrumb's unless `crumb` is set. */
   title: string;
+  /** Breadcrumb title when Figma names the page differently (both settings pages: "Cài đặt"). */
+  crumb?: string;
   group: NavGroup;
   /** Roles that may open the page (IA "Navigation by role"; mirrors `x-roles`, never authoritative). */
   roles: readonly Role[];
@@ -38,8 +40,9 @@ export const pages: readonly AppPage[] = [
     roles: MANAGERS,
     navLabel: "Cài đặt",
     section: "/settings",
+    crumb: "Cài đặt",
   },
-  { path: "/settings/mailbox", title: "Hộp thư & người gửi", group: "Quản trị", roles: ["ADMIN"] },
+  { path: "/settings/mailbox", title: "Hộp thư & người gửi", group: "Quản trị", roles: ["ADMIN"], crumb: "Cài đặt" },
   { path: "/profile", title: "Hồ sơ cá nhân", group: "Tài khoản", roles: ALL },
 ];
 
