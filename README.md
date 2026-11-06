@@ -596,8 +596,9 @@ docker compose up -d postgres        # Postgres 16 + pgvector on localhost:5433
 
 cd src/backend
 dotnet tool restore
-for v in ConnectionStrings__Ats Jwt__SigningKey Seed__AdminEmail Seed__AdminPassword; do export "$v=$(grep "^$v=" ../../.env | cut -d= -f2-)"; done
+for v in ConnectionStrings__Ats Jwt__SigningKey Seed__AdminEmail Seed__AdminPassword Seed__DemoPassword; do export "$v=$(grep "^$v=" ../../.env | cut -d= -f2-)"; done
 dotnet run --project src/RecruitmentAts.Api -- migrate   # migrations + seed (first Admin, departments); safe to repeat
+dotnet run --project src/RecruitmentAts.Api -- migrate --demo   # optional: also demo users, positions, applications (docs/07, seed data)
 dotnet build                         # warnings are errors
 dotnet test                          # all test projects; Infrastructure tests start Postgres with Testcontainers
 dotnet run --project src/RecruitmentAts.Api   # http://localhost:5080/health
@@ -607,7 +608,7 @@ npm install
 npm run dev:internal                 # http://localhost:5173 (career site: npm run dev:career → 5174)
 ```
 
-The development database `ats` is created with the `vector` and `btree_gist` extensions; EF Core migrations own its tables. The other Compose services (api, worker, web apps, Caddy, Mailpit, GreenMail) are added when the code that needs them exists ([delivery plan](docs/12-delivery-plan.md)).
+The development database `ats` is created with the `vector` and `btree_gist` extensions; EF Core migrations own its tables. To start again from an empty database: `docker compose exec -T postgres psql -U ats -d postgres -c "DROP DATABASE ats WITH (FORCE);" -c "CREATE DATABASE ats OWNER ats;"`, then `docker compose exec -T postgres psql -U ats -d ats < deploy/postgres/init/01-extensions.sql` and `migrate --demo` again. The other Compose services (api, worker, web apps, Caddy, Mailpit, GreenMail) are added when the code that needs them exists ([delivery plan](docs/12-delivery-plan.md)).
 
 ## Project Progress
 

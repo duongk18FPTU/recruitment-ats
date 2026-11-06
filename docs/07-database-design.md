@@ -560,4 +560,6 @@ The Worker's `RetentionJob` runs daily and audits every deletion as `CV_DELETE` 
 
 Seeding runs with the migrations in one deployment step, `dotnet RecruitmentAts.Api.dll migrate` (`DatabaseInitialization.MigrateAndSeedAsync`), and is safe to repeat. Rows of later milestones (`email_templates`, `mail_settings`) are seeded with their tables.
 
+**Demo data (local only).** `migrate --demo` also runs `DemoDataSeeder`: one account per role (`thu.ha@demo.test` HR Manager, `minh.anh@demo.test` and `minh.tam@demo.test` Recruiters, `van.khoa@demo.test` and `thanh.binh@demo.test` Interviewers; password `Seed__DemoPassword`, no forced change), 11 positions in every status with weighted criteria and target dates relative to today, and applications in several stages on the open and closed positions. It runs once (skipped when `thu.ha@demo.test` exists), grows with each milestone's stories, and is refused when the environment is Production.
+
 **Related:** [C4 architecture](06-c4-architecture.md) · [OpenAPI contract](08-openapi-contract.md) · [Use cases](02-use-cases.md)

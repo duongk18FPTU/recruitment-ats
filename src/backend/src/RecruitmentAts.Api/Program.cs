@@ -46,9 +46,16 @@ builder.Services.AddHealthChecks();
 var app = builder.Build();
 
 // One-off deployment step: `dotnet RecruitmentAts.Api.dll migrate` applies migrations and seed data, then exits.
+// `migrate --demo` also adds demo data for trying the app locally; it is refused in Production.
 if (args.Contains("migrate", StringComparer.Ordinal))
 {
-    await app.Services.MigrateAndSeedAsync(app.Lifetime.ApplicationStopping);
+    var demo = args.Contains("--demo", StringComparer.Ordinal);
+    if (demo && app.Environment.IsProduction())
+    {
+        throw new InvalidOperationException("Demo data is never seeded in Production.");
+    }
+
+    await app.Services.MigrateAndSeedAsync(app.Lifetime.ApplicationStopping, demo);
     return;
 }
 
