@@ -555,3 +555,20 @@ describe("close / reopen position (US07)", () => {
     expect(await within(dialog).findByText("Không thể chuyển vị trí từ Đã đóng sang Đã đóng.")).toBeTruthy();
   });
 });
+
+describe("breadcrumb below the position list", () => {
+  test("names the position and links back to the list", async () => {
+    mockPositions([backend]);
+    server.use(http.get(`*/api/positions/${detail.id}`, () => HttpResponse.json(detail)));
+    signIn("RECRUITER");
+    renderApp(`/jobs/${detail.id}`);
+
+    const breadcrumb = screen.getByRole("navigation", { name: "Breadcrumb" });
+    expect(await within(breadcrumb).findByText("Backend Developer (.NET)")).toBeTruthy();
+
+    fireEvent.click(within(breadcrumb).getByRole("link", { name: "Vị trí tuyển dụng" }));
+
+    expect(await screen.findByRole("heading", { name: "Vị trí tuyển dụng" })).toBeTruthy();
+    expect(within(breadcrumb).getByText("Tuyển dụng")).toBeTruthy();
+  });
+});

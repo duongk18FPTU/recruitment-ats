@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import plusIcon from "../../../assets/icons/plus.svg";
+import { useBreadcrumbItem } from "../../../components/layout/breadcrumb";
 import { Pagination } from "../../../components/Pagination";
 import { RowMenu, type RowAction } from "../../../components/RowMenu";
 import { useAuth } from "../../auth";
@@ -29,6 +30,7 @@ const tabs: { status: PositionStatus | undefined; label: string; key: "OPEN" | "
  */
 export function PositionsPage({ creating = false }: { creating?: boolean }) {
   const navigate = useNavigate();
+  useBreadcrumbItem(creating ? "Tạo vị trí" : undefined);
   const auth = useAuth();
   const me = auth.status === "signed-in" ? auth.user : undefined;
   const showOwnerFilter = me ? canPickOwner(me.role) : false;

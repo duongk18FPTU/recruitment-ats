@@ -1,5 +1,6 @@
 import { Outlet } from "react-router";
 import { useAuth } from "../../features/auth";
+import { BreadcrumbProvider } from "./breadcrumb";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
 import "./layout.css";
@@ -12,14 +13,16 @@ export function AppShell() {
   }
 
   return (
-    <div className="shell">
-      <Sidebar user={auth.user} />
-      <div className="shell__main">
-        <Topbar />
-        <main className="shell__content">
-          <Outlet />
-        </main>
+    <BreadcrumbProvider>
+      <div className="shell">
+        <Sidebar user={auth.user} />
+        <div className="shell__main">
+          <Topbar />
+          <main className="shell__content">
+            <Outlet />
+          </main>
+        </div>
       </div>
-    </div>
+    </BreadcrumbProvider>
   );
 }

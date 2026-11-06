@@ -1,6 +1,7 @@
 import { ApiError } from "@ats/api-client";
 import { useState, type ReactNode } from "react";
 import { Link, useNavigate, useParams } from "react-router";
+import { useBreadcrumbItem } from "../../../components/layout/breadcrumb";
 import { useAuth } from "../../auth";
 import type { PositionDetail, PositionStatus, Stage } from "../api";
 import {
@@ -30,6 +31,7 @@ export function PositionDetailPage({ editing = false }: { editing?: boolean }) {
   const { positionId = "" } = useParams();
   const navigate = useNavigate();
   const position = usePosition(positionId);
+  useBreadcrumbItem(position.data?.title ?? (position.isError ? "Không tìm thấy" : undefined));
   const [tab, setTab] = useState<Tab>("overview");
   const [statusTarget, setStatusTarget] = useState<PositionStatus | null>(null);
   const auth = useAuth();
