@@ -37,6 +37,7 @@ public static class DependencyInjection
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IDepartmentRepository, DepartmentRepository>();
         services.AddScoped<IPositionRepository, PositionRepository>();
+        services.AddScoped<IAnalysisRepository, AnalysisRepository>();
         services.AddScoped<DatabaseSeeder>();
 
         services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();

@@ -1,5 +1,13 @@
 import { keepPreviousData, useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createPosition, getPosition, listPositions, type PositionQuery, type PositionStatus } from "./api";
+import {
+  createPosition,
+  getPosition,
+  listPositions,
+  updatePosition,
+  type PositionQuery,
+  type PositionStatus,
+  type PositionUpdateRequest,
+} from "./api";
 
 export const positionsKey = ["positions"] as const;
 
@@ -41,3 +49,8 @@ function usePositionMutation<TVariables, TResult>(mutationFn: (variables: TVaria
 }
 
 export const useCreatePosition = () => usePositionMutation(createPosition);
+
+export const useUpdatePosition = () =>
+  usePositionMutation(({ positionId, body }: { positionId: string; body: PositionUpdateRequest }) =>
+    updatePosition(positionId, body),
+  );

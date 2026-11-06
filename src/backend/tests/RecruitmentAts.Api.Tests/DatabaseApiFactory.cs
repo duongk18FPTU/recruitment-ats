@@ -5,8 +5,11 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using RecruitmentAts.Application.Abstractions.Security;
+using RecruitmentAts.Application.Applications;
+using RecruitmentAts.Application.Candidates;
 using RecruitmentAts.Application.Lookups;
 using RecruitmentAts.Application.Positions;
+using RecruitmentAts.Application.Screening;
 using RecruitmentAts.Application.Users;
 using RecruitmentAts.Infrastructure.Persistence;
 using Testcontainers.PostgreSql;
@@ -103,6 +106,42 @@ public sealed class DatabaseApiFactory : TestApiFactory, IAsyncLifetime
             return db.SaveChangesAsync();
         });
         return position;
+    }
+
+    /// <summary>An application to the position with one CV analysis made with <paramref name="criteriaVersion"/>.</summary>
+    public async Task<CvAnalysis> CreateAnalysisAsync(Guid positionId, int criteriaVersion, AnalysisStatus status)
+    {
+        var candidate = new Candidate { FullName = "Trần Thị Lan", Email = $"{Guid.NewGuid():N}@example.test" };
+        var cv = new CvFile
+        {
+            CandidateId = candidate.Id,
+            StorageKey = $"cv/{Guid.NewGuid():N}.pdf",
+            OriginalName = "cv-tran-thi-lan.pdf",
+            ContentType = "application/pdf",
+            SizeBytes = 1024,
+            Sha256 = new string('a', 64),
+        };
+        var application = new JobApplication
+        {
+            PositionId = positionId,
+            CandidateId = candidate.Id,
+            Source = Source.Linkedin,
+            IntakeChannel = IntakeChannel.Manual,
+            CurrentCvFileId = cv.Id,
+        };
+        var analysis = new CvAnalysis
+        {
+            ApplicationId = application.Id,
+            CvFileId = cv.Id,
+            CriteriaVersion = criteriaVersion,
+            Status = status,
+        };
+        await QueryAsync(db =>
+        {
+            db.AddRange(candidate, cv, application, analysis);
+            return db.SaveChangesAsync();
+        });
+        return analysis;
     }
 
     public async Task<T> QueryAsync<T>(Func<AtsDbContext, Task<T>> query)

@@ -19,6 +19,12 @@ const builtPages: Partial<Record<string, ReactNode>> = {
 const subPages: { path: string; parent: string; roles?: readonly Role[]; element: ReactNode }[] = [
   { path: "/jobs/new", parent: "/jobs", roles: ["ADMIN", "HR_MANAGER", "RECRUITER"], element: <PositionsPage creating /> },
   { path: "/jobs/:positionId", parent: "/jobs", element: <PositionDetailPage /> },
+  {
+    path: "/jobs/:positionId/edit",
+    parent: "/jobs",
+    roles: ["ADMIN", "HR_MANAGER", "RECRUITER"],
+    element: <PositionDetailPage editing />,
+  },
 ];
 
 /** Hash routes of docs/04-information-architecture.md ("Routes"). */

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { PositionCreateRequest } from "./api";
+import type { PositionCreateRequest, PositionDetail } from "./api";
 
 export const MAX_CRITERIA = 30;
 
@@ -43,6 +43,8 @@ export function positionFormSchema(today: string) {
       )
       .min(1, "Thêm ít nhất một tiêu chí đánh giá.")
       .max(MAX_CRITERIA, `Tối đa ${MAX_CRITERIA} tiêu chí.`),
+    /** Editing only, for Admin and HR Manager. */
+    ownerId: z.string().optional(),
   });
 }
 
@@ -51,10 +53,33 @@ export type PositionFormValues = z.output<ReturnType<typeof positionFormSchema>>
 
 export const newCriterion = (): PositionFormInput["criteria"][number] => ({ name: "", type: "MUST_HAVE", weight: 3 });
 
+/** The form filled with a position being edited; criteria keep their ids and descriptions. */
+export function formValuesOf(position: PositionDetail): PositionFormInput {
+  return {
+    title: position.title,
+    departmentId: position.department.id,
+    location: position.location,
+    employmentType: position.employmentType,
+    level: position.level,
+    headcount: position.headcount,
+    targetHireDate: position.targetHireDate,
+    description: position.description,
+    criteria: position.criteria.map(({ id, name, description, type, weight }) => ({ id, name, description, type, weight })),
+    ownerId: position.owner.id,
+  };
+}
+
 /** The request fields shared by create and update. */
 export function toPositionFields(values: PositionFormValues): Omit<PositionCreateRequest, "status"> {
   return {
-    ...values,
+    title: values.title,
+    departmentId: values.departmentId,
+    location: values.location,
+    employmentType: values.employmentType,
+    level: values.level,
+    headcount: values.headcount,
+    targetHireDate: values.targetHireDate,
+    description: values.description,
     criteria: values.criteria.map((criterion) => ({ ...criterion, description: criterion.description ?? null })),
   };
 }

@@ -28,4 +28,9 @@ public sealed class PositionsController(PositionService positions, ActorAccessor
     [HttpGet("{positionId:guid}", Name = "getPosition")]
     public Task<PositionDetail> Get(Guid positionId, CancellationToken cancellationToken) =>
         positions.GetAsync(positionId, actors.Current(), cancellationToken);
+
+    [HttpPut("{positionId:guid}", Name = "updatePosition")]
+    [Authorize(Roles = HiringTeam)]
+    public Task<PositionDetail> Update(Guid positionId, PositionUpdateRequest request, CancellationToken cancellationToken) =>
+        positions.UpdateAsync(positionId, request, actors.Current(), cancellationToken);
 }

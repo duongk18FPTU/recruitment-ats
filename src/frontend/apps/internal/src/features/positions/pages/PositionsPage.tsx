@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import plusIcon from "../../../assets/icons/plus.svg";
 import { Pagination } from "../../../components/Pagination";
+import { RowMenu, type RowAction } from "../../../components/RowMenu";
 import { useAuth } from "../../auth";
 import { useDepartments, useUserOptions } from "../../lookups";
-import type { PositionQuery, PositionStatus } from "../api";
+import type { PositionQuery, PositionStatus, PositionSummary } from "../api";
 import { formatDate, statusTag, todayIn } from "../format";
 import { PositionFormModal } from "../components/PositionFormModal";
-import { canCreatePosition, canPickOwner } from "../permissions";
+import { canCreatePosition, canEditPosition, canPickOwner } from "../permissions";
 import { usePositions, useStatusCounts } from "../queries";
 import "../positions.css";
 
@@ -48,6 +49,12 @@ export function PositionsPage({ creating = false }: { creating?: boolean }) {
   const filter = (change: Partial<PositionQuery>) => setQuery((current) => ({ ...current, ...change, page: 1 }));
   const today = todayIn(me?.timezone ?? "Asia/Ho_Chi_Minh");
   const filtered = Boolean(query.q || query.departmentId || query.ownerId || query.status);
+
+  // Actions the viewer may take on a row; the API checks them again.
+  const actionsFor = (position: PositionSummary): RowAction[] =>
+    me && canEditPosition(me, position)
+      ? [{ label: "Sửa", onSelect: () => navigate(`/jobs/${position.id}/edit`) }]
+      : [];
 
   return (
     <section className="positions">
@@ -146,11 +153,15 @@ export function PositionsPage({ creating = false }: { creating?: boolean }) {
                   <th scope="col">Hạn tuyển</th>
                   <th scope="col">Phụ trách</th>
                   <th scope="col">Trạng thái</th>
+                  <th scope="col">
+                    <span className="visually-hidden">Thao tác</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {positions.data.items.map((position) => {
                   const tag = statusTag(position.status, position.targetHireDate, today);
+                  const actions = actionsFor(position);
                   return (
                     <tr key={position.id}>
                       <td className="positions__code">{position.code}</td>
@@ -170,6 +181,11 @@ export function PositionsPage({ creating = false }: { creating?: boolean }) {
                       <td>{position.owner.fullName}</td>
                       <td>
                         <span className={`tag tag--${tag.tone}`}>{tag.label}</span>
+                      </td>
+                      <td className="positions__actions">
+                        {actions.length > 0 && (
+                          <RowMenu label={`Thao tác với ${position.code} ${position.title}`} actions={actions} />
+                        )}
                       </td>
                     </tr>
                   );

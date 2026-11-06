@@ -5,6 +5,7 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using RecruitmentAts.Application.Audit;
 using RecruitmentAts.Application.Positions;
+using RecruitmentAts.Application.Screening;
 using RecruitmentAts.Application.Users;
 
 namespace RecruitmentAts.Api.Tests.Positions;
@@ -223,6 +224,145 @@ public sealed class PositionsApiTests(DatabaseApiFactory api) : IClassFixture<Da
         Assert.Equal("FORBIDDEN", await ErrorCodeOf(response));
     }
 
+    // ---------------------------------------------------------------- edit (AC-US06)
+
+    [Fact]
+    public async Task The_owner_edits_fields_and_unchanged_criteria_keep_their_version()
+    {
+        var recruiter = await SignInAsync(Role.Recruiter);
+        var department = await api.CreateDepartmentAsync();
+        var position = await api.CreatePositionAsync(recruiter.Id, department.Id);
+        var before = await DetailAsync(recruiter.Token, position.Id);
+
+        var response = await SendAsync(HttpMethod.Put, $"/api/positions/{position.Id}", recruiter.Token,
+            EditOf(before) with { title = "Lập trình viên Backend (.NET)", headcount = 3 });
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>(_ct);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("Lập trình viên Backend (.NET)", body.GetProperty("title").GetString());
+        Assert.Equal(3, body.GetProperty("headcount").GetInt32());
+        Assert.Equal(1, body.GetProperty("criteriaVersion").GetInt32());
+        Assert.Equal(
+            before.GetProperty("criteria")[0].GetProperty("id").GetGuid(),
+            body.GetProperty("criteria")[0].GetProperty("id").GetGuid());
+        Assert.NotEqual(before.GetProperty("rowVersion").GetString(), body.GetProperty("rowVersion").GetString());
+        Assert.True(await AuditedAsync(recruiter.Id, position.Id, AuditAction.Update));
+    }
+
+    [Fact]
+    public async Task A_Recruiter_who_does_not_own_the_position_gets_403()
+    {
+        var owner = await api.CreateUserAsync(Password, Role.Recruiter);
+        var other = await SignInAsync(Role.Recruiter);
+        var department = await api.CreateDepartmentAsync();
+        var position = await api.CreatePositionAsync(owner.Id, department.Id);
+        var detail = await DetailAsync(other.Token, position.Id);
+
+        var response = await SendAsync(HttpMethod.Put, $"/api/positions/{position.Id}", other.Token, EditOf(detail));
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Equal("FORBIDDEN", await ErrorCodeOf(response));
+    }
+
+    [Fact]
+    public async Task Changed_criteria_make_a_new_version_and_outdate_completed_analyses()
+    {
+        var hr = await SignInAsync(Role.HrManager);
+        var owner = await api.CreateUserAsync(Password, Role.Recruiter);
+        var department = await api.CreateDepartmentAsync();
+        var position = await api.CreatePositionAsync(owner.Id, department.Id);
+        var completed = await api.CreateAnalysisAsync(position.Id, 1, AnalysisStatus.Completed);
+        var failed = await api.CreateAnalysisAsync(position.Id, 1, AnalysisStatus.Failed);
+        var otherPosition = await api.CreatePositionAsync(owner.Id, department.Id);
+        var elsewhere = await api.CreateAnalysisAsync(otherPosition.Id, 1, AnalysisStatus.Completed);
+        var before = await DetailAsync(hr.Token, position.Id);
+        var kept = before.GetProperty("criteria")[0].GetProperty("id").GetGuid();
+
+        var response = await SendAsync(HttpMethod.Put, $"/api/positions/{position.Id}", hr.Token, EditOf(before) with
+        {
+            criteria =
+            [
+                new { id = kept, name = "C# và .NET", type = "MUST_HAVE", weight = 4 },
+                new { name = "PostgreSQL", type = "NICE_TO_HAVE", weight = 2 },
+            ],
+        });
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>(_ct);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(2, body.GetProperty("criteriaVersion").GetInt32());
+        Assert.Equal(
+            [("C# và .NET", 4, 2), ("PostgreSQL", 2, 2)],
+            body.GetProperty("criteria").EnumerateArray().Select(c =>
+                (c.GetProperty("name").GetString(), c.GetProperty("weight").GetInt32(), c.GetProperty("version").GetInt32())));
+        Assert.Equal(AnalysisStatus.Outdated, await StatusOfAsync(completed.Id));
+        Assert.Equal(AnalysisStatus.Failed, await StatusOfAsync(failed.Id));
+        Assert.Equal(AnalysisStatus.Completed, await StatusOfAsync(elsewhere.Id));
+        // Version 1 rows stay for the analyses that reference them.
+        Assert.Equal(3, await api.QueryAsync(db => db.Set<PositionCriterion>().CountAsync(c => c.PositionId == position.Id, _ct)));
+    }
+
+    [Fact]
+    public async Task A_stale_row_version_is_409_CONCURRENCY_CONFLICT()
+    {
+        var admin = await SignInAsync(Role.Admin);
+        var department = await api.CreateDepartmentAsync();
+        var position = await api.CreatePositionAsync(admin.Id, department.Id);
+        var first = await DetailAsync(admin.Token, position.Id);
+        var saved = await SendAsync(HttpMethod.Put, $"/api/positions/{position.Id}", admin.Token, EditOf(first) with { headcount = 4 });
+        Assert.Equal(HttpStatusCode.OK, saved.StatusCode);
+
+        var stale = await SendAsync(HttpMethod.Put, $"/api/positions/{position.Id}", admin.Token, EditOf(first) with { headcount = 5 });
+
+        Assert.Equal(HttpStatusCode.Conflict, stale.StatusCode);
+        Assert.Equal("CONCURRENCY_CONFLICT", await ErrorCodeOf(stale));
+    }
+
+    [Fact]
+    public async Task Only_Admin_and_HR_Manager_reassign_the_owner_to_an_active_hiring_team_member()
+    {
+        var hr = await SignInAsync(Role.HrManager);
+        var recruiter = await SignInAsync(Role.Recruiter);
+        var colleague = await api.CreateUserAsync(Password, Role.Recruiter, fullName: "Lý Minh Tâm");
+        var interviewer = await api.CreateUserAsync(Password, Role.Interviewer);
+        var department = await api.CreateDepartmentAsync();
+        var position = await api.CreatePositionAsync(recruiter.Id, department.Id);
+
+        var byOwner = await SendAsync(HttpMethod.Put, $"/api/positions/{position.Id}", recruiter.Token,
+            EditOf(await DetailAsync(recruiter.Token, position.Id)) with { ownerId = colleague.Id });
+        var toInterviewer = await SendAsync(HttpMethod.Put, $"/api/positions/{position.Id}", hr.Token,
+            EditOf(await DetailAsync(hr.Token, position.Id)) with { ownerId = interviewer.Id });
+        var byHr = await SendAsync(HttpMethod.Put, $"/api/positions/{position.Id}", hr.Token,
+            EditOf(await DetailAsync(hr.Token, position.Id)) with { ownerId = colleague.Id });
+
+        Assert.Equal(HttpStatusCode.Forbidden, byOwner.StatusCode);
+        Assert.Equal(["ownerId"], await ErrorsOf(toInterviewer));
+        Assert.Equal(HttpStatusCode.OK, byHr.StatusCode);
+        Assert.Equal("Lý Minh Tâm", (await byHr.Content.ReadFromJsonAsync<JsonElement>(_ct)).GetProperty("owner").GetProperty("fullName").GetString());
+    }
+
+    [Fact]
+    public async Task Edit_rejects_a_criterion_id_from_another_version_and_unknown_positions()
+    {
+        var admin = await SignInAsync(Role.Admin);
+        var interviewer = await SignInAsync(Role.Interviewer);
+        var department = await api.CreateDepartmentAsync();
+        var position = await api.CreatePositionAsync(admin.Id, department.Id);
+        var detail = await DetailAsync(admin.Token, position.Id);
+
+        var foreignId = await SendAsync(HttpMethod.Put, $"/api/positions/{position.Id}", admin.Token, EditOf(detail) with
+        {
+            criteria = [new { id = Guid.NewGuid(), name = "C# và .NET", type = "MUST_HAVE", weight = 5 }],
+        });
+        var missing = await SendAsync(HttpMethod.Put, $"/api/positions/{Guid.NewGuid()}", admin.Token, EditOf(detail));
+        var noVersion = await SendAsync(HttpMethod.Put, $"/api/positions/{position.Id}", admin.Token, EditOf(detail) with { rowVersion = "" });
+        var byInterviewer = await SendAsync(HttpMethod.Put, $"/api/positions/{position.Id}", interviewer.Token, EditOf(detail));
+
+        Assert.Equal(["criteria[0].id"], await ErrorsOf(foreignId));
+        Assert.Equal(HttpStatusCode.NotFound, missing.StatusCode);
+        Assert.Equal(["rowVersion"], await ErrorsOf(noVersion));
+        Assert.Equal(HttpStatusCode.Forbidden, byInterviewer.StatusCode);
+    }
+
     // ---------------------------------------------------------------- detail
 
     [Fact]
@@ -378,6 +518,49 @@ public sealed class PositionsApiTests(DatabaseApiFactory api) : IClassFixture<Da
             new { name = "Spark", description = "Đã chạy job trên cụm", type = "NICE_TO_HAVE", weight = 2 },
         ],
         status);
+
+    private sealed record EditBody(
+        string title,
+        Guid departmentId,
+        string location,
+        string employmentType,
+        string level,
+        int headcount,
+        string targetHireDate,
+        string description,
+        object[] criteria,
+        string rowVersion,
+        Guid? ownerId = null);
+
+    /// <summary>The body that saves <paramref name="detail"/> unchanged.</summary>
+    private static EditBody EditOf(JsonElement detail) => new(
+        detail.GetProperty("title").GetString()!,
+        detail.GetProperty("department").GetProperty("id").GetGuid(),
+        detail.GetProperty("location").GetString()!,
+        detail.GetProperty("employmentType").GetString()!,
+        detail.GetProperty("level").GetString()!,
+        detail.GetProperty("headcount").GetInt32(),
+        detail.GetProperty("targetHireDate").GetString()!,
+        detail.GetProperty("description").GetString()!,
+        [.. detail.GetProperty("criteria").EnumerateArray().Select(c => (object)new
+        {
+            id = c.GetProperty("id").GetGuid(),
+            name = c.GetProperty("name").GetString(),
+            description = c.GetProperty("description").GetString(),
+            type = c.GetProperty("type").GetString(),
+            weight = c.GetProperty("weight").GetInt32(),
+        })],
+        detail.GetProperty("rowVersion").GetString()!);
+
+    private async Task<JsonElement> DetailAsync(string token, Guid positionId)
+    {
+        var response = await SendAsync(HttpMethod.Get, $"/api/positions/{positionId}", token);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        return await response.Content.ReadFromJsonAsync<JsonElement>(_ct);
+    }
+
+    private Task<AnalysisStatus> StatusOfAsync(Guid analysisId) =>
+        api.QueryAsync(db => db.Set<CvAnalysis>().Where(a => a.Id == analysisId).Select(a => a.Status).SingleAsync(_ct));
 
     private async Task<List<string>> ErrorsOf(HttpResponseMessage response)
     {

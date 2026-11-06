@@ -1,3 +1,4 @@
+using System.Globalization;
 using FluentValidation;
 using RecruitmentAts.Application.Abstractions.Time;
 using RecruitmentAts.Application.Common;
@@ -13,6 +14,17 @@ public sealed class PositionCreateRequestValidator : AbstractValidator<PositionC
         RuleFor(x => x.Status)
             .Must(status => status is null or PositionStatus.Draft or PositionStatus.Open)
             .WithMessage("Vị trí mới chỉ được lưu nháp hoặc mở tuyển.");
+    }
+}
+
+public sealed class PositionUpdateRequestValidator : AbstractValidator<PositionUpdateRequest>
+{
+    public PositionUpdateRequestValidator(IClock clock)
+    {
+        this.IncludePositionFieldRules(clock);
+        RuleFor(x => x.RowVersion)
+            .Must(rowVersion => uint.TryParse(rowVersion, NumberStyles.None, CultureInfo.InvariantCulture, out _))
+            .WithMessage("Thiếu phiên bản dữ liệu; tải lại vị trí rồi sửa.");
     }
 }
 

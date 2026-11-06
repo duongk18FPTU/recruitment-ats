@@ -28,5 +28,26 @@ public static class PositionPolicy
         }
     }
 
+    /// <summary>A Recruiter edits only positions they own (BR-14, AC-US06 #1).</summary>
+    public static void EnsureCanEdit(Actor actor, Position position)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+        ArgumentNullException.ThrowIfNull(position);
+        if (actor.Role == Role.Recruiter && position.OwnerId != actor.UserId)
+        {
+            throw AppException.Forbidden("Bạn chỉ được sửa vị trí do mình phụ trách.");
+        }
+    }
+
+    /// <summary>Only Admin and HR Manager reassign the owner (BR-14).</summary>
+    public static void EnsureCanChangeOwner(Actor actor)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+        if (actor.Role is not (Role.Admin or Role.HrManager))
+        {
+            throw AppException.Forbidden("Chỉ Quản trị viên hoặc Trưởng tuyển dụng được đổi người phụ trách.");
+        }
+    }
+
     internal static AppException PositionNotFound() => AppException.NotFound("Không tìm thấy vị trí tuyển dụng.");
 }

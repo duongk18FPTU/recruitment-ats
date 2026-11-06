@@ -319,3 +319,136 @@ describe("SCR-11 create position (US05)", () => {
     expect(within(dialog).getByLabelText("Trọng số tiêu chí 1").getAttribute("aria-invalid")).toBe("true");
   });
 });
+
+describe("SCR-11 edit position (US06)", () => {
+  const ME = "0190a1b2-0000-7000-8000-000000000001"; // the id signIn() uses
+  const mine: PositionDetail = { ...detail, owner: { id: ME, fullName: "Phạm Thu Hà", role: "RECRUITER" } };
+
+  function mockDetail(position: PositionDetail) {
+    const bodies: unknown[] = [];
+    let respond: () => Response = () => HttpResponse.json({ ...position, title: "Backend Developer (.NET 10)", rowVersion: "900" });
+    server.use(
+      http.get(`*/api/positions/${position.id}`, () => HttpResponse.json(position)),
+      http.put(`*/api/positions/${position.id}`, async ({ request }) => {
+        bodies.push(await request.json());
+        return respond();
+      }),
+      http.get("*/api/lookups/departments", () => HttpResponse.json([kyThuat, marketing])),
+      http.get("*/api/lookups/users", () =>
+        HttpResponse.json([anh, { id: ME, fullName: "Phạm Thu Hà", role: "RECRUITER" }]),
+      ),
+    );
+    return { bodies, respondWith: (r: () => Response) => (respond = r) };
+  }
+
+  test("the row menu offers Sửa only on positions the Recruiter owns", async () => {
+    const other = { ...backend, id: "other", code: "JOB-016", title: "Kế toán tổng hợp" };
+    mockPositions([{ ...backend, owner: mine.owner }, other]);
+    signIn("RECRUITER");
+    renderApp("/jobs");
+
+    await screen.findByText("Kế toán tổng hợp");
+    expect(screen.getByRole("button", { name: "Thao tác với JOB-014 Backend Developer (.NET)" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Thao tác với JOB-016 Kế toán tổng hợp" })).toBeNull();
+  });
+
+  test("the owner saves changes with the row version and the kept criterion ids", async () => {
+    const { bodies } = mockDetail(mine);
+    signIn("RECRUITER");
+    renderApp(`/jobs/${mine.id}`);
+
+    fireEvent.click(await screen.findByRole("button", { name: "Sửa vị trí" }));
+    const dialog = await screen.findByRole("dialog", { name: "Sửa vị trí JOB-014" });
+    expect((within(dialog).getByLabelText("Tên vị trí *") as HTMLInputElement).value).toBe("Backend Developer (.NET)");
+    expect(within(dialog).queryByLabelText("Người phụ trách")).toBeNull();
+    fireEvent.change(within(dialog).getByLabelText("Tên vị trí *"), { target: { value: "Backend Developer (.NET 10)" } });
+
+    fireEvent.click(within(dialog).getByRole("button", { name: "Lưu thay đổi" }));
+
+    expect(await screen.findByText("Đã lưu thay đổi cho JOB-014.")).toBeTruthy();
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(bodies).toEqual([
+      {
+        title: "Backend Developer (.NET 10)",
+        departmentId: kyThuat.id,
+        location: "Hà Nội",
+        employmentType: "FULL_TIME",
+        level: "SENIOR",
+        headcount: 2,
+        targetHireDate: "2099-11-01",
+        description: "Phát triển API cho hệ thống tuyển dụng.",
+        criteria: [
+          { id: "c1", name: "C# và .NET", description: "Ít nhất 3 năm", type: "MUST_HAVE", weight: 5 },
+          { id: "c2", name: "Kubernetes", description: null, type: "NICE_TO_HAVE", weight: 2 },
+        ],
+        rowVersion: "812",
+      },
+    ]);
+  });
+
+  test("a Recruiter who does not own the position has no edit button", async () => {
+    mockDetail(detail);
+    signIn("RECRUITER");
+    renderApp(`/jobs/${detail.id}/edit`);
+
+    await screen.findByText("Phát triển API cho hệ thống tuyển dụng.");
+    expect(screen.queryByRole("button", { name: "Sửa vị trí" })).toBeNull();
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  test("an HR Manager reassigns the owner", async () => {
+    const { bodies } = mockDetail(detail);
+    signIn("HR_MANAGER");
+    renderApp(`/jobs/${detail.id}/edit`);
+
+    const dialog = await screen.findByRole("dialog", { name: "Sửa vị trí JOB-014" });
+    const owner = within(dialog).getByLabelText("Người phụ trách");
+    await within(owner).findByRole("option", { name: "Phạm Thu Hà" });
+    fireEvent.change(owner, { target: { value: ME } });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Lưu thay đổi" }));
+
+    await waitFor(() => expect(bodies).toHaveLength(1));
+    expect(bodies[0]).toMatchObject({ ownerId: ME, rowVersion: "812" });
+  });
+
+  test("changed criteria announce the new version", async () => {
+    const { respondWith } = mockDetail(mine);
+    respondWith(() => HttpResponse.json({ ...mine, criteriaVersion: 3, rowVersion: "901" }));
+    signIn("RECRUITER");
+    renderApp(`/jobs/${mine.id}/edit`);
+
+    const dialog = await screen.findByRole("dialog", { name: "Sửa vị trí JOB-014" });
+    fireEvent.change(within(dialog).getByLabelText("Trọng số tiêu chí 2"), { target: { value: "3" } });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Lưu thay đổi" }));
+
+    expect(
+      await screen.findByText("Đã lưu JOB-014. Tiêu chí chuyển sang phiên bản 3; kết quả AI cũ được đánh dấu lỗi thời."),
+    ).toBeTruthy();
+  });
+
+  test("a conflicting save keeps the form open and explains it", async () => {
+    const { respondWith } = mockDetail(mine);
+    respondWith(() =>
+      HttpResponse.json(
+        {
+          type: "x",
+          title: "x",
+          status: 409,
+          detail: "Vị trí vừa được người khác thay đổi. Tải lại để xem bản mới nhất rồi sửa lại.",
+          errorCode: "CONCURRENCY_CONFLICT",
+          traceId: "1",
+        },
+        { status: 409 },
+      ),
+    );
+    signIn("RECRUITER");
+    renderApp(`/jobs/${mine.id}/edit`);
+
+    const dialog = await screen.findByRole("dialog", { name: "Sửa vị trí JOB-014" });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Lưu thay đổi" }));
+
+    expect(
+      await within(dialog).findByText("Vị trí vừa được người khác thay đổi. Tải lại để xem bản mới nhất rồi sửa lại."),
+    ).toBeTruthy();
+  });
+});

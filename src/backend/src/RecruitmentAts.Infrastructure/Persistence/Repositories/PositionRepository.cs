@@ -78,6 +78,20 @@ internal sealed class PositionRepository(AtsDbContext db) : IPositionRepository
             p.CreatedAt, p.ClosedAt, p.RowVersion.ToString(CultureInfo.InvariantCulture));
     }
 
+    public async Task<Position?> GetAsync(Guid id, CancellationToken cancellationToken)
+    {
+        var position = await db.Set<Position>().SingleOrDefaultAsync(p => p.Id == id, cancellationToken);
+        if (position is not null)
+        {
+            // Loading the current rows fixes them up into position.Criteria.
+            await db.Set<PositionCriterion>()
+                .Where(c => c.PositionId == id && c.Version == position.CriteriaVersion)
+                .LoadAsync(cancellationToken);
+        }
+
+        return position;
+    }
+
     public void Add(Position position) => db.Set<Position>().Add(position);
 
     private IQueryable<Row> Rows(IQueryable<Position> positions) =>

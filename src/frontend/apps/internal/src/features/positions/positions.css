@@ -265,3 +265,20 @@ a.positions__title:hover {
 .position-form__remove:hover {
   background: var(--color-surface-sunken);
 }
+
+.positions__actions {
+  width: 48px;
+  text-align: right;
+}
+
+.position__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-16);
+}
+
+.position__actions {
+  display: flex;
+  gap: var(--space-8);
+}

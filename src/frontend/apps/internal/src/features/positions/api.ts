@@ -14,7 +14,12 @@ export async function getPosition(positionId: string) {
 }
 
 export type PositionCreateRequest = components["schemas"]["PositionCreateRequest"];
+export type PositionUpdateRequest = components["schemas"]["PositionUpdateRequest"];
 
 export async function createPosition(body: PositionCreateRequest) {
   return unwrap(await apiClient.POST("/api/positions", { body }));
+}
+
+export async function updatePosition(positionId: string, body: PositionUpdateRequest) {
+  return unwrap(await apiClient.PUT("/api/positions/{positionId}", { params: { path: { positionId } }, body }));
 }

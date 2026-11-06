@@ -1,6 +1,6 @@
 import { ApiError } from "@ats/api-client";
 import { useState, type ReactNode } from "react";
-import { Link, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import { useAuth } from "../../auth";
 import type { PositionDetail } from "../api";
 import {
@@ -13,6 +13,8 @@ import {
   statusTag,
   todayIn,
 } from "../format";
+import { PositionFormModal } from "../components/PositionFormModal";
+import { canChangeOwner, canEditPosition } from "../permissions";
 import { usePosition } from "../queries";
 import "../positions.css";
 
@@ -20,14 +22,16 @@ type Tab = "overview" | "criteria";
 
 /**
  * SCR-12 position detail (US04): the Overview and Criteria tabs. The Job post (US22) and Pipeline
- * (US08) tabs come with their stories.
+ * (US08) tabs come with their stories. At `#/jobs/:id/edit` the SCR-11 form opens over it (US06).
  */
-export function PositionDetailPage() {
+export function PositionDetailPage({ editing = false }: { editing?: boolean }) {
   const { positionId = "" } = useParams();
+  const navigate = useNavigate();
   const position = usePosition(positionId);
   const [tab, setTab] = useState<Tab>("overview");
   const auth = useAuth();
-  const timeZone = (auth.status === "signed-in" ? auth.user.timezone : undefined) ?? "Asia/Ho_Chi_Minh";
+  const me = auth.status === "signed-in" ? auth.user : undefined;
+  const timeZone = me?.timezone ?? "Asia/Ho_Chi_Minh";
 
   if (position.isPending) {
     return <p className="page-status">Đang tải vị trí…</p>;
@@ -49,18 +53,29 @@ export function PositionDetailPage() {
   }
 
   const p = position.data;
-  const tag = statusTag(p.status, p.targetHireDate, todayIn(timeZone));
+  const today = todayIn(timeZone);
+  const tag = statusTag(p.status, p.targetHireDate, today);
+  const mayEdit = me ? canEditPosition(me, p) : false;
 
   return (
     <section className="position">
-      <header className="position__header">
-        <h1>
-          {p.title} <span className={`tag tag--${tag.tone}`}>{tag.label}</span>
-        </h1>
-        <p className="position__meta">
-          <span className="positions__code">{p.code}</span> · {p.department.name} · {p.location} · Hạn tuyển{" "}
-          {formatDate(p.targetHireDate)} · Đã tuyển {p.hiredCount} / {p.headcount}
-        </p>
+      <header className="position__header position__top">
+        <div>
+          <h1>
+            {p.title} <span className={`tag tag--${tag.tone}`}>{tag.label}</span>
+          </h1>
+          <p className="position__meta">
+            <span className="positions__code">{p.code}</span> · {p.department.name} · {p.location} · Hạn tuyển{" "}
+            {formatDate(p.targetHireDate)} · Đã tuyển {p.hiredCount} / {p.headcount}
+          </p>
+        </div>
+        <div className="position__actions">
+          {mayEdit && (
+            <button type="button" className="button button--secondary" onClick={() => navigate(`/jobs/${p.id}/edit`)}>
+              Sửa vị trí
+            </button>
+          )}
+        </div>
       </header>
 
       <div className="position__tabs" role="tablist" aria-label="Thông tin vị trí">
@@ -75,6 +90,17 @@ export function PositionDetailPage() {
       <div role="tabpanel" id={`position-${tab}`} aria-labelledby={`position-tab-${tab}`}>
         {tab === "overview" ? <Overview position={p} timeZone={timeZone} /> : <Criteria position={p} />}
       </div>
+
+      {editing && mayEdit && (
+        <PositionFormModal
+          // A fresh form for each saved version, so a reopened form never shows stale values.
+          key={p.rowVersion}
+          today={today}
+          position={p}
+          canChangeOwner={me ? canChangeOwner(me.role) : false}
+          onClose={() => navigate(`/jobs/${p.id}`)}
+        />
+      )}
     </section>
   );
 }

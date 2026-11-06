@@ -5,13 +5,14 @@ import { useFieldArray, useForm, type FieldError, type Path } from "react-hook-f
 import plusIcon from "../../../assets/icons/plus.svg";
 import { Modal } from "../../../components/Modal";
 import { useToast } from "../../../components/Toasts";
-import { useDepartments } from "../../lookups";
-import type { PositionCreateRequest } from "../api";
+import { useDepartments, useUserOptions } from "../../lookups";
+import type { PositionCreateRequest, PositionDetail } from "../api";
 import { criterionTypeLabels, employmentTypeLabels, levelLabels } from "../format";
-import { useCreatePosition } from "../queries";
+import { useCreatePosition, useUpdatePosition } from "../queries";
 import {
   MAX_CRITERIA,
   formPath,
+  formValuesOf,
   newCriterion,
   positionFormSchema,
   toPositionFields,
@@ -20,33 +21,46 @@ import {
 } from "../schemas";
 
 const WEIGHTS = [1, 2, 3, 4, 5];
+const OWNER_ROLES = ["ADMIN", "HR_MANAGER", "RECRUITER"] as const;
 
 interface PositionFormModalProps {
   /** The viewer's calendar date (yyyy-MM-dd): the target hire date must be after it. */
   today: string;
+  /** Absent: create a position (US05). Present: edit it (US06). */
+  position?: PositionDetail;
+  /** Editing only: Admin and HR Manager may reassign the owner. */
+  canChangeOwner?: boolean;
   onClose: () => void;
 }
 
-/** SCR-11 Tạo vị trí tuyển dụng (US05): general information and weighted criteria; save as a draft or open. */
-export function PositionFormModal({ today, onClose }: PositionFormModalProps) {
+/**
+ * SCR-11 position form: general information and weighted criteria. Creating saves a draft or opens the
+ * position (US05); editing saves the changes, and changed criteria become a new version (US06).
+ */
+export function PositionFormModal({ today, position, canChangeOwner = false, onClose }: PositionFormModalProps) {
   const formId = useId();
   const toast = useToast();
   const departments = useDepartments();
+  const owners = useUserOptions({ roles: [...OWNER_ROLES] }, Boolean(position) && canChangeOwner);
   const create = useCreatePosition();
+  const update = useUpdatePosition();
+  const pending = create.isPending || update.isPending;
   const [formError, setFormError] = useState<Error | null>(null);
   const form = useForm<PositionFormInput, unknown, PositionFormValues>({
     resolver: zodResolver(positionFormSchema(today)),
-    defaultValues: {
-      title: "",
-      departmentId: "",
-      location: "",
-      employmentType: "FULL_TIME",
-      level: undefined,
-      headcount: 1,
-      targetHireDate: "",
-      description: "",
-      criteria: [newCriterion()],
-    },
+    defaultValues: position
+      ? formValuesOf(position)
+      : {
+          title: "",
+          departmentId: "",
+          location: "",
+          employmentType: "FULL_TIME",
+          level: undefined,
+          headcount: 1,
+          targetHireDate: "",
+          description: "",
+          criteria: [newCriterion()],
+        },
   });
   const { register, control, handleSubmit, setError, formState } = form;
   const criteria = useFieldArray({ control, name: "criteria" });
@@ -63,6 +77,34 @@ export function PositionFormModal({ today, onClose }: PositionFormModalProps) {
       setError(formPath(field) as Path<PositionFormInput>, { message: messages[0] }, { shouldFocus: index === 0 }),
     );
   };
+
+  const saveChanges = handleSubmit((values) => {
+    if (!position) {
+      return;
+    }
+    setFormError(null);
+    update.mutate(
+      {
+        positionId: position.id,
+        body: {
+          ...toPositionFields(values),
+          rowVersion: position.rowVersion,
+          ...(canChangeOwner && values.ownerId ? { ownerId: values.ownerId } : {}),
+        },
+      },
+      {
+        onSuccess: (saved) => {
+          toast(
+            saved.criteriaVersion > position.criteriaVersion
+              ? `Đã lưu ${saved.code}. Tiêu chí chuyển sang phiên bản ${saved.criteriaVersion}; kết quả AI cũ được đánh dấu lỗi thời.`
+              : `Đã lưu thay đổi cho ${saved.code}.`,
+          );
+          onClose();
+        },
+        onError: fail,
+      },
+    );
+  });
 
   const save = (status: NonNullable<PositionCreateRequest["status"]>) =>
     handleSubmit((values) => {
@@ -83,26 +125,43 @@ export function PositionFormModal({ today, onClose }: PositionFormModalProps) {
       );
     });
 
+  // An inactive department of an existing position stays selectable.
+  const departmentOptions =
+    position && !departments.data?.some((d) => d.id === position.department.id)
+      ? [...(departments.data ?? []), position.department]
+      : (departments.data ?? []);
+
   return (
     <Modal
-      title="Tạo vị trí tuyển dụng"
+      title={position ? `Sửa vị trí ${position.code}` : "Tạo vị trí tuyển dụng"}
       size="wide"
       onClose={onClose}
       footer={
-        <>
-          <button type="button" className="button button--secondary" onClick={onClose}>
-            Huỷ
-          </button>
-          <button type="button" className="button button--secondary" disabled={create.isPending} onClick={save("DRAFT")}>
-            Lưu nháp
-          </button>
-          <button type="button" className="button button--primary" disabled={create.isPending} onClick={save("OPEN")}>
-            {create.isPending ? "Đang lưu…" : "Lưu và mở tuyển"}
-          </button>
-        </>
+        position ? (
+          <>
+            <button type="button" className="button button--secondary" onClick={onClose}>
+              Huỷ
+            </button>
+            <button type="submit" form={formId} className="button button--primary" disabled={pending}>
+              {pending ? "Đang lưu…" : "Lưu thay đổi"}
+            </button>
+          </>
+        ) : (
+          <>
+            <button type="button" className="button button--secondary" onClick={onClose}>
+              Huỷ
+            </button>
+            <button type="button" className="button button--secondary" disabled={pending} onClick={save("DRAFT")}>
+              Lưu nháp
+            </button>
+            <button type="button" className="button button--primary" disabled={pending} onClick={save("OPEN")}>
+              {pending ? "Đang lưu…" : "Lưu và mở tuyển"}
+            </button>
+          </>
+        )
       }
     >
-      <form id={formId} noValidate onSubmit={save("DRAFT")}>
+      <form id={formId} noValidate onSubmit={position ? saveChanges : save("DRAFT")}>
         {formError && (
           <div role="alert" className="form-error">
             <p>{formError.message}</p>
@@ -118,7 +177,7 @@ export function PositionFormModal({ today, onClose }: PositionFormModalProps) {
             {(props) => (
               <select {...props} {...register("departmentId")}>
                 <option value="">Chọn phòng ban</option>
-                {departments.data?.map((department) => (
+                {departmentOptions.map((department) => (
                   <option key={department.id} value={department.id}>
                     {department.name}
                   </option>
@@ -158,6 +217,22 @@ export function PositionFormModal({ today, onClose }: PositionFormModalProps) {
           <Field label="Hạn tuyển *" error={errors.targetHireDate}>
             {(props) => <input {...props} {...register("targetHireDate")} type="date" min={today} />}
           </Field>
+          {position && canChangeOwner && (
+            <Field label="Người phụ trách" error={errors.ownerId}>
+              {(props) => (
+                <select {...props} {...register("ownerId")}>
+                  {!owners.data?.some((o) => o.id === position.owner.id) && (
+                    <option value={position.owner.id}>{position.owner.fullName}</option>
+                  )}
+                  {owners.data?.map((owner) => (
+                    <option key={owner.id} value={owner.id}>
+                      {owner.fullName}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </Field>
+          )}
         </div>
         <Field label="Mô tả công việc *" error={errors.description}>
           {(props) => <textarea {...props} {...register("description")} rows={4} />}

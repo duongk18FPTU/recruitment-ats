@@ -56,6 +56,38 @@ public sealed class Position
     public IEnumerable<PositionCriterion> CurrentCriteria() =>
         Criteria.Where(c => c.Version == CriteriaVersion).OrderBy(c => c.SortOrder);
 
+    /// <summary>Replaces the general fields (US06); the criteria change through <see cref="ReplaceCriteria"/>.</summary>
+    public void Update(IPositionFields fields)
+    {
+        ArgumentNullException.ThrowIfNull(fields);
+        SetFields(fields);
+    }
+
+    /// <summary>
+    /// Keeps the current version when the list is the same (names, descriptions, types, weights, order);
+    /// otherwise appends the new list as version <c>CriteriaVersion + 1</c>. Old rows stay for the
+    /// analyses and scorecards that reference them (AC-US06 #2).
+    /// </summary>
+    public bool ReplaceCriteria(IReadOnlyList<CriterionInput> inputs)
+    {
+        ArgumentNullException.ThrowIfNull(inputs);
+        var current = CurrentCriteria().ToList();
+        if (current.Count == inputs.Count && current.Zip(inputs).All(pair => Same(pair.First, pair.Second)))
+        {
+            return false;
+        }
+
+        CriteriaVersion++;
+        Criteria.AddRange(NewCriteria(Id, CriteriaVersion, inputs));
+        return true;
+    }
+
+    private static bool Same(PositionCriterion criterion, CriterionInput input) =>
+        criterion.Name == input.Name.Trim()
+        && criterion.Description == (string.IsNullOrWhiteSpace(input.Description) ? null : input.Description.Trim())
+        && criterion.Type == input.Type
+        && criterion.Weight == input.Weight;
+
     private void SetFields(IPositionFields fields)
     {
         Title = fields.Title.Trim();

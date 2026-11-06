@@ -344,7 +344,7 @@ classDiagram
     Position --> JobPost
 ```
 
-- `Position.ReplaceCriteria` returns `true` when anything changed; it then appends rows with `CriteriaVersion + 1`, and `PositionService` calls `IAnalysisRepository.MarkOutdatedAsync` in the same unit of work (US06).
+- `Position.ReplaceCriteria` returns `true` when anything changed (names, descriptions, types, weights, or order); it then appends rows with `CriteriaVersion + 1`, and `PositionService` calls `IAnalysisRepository.MarkOutdatedAsync` in the same unit of work (US06), which sets the position's `COMPLETED` analyses of older versions to `OUTDATED`.
 - `Position.Close` and `PositionService.ChangeStatusAsync` also call `JobPost.Unpublish` (BR-05). `JobPost.Publish` throws `POSITION_NOT_OPEN` unless the position is `OPEN`.
 - `PositionPolicy`: Recruiter may edit only `OwnerId == actor`; only Admin and HR Manager close, reopen, or change owner (BR-14, US07); Interviewer may view only positions where they sit on a panel. Until panels exist (US14) `SeesAllPositions` is false for an Interviewer: `ListAsync` returns an empty page and `GetAsync` answers 404, so existence does not leak. Reads (`ListAsync`, `GetDetailAsync`) project straight to the contract records with the department, owner, and application counts; `rowVersion` is PostgreSQL `xmin`.
 

@@ -98,3 +98,20 @@ public sealed record PositionCreateRequest(
     string Description,
     IReadOnlyList<CriterionInput>? Criteria,
     PositionStatus? Status = null) : IPositionFields;
+
+/// <summary>
+/// OpenAPI <c>PositionUpdateRequest</c>. <c>OwnerId</c> may change only for Admin and HR Manager;
+/// <c>RowVersion</c> is the token from the last read.
+/// </summary>
+public sealed record PositionUpdateRequest(
+    string Title,
+    Guid? DepartmentId,
+    string Location,
+    EmploymentType? EmploymentType,
+    PositionLevel? Level,
+    int? Headcount,
+    DateOnly? TargetHireDate,
+    string Description,
+    IReadOnlyList<CriterionInput>? Criteria,
+    string RowVersion,
+    Guid? OwnerId = null) : IPositionFields;
