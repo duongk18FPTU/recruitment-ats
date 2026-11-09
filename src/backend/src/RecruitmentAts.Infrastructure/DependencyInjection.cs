@@ -1,8 +1,10 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using RecruitmentAts.Application.Abstractions.Files;
 using RecruitmentAts.Application.Abstractions.Persistence;
 using RecruitmentAts.Application.Abstractions.Security;
 using RecruitmentAts.Application.Abstractions.Time;
+using RecruitmentAts.Infrastructure.Files;
 using RecruitmentAts.Infrastructure.Persistence;
 using RecruitmentAts.Infrastructure.Persistence.Repositories;
 using RecruitmentAts.Infrastructure.Persistence.Seed;
@@ -40,6 +42,10 @@ public static class DependencyInjection
         services.AddScoped<IAnalysisRepository, AnalysisRepository>();
         services.AddScoped<DatabaseSeeder>();
         services.AddScoped<DemoDataSeeder>();
+
+        services.AddSingleton<IFileStorage>(_ =>
+            new LocalFileStorage(configuration["FileStorage:Root"] ?? Path.Combine(AppContext.BaseDirectory, "data", "cv-files")));
+        services.AddSingleton<ITextExtractor, DocumentTextExtractor>();
 
         services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
         services.AddSingleton<ITokenIssuer>(provider =>

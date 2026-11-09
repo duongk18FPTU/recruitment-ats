@@ -29,6 +29,7 @@ node_modules/
 
 # Uploaded CVs and other local data (personal data — never commit)
 data/uploads/
+data/cv-files/
 
 # Local Claude worktrees
 .claude/worktrees/

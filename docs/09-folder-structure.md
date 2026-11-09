@@ -185,8 +185,8 @@ RecruitmentAts.Infrastructure/
 ├── Email/MailKitEmailSender.cs
 ├── Mailbox/MailKitMailboxReader.cs
 ├── Files/
-│   ├── LocalFileStorage.cs             # cv-files volume
-│   └── TextExtractor.cs                # PdfPig (PDF), DocumentFormat.OpenXml (DOCX)
+│   ├── LocalFileStorage.cs             # cv-files volume (FileStorage__Root); keys cannot leave the root
+│   └── DocumentTextExtractor.cs        # PdfPig (PDF), DocumentFormat.OpenXml (DOCX); an unreadable file gives an empty text
 ├── Spreadsheets/                       # ClosedXML reader and writer
 ├── Reports/QuestPdfReportRenderer.cs
 ├── Security/                           # PasswordHasher (PBKDF2), JwtTokenIssuer, DataProtection secret/consent tokens

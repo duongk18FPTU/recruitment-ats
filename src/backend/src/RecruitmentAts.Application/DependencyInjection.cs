@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using RecruitmentAts.Application.Auth;
 using RecruitmentAts.Application.Auth.Contracts;
 using RecruitmentAts.Application.Auth.Validation;
+using RecruitmentAts.Application.Candidates;
 using RecruitmentAts.Application.Common.Audit;
 using RecruitmentAts.Application.Lookups;
 using RecruitmentAts.Application.Lookups.Contracts;
@@ -25,6 +26,8 @@ public static class DependencyInjection
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddScoped<AuditWriter>();
+
+        services.AddScoped<CvFileService>();
 
         services.AddScoped<AuthService>();
         services.AddSingleton<IValidator<LoginRequest>, LoginRequestValidator>();
