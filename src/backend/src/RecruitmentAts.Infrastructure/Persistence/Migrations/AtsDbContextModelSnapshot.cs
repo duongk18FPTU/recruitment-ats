@@ -96,6 +96,12 @@ namespace RecruitmentAts.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(25)")
                         .HasColumnName("rejection_reason");
 
+                    b.Property<uint>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
                     b.Property<string>("Source")
                         .IsRequired()
                         .HasMaxLength(15)

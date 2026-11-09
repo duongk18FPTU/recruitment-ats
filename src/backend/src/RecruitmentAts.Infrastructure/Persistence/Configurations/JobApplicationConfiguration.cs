@@ -38,6 +38,7 @@ internal sealed class JobApplicationConfiguration : IEntityTypeConfiguration<Job
         builder.Property(x => x.AppliedAt).HasDbDefault("now()");
         builder.Property(x => x.StageChangedAt).HasDbDefault("now()");
         builder.Property(x => x.UpdatedAt).HasDbDefault("now()");
+        builder.Property(x => x.RowVersion).IsRowVersion(); // maps to the system column xmin, not a real column
 
         builder.HasOne<Position>().WithMany().HasForeignKey(x => x.PositionId).OnDelete(DeleteBehavior.NoAction);
         builder.HasOne<Candidate>().WithMany().HasForeignKey(x => x.CandidateId).OnDelete(DeleteBehavior.NoAction);

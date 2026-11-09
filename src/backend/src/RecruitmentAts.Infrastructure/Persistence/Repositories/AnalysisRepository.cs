@@ -7,6 +7,8 @@ namespace RecruitmentAts.Infrastructure.Persistence.Repositories;
 
 internal sealed class AnalysisRepository(AtsDbContext db) : IAnalysisRepository
 {
+    public void Add(CvAnalysis analysis) => db.Add(analysis);
+
     // Runs at once inside the caller's unit-of-work transaction.
     public Task<int> MarkOutdatedAsync(Guid positionId, int currentVersion, CancellationToken cancellationToken) =>
         db.Set<CvAnalysis>()

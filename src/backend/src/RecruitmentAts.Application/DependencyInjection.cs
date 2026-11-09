@@ -1,9 +1,13 @@
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
+using RecruitmentAts.Application.Applications;
+using RecruitmentAts.Application.Applications.Contracts;
+using RecruitmentAts.Application.Applications.Validation;
 using RecruitmentAts.Application.Auth;
 using RecruitmentAts.Application.Auth.Contracts;
 using RecruitmentAts.Application.Auth.Validation;
 using RecruitmentAts.Application.Candidates;
+using RecruitmentAts.Application.Candidates.Contracts;
 using RecruitmentAts.Application.Common.Audit;
 using RecruitmentAts.Application.Lookups;
 using RecruitmentAts.Application.Lookups.Contracts;
@@ -49,6 +53,12 @@ public static class DependencyInjection
         services.AddSingleton<IValidator<PositionCreateRequest>, PositionCreateRequestValidator>();
         services.AddSingleton<IValidator<PositionUpdateRequest>, PositionUpdateRequestValidator>();
         services.AddSingleton<IValidator<PositionStatusRequest>, PositionStatusRequestValidator>();
+
+        services.AddScoped<CandidateService>();
+        services.AddSingleton<IValidator<CandidateMatchQuery>, CandidateMatchQueryValidator>();
+
+        services.AddScoped<ApplicationService>();
+        services.AddSingleton<IValidator<ApplicationCreateRequest>, ApplicationCreateRequestValidator>();
 
         return services;
     }

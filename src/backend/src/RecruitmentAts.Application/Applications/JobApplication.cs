@@ -23,4 +23,7 @@ public sealed class JobApplication
     public DateTimeOffset? ClosedAt { get; set; }
     public Guid? CreatedBy { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
+
+    /// <summary>PostgreSQL <c>xmin</c>: the optimistic concurrency token (<c>rowVersion</c> in the contract).</summary>
+    public uint RowVersion { get; set; }
 }

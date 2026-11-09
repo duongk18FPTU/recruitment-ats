@@ -28,16 +28,24 @@ public sealed class DatabaseApiFactory : TestApiFactory, IAsyncLifetime
         await scope.ServiceProvider.GetRequiredService<AtsDbContext>().Database.MigrateAsync();
     }
 
+    /// <summary>The CV file store of this run, so tests can check that nothing was stored.</summary>
+    public string FileRoot { get; } = Path.Combine(Path.GetTempPath(), "ats-api-tests-" + Guid.NewGuid().ToString("N"));
+
     public override async ValueTask DisposeAsync()
     {
         await base.DisposeAsync();
         await _postgres.DisposeAsync();
+        if (Directory.Exists(FileRoot))
+        {
+            Directory.Delete(FileRoot, recursive: true);
+        }
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         base.ConfigureWebHost(builder);
         builder.UseSetting("ConnectionStrings:Ats", _postgres.GetConnectionString());
+        builder.UseSetting("FileStorage:Root", FileRoot);
         builder.ConfigureTestServices(services =>
             services.AddControllers().AddApplicationPart(typeof(ProtectedTestController).Assembly));
     }

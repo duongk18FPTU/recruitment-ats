@@ -44,7 +44,7 @@
 | 5 | US06 Edit position | 3 | ✓ | ✓ | 2 / 2 | `DONE` |
 | 5 | US07 Close / reopen position | 2 | ✓ | ✓ | 1 / 2 | `PARTIAL` |
 | 6 | T1.4 CV files (storage, text extraction, BR-15) | — | ✓ | — | — | `DONE` |
-| 7 | US09 Add application with CV | 5 | | | 0 / 5 | `TODO` |
+| 7 | US09 Add application with CV | 5 | ✓ | | 4 / 5 | `DOING` |
 | 7 | US08 View applications | 5 | | | 0 / 3 | `TODO` |
 | 7 | US11 Move pipeline stage | 5 | | | 0 / 5 | `TODO` |
 | 8 | T1.5 AI screening core (redactor, quote check, score, analyzers, Worker) | — | | — | — | `TODO` |
@@ -106,8 +106,7 @@ A story is `PARTIAL` while one of these is open; it becomes `DONE` when the crit
 | AC-US08 #3 — an Interviewer sees only assigned applications | US14 panel assignment | M2 |
 | AC-US11 #5 — moving to `REJECTED` / `OFFER` creates a pending email | US27 emails | M2 |
 | AC-US04 #2 — an Interviewer sees only positions where they sit on a panel (until then they see none) | US14 panel assignment | M2 |
-| AC-US07 #1 — adding an application to a closed position returns 409 (status, `closedAt`, and audit entry already pass) | US09 add application | M1 |
-| AC-US07 #1 — closing unpublishes the job post | US22 job posts | M2 |
+| AC-US07 #1 — closing unpublishes the job post (status, `closedAt`, audit entry, and the 409 for a new application to a closed position already pass) | US22 job posts | M2 |
 
 ## Decisions and changes during implementation
 
@@ -157,6 +156,7 @@ Deviations from the design documents, kept here so they are easy to review (each
 | 2026-11-06 | Breadcrumb below a top-level page follows Figma SCR-13: "Vị trí tuyển dụng" (link back) / the record's name ("Backend Developer (.NET)", "Tạo vị trí"); a top-level page keeps "group / title", where the group is a sidebar heading, not a link. Pages name their record with `useBreadcrumbItem` | 05 |
 | 2026-11-06 | Figma: frames "SCR-12 Chi tiết vị trí — Tổng quan" and "— Tiêu chí" added (cloned from SCR-13, file styles and variables) so the built overview and criteria tabs, including "Hồ sơ ứng tuyển" per stage, have a design; screenshots exported. Settings pages use the Figma breadcrumb "Quản trị / Cài đặt" (`AppPage.crumb`) | 05, 09, `images/screens` |
 | 2026-11-09 | **T1.4 CV files:** `CvFileService.StoreAsync` checks the declared type (PDF / DOCX), the first bytes (a renamed file is `UNSUPPORTED_FILE_TYPE`), the size (exactly 10 MB passes, more is `FILE_TOO_LARGE`), and the text (`NO_EXTRACTABLE_TEXT`, also for a damaged file) before writing; NUL characters are removed from the text (PostgreSQL `text` refuses them). It returns a `CvFile` the database does not track yet, for the caller's unit of work; `DiscardAsync` removes the stored file if that work fails. Storage key is `{candidateId}/{fileId}.ext` (no personal data in the path), the root comes from `FileStorage__Root`, and a key leaving the root is refused. PdfPig 0.1.16 and Open XML SDK 3.5.1 | 09 (Files), `.env.example` |
+| 2026-11-09 | **US09 backend:** `createApplication` is `ApplicationService.CreateAsync` (one unit of work: candidate, CV, application in `NEW`, first stage-history row, `PENDING` analysis for the position's criteria version, audit entry); the shared `IntakeService` of doc 10 comes with the second channel (US24). A matched candidate is reused as is — the typed name, phone, and notes do not overwrite it (US10 edits candidates); email wins over phone; `sourceNote` is kept only for `OTHER`. Unknown position → 404, `DRAFT` / `CLOSED` → 409 `POSITION_NOT_OPEN`, a repeat → 409 `DUPLICATE_APPLICATION` with `existingApplicationId`. Phones are normalized to digits with `+84` / `84` written as `0`. `receiptEmailQueued` is `false` until US27. `applications.CurrentAnalysisId` stays null until the Worker sets it (T1.5). `applications` gets `rowVersion` from `xmin` (migration `ApplicationRowVersion`, snapshot only). `StageTransitions.AllowedNext` (BR-01 to BR-03) fills `allowedStages`; US11 adds the move itself | 10, `openapi.yaml` (404 on `createApplication`) |
 | 2026-11-04 | Internal app: every IA page has its route and sidebar item from T1.3; a page whose story is not built shows "Chức năng này đang được xây dựng". Nav icons come with the `ui` icon set | 09 §4.2 |
 | 2026-11-04 | React Router 8 (docs did not name a version); `packages/api-client` has its own Vitest project | 09 §4.1 |
 | 2026-11-04 | Contract test checks routes against the YAML (name, method, path, no duplicates); operations of unbuilt stories have no route yet | 09 §3.6 |
