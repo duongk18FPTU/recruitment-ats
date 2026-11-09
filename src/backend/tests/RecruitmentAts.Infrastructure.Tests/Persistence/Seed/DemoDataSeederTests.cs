@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using RecruitmentAts.Application.Abstractions.Security;
 using RecruitmentAts.Application.Applications;
+using RecruitmentAts.Application.Candidates;
 using RecruitmentAts.Application.Positions;
 using RecruitmentAts.Application.Users;
 using RecruitmentAts.Infrastructure.Persistence;
@@ -45,6 +46,11 @@ public sealed class DemoDataSeederTests(SeedPostgres postgres) : IClassFixture<S
         Assert.All(positions, p => Assert.NotEmpty(p.Criteria));
         Assert.All(positions.Where(p => p.Status == PositionStatus.Closed), p => Assert.NotNull(p.ClosedAt));
         Assert.True(await db.Set<JobApplication>().AnyAsync(a => a.Stage == Stage.Hired, _ct));
+
+        // Demo candidates carry the keys of BR-06, so the duplicate notice of US09 can be tried by hand.
+        var first = await db.Set<Candidate>().SingleAsync(c => c.EmailNormalized == "ung.vien.1@demo.test", _ct);
+        Assert.Equal(first.Id, (await db.Set<Candidate>().SingleAsync(c => c.PhoneNormalized == "0900000001", _ct)).Id);
+        Assert.True(await db.Set<Candidate>().AllAsync(c => c.EmailNormalized != null && c.PhoneNormalized != null, _ct));
         Assert.False(await db.Set<JobApplication>().AnyAsync(
             a => db.Set<Position>().Any(p => p.Id == a.PositionId && p.Status == PositionStatus.Draft), _ct));
     }

@@ -70,7 +70,7 @@ Internal app (Recruitment ATS) — hiring team
 
 ### Routes
 
-Internal app (hash routes): `#/login` `#/dashboard` `#/jobs` `#/jobs/new` `#/jobs/:id` `#/jobs/:id/edit` `#/jobs/:id/post` `#/jobs/:id/pipeline` `#/applications` `#/applications/:id` `#/inbox` `#/talent-pool` `#/interviews` `#/interviews/:id/scorecard` `#/import` `#/reports` `#/audit` `#/users` `#/settings/email-templates` `#/settings/mailbox` `#/profile` `#/403`
+Internal app (hash routes): `#/login` `#/dashboard` `#/jobs` `#/jobs/new` `#/jobs/:id` `#/jobs/:id/edit` `#/jobs/:id/applications/new` `#/jobs/:id/post` `#/jobs/:id/pipeline` `#/applications` `#/applications/:id` `#/inbox` `#/talent-pool` `#/interviews` `#/interviews/:id/scorecard` `#/import` `#/reports` `#/audit` `#/users` `#/settings/email-templates` `#/settings/mailbox` `#/profile` `#/403`
 
 Career site (separate app with its own domain, e.g. `careers.recruitment-ats.vn`, path routes for shareable links): `/jobs` `/jobs/:slug` `/jobs/:slug/apply` `/jobs/:slug/thank-you` `/privacy` `/consent/:token`. Share links add `?src=linkedin|facebook|topcv|vietnamworks|referral` (BR-18), e.g. `https://careers.recruitment-ats.vn/jobs/backend-dotnet?src=linkedin`.
 

@@ -1,0 +1,23 @@
+/* SCR-21 add application (docs/05-ui-ux.md). */
+.application-form__position {
+  margin: 0 0 var(--space-16);
+  color: var(--color-ink-2);
+}
+
+.application-form__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 var(--space-16);
+}
+
+.application-form__match {
+  margin-bottom: var(--space-16);
+  padding: var(--space-12);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2, var(--color-surface));
+}
+
+.application-form__match p {
+  margin: 0;
+}

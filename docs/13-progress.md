@@ -16,7 +16,7 @@
 | M4 Should-have | v1.1 | 0 / 8 | 0 / 34 | `TODO` |
 | **Total** | | **5 / 35** | **15 / 154** | |
 
-**Now:** M1 → US09 Add application with CV (then US08, US11).
+**Now:** M1 → US08 View applications (then US11).
 
 ## M0 Foundation — `DONE`
 
@@ -44,7 +44,7 @@
 | 5 | US06 Edit position | 3 | ✓ | ✓ | 2 / 2 | `DONE` |
 | 5 | US07 Close / reopen position | 2 | ✓ | ✓ | 1 / 2 | `PARTIAL` |
 | 6 | T1.4 CV files (storage, text extraction, BR-15) | — | ✓ | — | — | `DONE` |
-| 7 | US09 Add application with CV | 5 | ✓ | | 4 / 5 | `DOING` |
+| 7 | US09 Add application with CV | 5 | ✓ | ✓ | 4 / 5 | `PARTIAL` |
 | 7 | US08 View applications | 5 | | | 0 / 3 | `TODO` |
 | 7 | US11 Move pipeline stage | 5 | | | 0 / 5 | `TODO` |
 | 8 | T1.5 AI screening core (redactor, quote check, score, analyzers, Worker) | — | | — | — | `TODO` |
@@ -157,6 +157,7 @@ Deviations from the design documents, kept here so they are easy to review (each
 | 2026-11-06 | Figma: frames "SCR-12 Chi tiết vị trí — Tổng quan" and "— Tiêu chí" added (cloned from SCR-13, file styles and variables) so the built overview and criteria tabs, including "Hồ sơ ứng tuyển" per stage, have a design; screenshots exported. Settings pages use the Figma breadcrumb "Quản trị / Cài đặt" (`AppPage.crumb`) | 05, 09, `images/screens` |
 | 2026-11-09 | **T1.4 CV files:** `CvFileService.StoreAsync` checks the declared type (PDF / DOCX), the first bytes (a renamed file is `UNSUPPORTED_FILE_TYPE`), the size (exactly 10 MB passes, more is `FILE_TOO_LARGE`), and the text (`NO_EXTRACTABLE_TEXT`, also for a damaged file) before writing; NUL characters are removed from the text (PostgreSQL `text` refuses them). It returns a `CvFile` the database does not track yet, for the caller's unit of work; `DiscardAsync` removes the stored file if that work fails. Storage key is `{candidateId}/{fileId}.ext` (no personal data in the path), the root comes from `FileStorage__Root`, and a key leaving the root is refused. PdfPig 0.1.16 and Open XML SDK 3.5.1 | 09 (Files), `.env.example` |
 | 2026-11-09 | **US09 backend:** `createApplication` is `ApplicationService.CreateAsync` (one unit of work: candidate, CV, application in `NEW`, first stage-history row, `PENDING` analysis for the position's criteria version, audit entry); the shared `IntakeService` of doc 10 comes with the second channel (US24). A matched candidate is reused as is — the typed name, phone, and notes do not overwrite it (US10 edits candidates); email wins over phone; `sourceNote` is kept only for `OTHER`. Unknown position → 404, `DRAFT` / `CLOSED` → 409 `POSITION_NOT_OPEN`, a repeat → 409 `DUPLICATE_APPLICATION` with `existingApplicationId`. Phones are normalized to digits with `+84` / `84` written as `0`. `receiptEmailQueued` is `false` until US27. `applications.CurrentAnalysisId` stays null until the Worker sets it (T1.5). `applications` gets `rowVersion` from `xmin` (migration `ApplicationRowVersion`, snapshot only). `StageTransitions.AllowedNext` (BR-01 to BR-03) fills `allowedStages`; US11 adds the move itself | 10, `openapi.yaml` (404 on `createApplication`) |
+| 2026-11-09 | **SCR-21 (US09 frontend):** the modal opens at `#/jobs/:id/applications/new` over SCR-12 (the pipeline and candidate lists that will also offer it come with US08); "Thêm hồ sơ" is in the SCR-12 header for an open position. The known-candidate notice uses `matchCandidate` 400 ms after the last key. Figma: frame "SCR-21 Thêm hồ sơ ứng tuyển (modal)" added (cloned from SCR-12 and the SCR-11 / SCR-24 pieces) and "Thêm hồ sơ" added to both SCR-12 frames; screenshots exported. Sample CVs and the manual test script are in `docs/demo`; the demo candidates now carry normalized email and phone | 04, 05, `images/screens`, `demo/manual-tests.md` |
 | 2026-11-04 | Internal app: every IA page has its route and sidebar item from T1.3; a page whose story is not built shows "Chức năng này đang được xây dựng". Nav icons come with the `ui` icon set | 09 §4.2 |
 | 2026-11-04 | React Router 8 (docs did not name a version); `packages/api-client` has its own Vitest project | 09 §4.1 |
 | 2026-11-04 | Contract test checks routes against the YAML (name, method, path, no duplicates); operations of unbuilt stories have no route yet | 09 §3.6 |

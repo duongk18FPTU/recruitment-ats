@@ -56,6 +56,30 @@ public class DocumentTextExtractorTests
         Assert.Equal(string.Empty, await Extract(Pdf("text"), "image/png"));
     }
 
+    [Theory]
+    [InlineData("cv-tran-thi-lan.pdf", CvFileRules.Pdf, "5 years of C# and .NET")]
+    [InlineData("cv-le-van-khoi.docx", CvFileRules.Docx, "4 years of product design")]
+    [InlineData("cv-scan-khong-co-chu.pdf", CvFileRules.Pdf, null)]
+    public async Task The_demo_CVs_behave_as_the_manual_test_script_says(string file, string contentType, string? expected)
+    {
+        var directory = AppContext.BaseDirectory;
+        while (!Directory.Exists(Path.Combine(directory, "docs", "demo", "cvs")))
+        {
+            directory = Path.GetDirectoryName(directory) ?? throw new DirectoryNotFoundException("docs/demo/cvs");
+        }
+
+        var text = await Extract(await File.ReadAllBytesAsync(Path.Combine(directory, "docs", "demo", "cvs", file), TestContext.Current.CancellationToken), contentType);
+
+        if (expected is null)
+        {
+            Assert.Equal(string.Empty, text.Trim());
+        }
+        else
+        {
+            Assert.Contains(expected, text, StringComparison.Ordinal);
+        }
+    }
+
     private Task<string> Extract(byte[] bytes, string contentType) =>
         _extractor.ExtractAsync(new MemoryStream(bytes), contentType, TestContext.Current.CancellationToken);
 

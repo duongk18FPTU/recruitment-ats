@@ -15,9 +15,10 @@ import {
   statusTag,
   todayIn,
 } from "../format";
+import { ApplicationFormModal } from "../../applications";
 import { PositionFormModal } from "../components/PositionFormModal";
 import { PositionStatusModal } from "../components/PositionStatusModal";
-import { canChangeOwner, canEditPosition, statusActionLabel, statusTargets } from "../permissions";
+import { canAddApplication, canChangeOwner, canEditPosition, statusActionLabel, statusTargets } from "../permissions";
 import { usePosition } from "../queries";
 import "../positions.css";
 
@@ -27,7 +28,7 @@ type Tab = "overview" | "criteria";
  * SCR-12 position detail (US04): the Overview and Criteria tabs. The Job post (US22) and Pipeline
  * (US08) tabs come with their stories. At `#/jobs/:id/edit` the SCR-11 form opens over it (US06).
  */
-export function PositionDetailPage({ editing = false }: { editing?: boolean }) {
+export function PositionDetailPage({ editing = false, addingApplication = false }: { editing?: boolean; addingApplication?: boolean }) {
   const { positionId = "" } = useParams();
   const navigate = useNavigate();
   const position = usePosition(positionId);
@@ -80,6 +81,11 @@ export function PositionDetailPage({ editing = false }: { editing?: boolean }) {
               Sửa vị trí
             </button>
           )}
+          {me && canAddApplication(me.role, p) && (
+            <button type="button" className="button button--primary" onClick={() => navigate(`/jobs/${p.id}/applications/new`)}>
+              Thêm hồ sơ
+            </button>
+          )}
           {me &&
             statusTargets(me, p).map((target) => (
               <button
@@ -109,6 +115,9 @@ export function PositionDetailPage({ editing = false }: { editing?: boolean }) {
 
       {statusTarget && (
         <PositionStatusModal position={p} target={statusTarget} onClose={() => setStatusTarget(null)} />
+      )}
+      {addingApplication && me && canAddApplication(me.role, p) && (
+        <ApplicationFormModal position={p} onClose={() => navigate(`/jobs/${p.id}`)} />
       )}
       {editing && mayEdit && (
         <PositionFormModal

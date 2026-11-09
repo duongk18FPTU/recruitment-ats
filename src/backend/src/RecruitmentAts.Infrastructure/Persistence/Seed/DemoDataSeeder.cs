@@ -164,10 +164,17 @@ internal sealed partial class DemoDataSeeder(
             for (var i = 0; i < applicationCount; i++)
             {
                 var name = names[candidateIndex % names.Length];
+                // Email and phone are normalized like real intake, so matchCandidate finds them (try the
+                // duplicate notice with ung.vien.1@demo.test or 0900 000 001).
+                var email = $"ung.vien.{++candidateIndex}@demo.test";
+                var phone = $"0900 000 {candidateIndex:000}";
                 var candidate = new Candidate
                 {
                     FullName = name,
-                    Email = $"ung.vien.{++candidateIndex}@demo.test",
+                    Email = email,
+                    EmailNormalized = ContactNormalizer.Email(email),
+                    Phone = phone,
+                    PhoneNormalized = ContactNormalizer.Phone(phone),
                     LastActivityAt = clock.UtcNow,
                 };
                 var stage = stages[(i + count) % stages.Length];

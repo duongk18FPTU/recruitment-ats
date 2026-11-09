@@ -39,3 +39,7 @@ export function statusActionLabel(from: PositionStatus, to: PositionStatus): str
   }
   return from === "CLOSED" ? "Mở lại" : "Mở tuyển";
 }
+
+/** `createApplication` x-roles: Admin, HR Manager, Recruiter; only an open position takes new applications (BR-05). */
+export const canAddApplication = (role: Role, position: Pick<PositionSummary, "status">) =>
+  role !== "INTERVIEWER" && position.status === "OPEN";

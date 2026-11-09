@@ -25,6 +25,12 @@ const subPages: { path: string; parent: string; roles?: readonly Role[]; element
     roles: ["ADMIN", "HR_MANAGER", "RECRUITER"],
     element: <PositionDetailPage editing />,
   },
+  {
+    path: "/jobs/:positionId/applications/new",
+    parent: "/jobs",
+    roles: ["ADMIN", "HR_MANAGER", "RECRUITER"],
+    element: <PositionDetailPage addingApplication />,
+  },
 ];
 
 /** Hash routes of docs/04-information-architecture.md ("Routes"). */
