@@ -1,1 +1,4 @@
 *.sh text eol=lf
+
+# Demo CVs are fixtures: line endings must never change (PDF offsets, DOCX is a zip).
+docs/demo/cvs/* -text
